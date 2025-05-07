@@ -1,10 +1,11 @@
+import clsx from "clsx";
 import PresentationItem from "../presentationItem";
 
 export default function Presentation() {
   return (
-    <div className="text-center px-7 py-10 flex flex-col gap-10">
+    <div className="text-center max-w-6xl m-auto py-10 flex flex-col gap-10">
       {sections.map((section, index) => (
-        <PresentationItem key={index} {...section} />
+        <PresentationItem index={index} key={index} {...section} />
       ))}
     </div>
   );

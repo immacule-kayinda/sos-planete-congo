@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat, Nunito } from "next/font/google";
 import "./globals.css";
+import Header from "@/components/header";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -24,8 +25,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" >
-      <body className={`${nunito.className} ${montserrat.variable} antialiased`}>
+    <html lang="fr">
+      <body
+        className={`${nunito.className} ${montserrat.variable} antialiased`}
+      >
         {children}
       </body>
     </html>
