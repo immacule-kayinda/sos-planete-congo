@@ -4,14 +4,14 @@ import Presentation from "@/components/landing/presentation";
 import StatCard from "@/components/landing/stat_card";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/ui/footer";
-import { Book, Globe, School, Users, WholeWordIcon } from "lucide-react";
+import { Book, Globe, School, Users } from "lucide-react";
 import Image from "next/image";
 
 export default function Home() {
   return (
     <div>
       <Header />
-      <main className="pt-16">
+      <main className="">
         <HeroSection />
         <Presentation />
         <section className="flex flex-col text-center justify-center items-center py-10 w-full bg-[url('/bg-green.svg')] min-h-screen bg-cover object-cover bg-no-repeat bg-center">
