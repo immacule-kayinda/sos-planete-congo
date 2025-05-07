@@ -7,10 +7,10 @@ const nunito = Nunito({
   subsets: ["latin"],
 });
 
-export const montserrat = Montserrat({
-  subsets: ['latin'],
-  variable: '--font-montserrat',
-  weight: ['400', '700'],
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {

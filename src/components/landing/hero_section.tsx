@@ -1,4 +1,3 @@
-import { montserrat } from "@/app/layout";
 import { Button } from "@/components/ui/button";
 
 export default function HeroSection() {
@@ -6,7 +5,7 @@ export default function HeroSection() {
     <section className="px-7 py-10">
       <div className="">
         <h1
-          className={`uppercase font-bold text-3xl text-primary ${montserrat.className} text-center mb-4`}
+          className={`uppercase font-bold text-3xl text-primary text-center mb-4`}
         >
           Sos planete congo
         </h1>
