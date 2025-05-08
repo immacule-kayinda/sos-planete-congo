@@ -1,13 +1,18 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function HeroSection() {
   return (
-    <section className="px-7 py-10 flex w-full max-w-6xl m-auto gap-6 justify-center">
-      <div className="flex justify-center items-center w-6/12 bg-neutral-100">
-        Image must be here
-      </div>
-      <div className="w-4/12 text-center md:text-start">
+    <section className="md:px-7 sm:px-3 px-10 py-24 flex w-full max-w-6xl m-auto gap-6 justify-center items-center flex-col md:flex-row">
+      <Image
+        src="/landing/hero-image.png"
+        alt="Hero Image"
+        width={600}
+        height={700}
+        className="w-full md:w-6/12 h-auto m-auto"
+      />
+      <div className="w-full md:w-4/12 text-center md:text-start">
         <div className="">
           <h1 className={`uppercase font-bold text-3xl text-primary mb-4`}>
             Sos planete congo

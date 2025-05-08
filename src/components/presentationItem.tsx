@@ -6,7 +6,7 @@ interface PresentationItemProps {
   title: string;
   text: string;
   buttonText?: string;
-  imgUrl?: string;
+  imgUrl: string;
   alt?: string;
   index: number;
 }
@@ -22,12 +22,12 @@ export default function PresentationItem({
   return (
     <section
       className={clsx(
-        "flex text-center justify-between md:items-start px-7 w-full gap-10 flex-col items-center py-10 ",
-        index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
+        "flex text-center justify-between md:items-start w-full gap-10 flex-col ",
+        index % 2 !== 0 ? "md:flex-row" : "md:flex-row-reverse"
       )}
     >
-      <div className="flex flex-col justify-center items-center md:w-4/12 md:text-start md:items-start h-fit self-center">
-        <h1 className="uppercase">{title}</h1>
+      <div className="flex flex-col justify-start items-center md:w-4/12 md:text-start md:items-start h-fit self-center">
+        <h1 className="uppercase text-4xl mb-7">{title}</h1>
         <p className="text-neutral-400">
           {text.split("<br />").map((line, index) => (
             <span key={index}>
@@ -42,16 +42,13 @@ export default function PresentationItem({
           </Button>
         )}
       </div>
-      {imgUrl && (
-        <Image
-          alt={alt!}
-          src={imgUrl}
-          width={600}
-          height={700}
-          className="w-3/12 h-auto m-auto"
-        />
-      )}
-      {!imgUrl && <div className="bg-neutral-500 w-8/12 h-72 self-center"></div>}
+      <Image
+        alt={alt!}
+        src={imgUrl}
+        width={600}
+        height={700}
+        className="w-6/12 h-auto m-auto md:m-0 "
+      />
     </section>
   );
 }

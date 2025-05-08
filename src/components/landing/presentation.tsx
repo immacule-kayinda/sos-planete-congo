@@ -3,7 +3,7 @@ import PresentationItem from "../presentationItem";
 
 export default function Presentation() {
   return (
-    <div className="text-center max-w-6xl m-auto py-10 flex flex-col gap-10">
+    <div className="text-center max-w-6xl m-auto py-10 flex flex-col gap-10 px-7">
       {sections.map((section, index) => (
         <PresentationItem index={index} key={index} {...section} />
       ))}
@@ -14,21 +14,11 @@ export default function Presentation() {
 const sections: {
   title: string;
   text: string;
-  imgUrl?: string;
+  imgUrl: string;
   alt: string;
   buttonText?: string;
   //   buttonUrl?: string;
 }[] = [
-  {
-    title: "Offrez vous le livre",
-    alt: "Book Cover",
-    // imgUrl: "/book-landing.png",
-    text: `Un livre d'activités éducatives et ludiques pour explorer
-            l'environnement et la culture de la RDC. <br />
-            Des outils interactifs et bilingues (français et langues nationales)
-            pour les élèves et enseignants`,
-    buttonText: "Acheter le livre",
-  },
   {
     title: "Pour les enseignant et les écoles",
     alt: "Teacher is Teaching",
@@ -43,7 +33,18 @@ const sections: {
     alt: "Student with book",
     imgUrl: "/grenouille.png",
     text: `Apprendre les langues nationalesInitiez-vous au lingala, kikongo, 
-            swahili et tshiluba grâce à des cours interactifs pensés pour petits et grands.`,
+    swahili et tshiluba grâce à des cours interactifs pensés pour petits et grands.`,
     buttonText: "Explorer les activités",
+  },
+  {
+    title: "Offrez vous le livre",
+    alt: "Book Cover",
+    // imgUrl: "/book-landing.png",
+    text: `Un livre d'activités éducatives et ludiques pour explorer
+              l'environnement et la culture de la RDC. <br />
+              Des outils interactifs et bilingues (français et langues nationales)
+              pour les élèves et enseignants`,
+    imgUrl: "/landing/bookimage.png",
+    buttonText: "Acheter le livre",
   },
 ];
