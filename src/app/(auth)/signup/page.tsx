@@ -6,6 +6,16 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { AiOutlineArrowLeft } from "react-icons/ai";
+import {
+  Select,
+  SelectContent,
+  SelectValue,
+  SelectGroup,
+  SelectTrigger,
+  SelectLabel,
+  SelectItem,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 export default function Signup() {
   const [role, setRole] = useState<"apprenant" | "enseignant">("apprenant");
@@ -66,31 +76,33 @@ export default function Signup() {
             </div>
           </div>
           {/* Title */}
-          <h1 className="text-5xl md:text-6xl font-semibold text-black mb-8 text-center font-nunito">
+          <h1 className="text-5xl hidden md:text-6xl font-semibold text-black mb-8 text-center font-nunito">
             Inscription
           </h1>
           {/* Form */}
-          <form className="w-full flex flex-col gap-4 **:placeholder:text-base">
+          <form className="w-full flex flex-col gap-4 **:placeholder:text-base **:h-auto">
             {role === "apprenant" ? (
               <>
-                <input
+                <Input
                   ref={inputRef}
                   type="number"
+                  max={500}
+                  min={0}
                   placeholder="Age"
                   className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
                 />
-                <input
+                <Input
                   type="text"
                   placeholder="Nom complet"
                   className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
                 />
-                <input
+                <Input
                   type="email"
                   placeholder="Email"
                   className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
                 />
                 <div className="relative">
-                  <input
+                  <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Mot de passe"
                     className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg pr-12"
@@ -111,40 +123,49 @@ export default function Signup() {
               </>
             ) : (
               <>
-                <input
+                <Input
                   ref={inputRef}
                   type="text"
                   placeholder="Nom complet"
-                  className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
+                  className="w-full px-4 py-3 h-auto border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
                 />
-                <input
+                <Input
                   type="text"
                   placeholder="Numero de carte d'electeur"
-                  className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
+                  className="w-full px-4 py-3 border h-auto border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
                 />
-                <input
+                <Input
                   type="email"
-                  placeholder="Email"
-                  className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
+                  placeholder="Email Bonsoir"
+                  className="w-full px-4 py-3 border h-auto focus-visible: border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
                 />
-                <div className="flex gap-2">
-                  <select className="flex-1 px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg w-full">
-                    <option>Niveau d'enseignement</option>
-                    <option>Primaire</option>
-                    <option>Secondaire</option>
-                    <option>Supérieur</option>
-                  </select>
-                  <input
+                <div className="flex gap-2 h-12">
+                  <Select>
+                    <SelectTrigger className="text-base h-auto adaptive py-6">
+                      <SelectValue placeholder="Niveau d'enseignement" />
+                    </SelectTrigger>
+                    <SelectContent className="">
+                      <SelectGroup className="">
+                        <SelectLabel>Niveau d'enseignement</SelectLabel>
+                        <div className="">
+                          <SelectItem value="primaire">Primaire</SelectItem>
+                          <SelectItem value="secondaire">Secondaire</SelectItem>
+                          <SelectItem value="superieur">Superieur</SelectItem>
+                        </div>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <Input
                     type="text"
                     placeholder="Nom de l'etablissement"
-                    className="flex-1 px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg w-full"
+                    className="flex-1 px-4 py-3 border h-auto border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg w-full"
                   />
                 </div>
                 <div className="relative">
-                  <input
+                  <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Mot de passe"
-                    className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg pr-12"
+                    className="w-full px-4 py-3 border h-auto border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg pr-12"
                   />
                   <button
                     type="button"
