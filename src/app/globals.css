@@ -126,4 +126,13 @@
   h1 {
     @apply font-montserrat font-bold text-3xl text-primary
   }
+
+  .header-transition {
+    transition: all 0.1s ease-in-out;
+    opacity: 1;
+  }
+
+  .header-hidden {
+    transform: translateY(-100%);
+  }
 }
