@@ -14,7 +14,10 @@ export default function LessonsList({
     <div className="bg-white rounded-xl p-4 border-2 border-gray-200">
       <h3 className="font-bold">{title}</h3>
       <p className="text-xs text-gray-500">{subtitle}</p>
-      <Progress value={progress} className="w-full h-2 bg-gray-200 rounded my-2" />
+      <Progress
+        value={progress}
+        className="w-full h-2 bg-gray-200 rounded my-2"
+      />
       {/* Liste des leçons */}
       <div className="flex flex-col gap-2">
         {/* Répéter ce bloc pour chaque leçon */}

@@ -17,19 +17,19 @@ import { usePathname } from "next/navigation";
 export default function NavLinks() {
   const pathname = usePathname();
   return (
-    <nav className="flex flex-col gap-2">
+    <nav className="flex md:flex-col gap-2">
       {links.map((link, index) => (
         <Link
           href={link.href ?? "#"}
           key={index}
           className={clsx(
-            "flex items-center gap-2 p-3 w-full hover:bg-red-200 rounded-md hover:text-red-500",
+            "flex items-center gap-2 p-3 w-full hover:bg-red-200 md:justify-start rounded-md justify-center hover:text-red-500",
             pathname === link.href &&
               "bg-red-200 text-red-500 border-2 border-red-500"
           )}
         >
           {link.icon}
-          <span className="font-black uppercase text-sm">{link.label}</span>
+          <span className="font-black uppercase text-sm hidden md:block">{link.label}</span>
         </Link>
       ))}
     </nav>

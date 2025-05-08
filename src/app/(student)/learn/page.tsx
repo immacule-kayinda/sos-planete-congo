@@ -6,7 +6,7 @@ export default function LearnPage() {
   return (
     <div className="flex flex-col gap-6">
       {/* Header Chapitre */}
-      <div className="bg-[#5B4FFF] rounded-xl p-6 flex justify-between items-center text-white">
+      <div className="bg-[#5B4FFF] rounded-xl p-6 flex justify-between items-center text-white sticky -top-3 z-10">
         <div>
           <h2 className="font-bold text-lg">CHAPITRE 1, UNITE 1</h2>
           <p>Biodiversité</p>
