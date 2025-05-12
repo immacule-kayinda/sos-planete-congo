@@ -9,26 +9,16 @@ import Footer from "@/components/ui/footer";
 import { Book, Globe, School, Users } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 
 export default function Home() {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [isThanosVisible, setIsThanosVisible] = useState(true);
+  const [ref, inView] = useInView({
+    threshold: 0,
+  });
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const section = document.querySelector("#thanos");
-      if (section) {
-        const sectionTop = section.getBoundingClientRect().top;
-        const sectionHeight = section.getBoundingClientRect().height;
-        const sectionBottom = sectionTop + sectionHeight;
-
-        setIsHeaderVisible(sectionBottom < 0);
-        console.log(sectionBottom, sectionTop);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  useEffect(() => {}, []);
 
   return (
     <div>
@@ -42,16 +32,20 @@ export default function Home() {
         <Presentation />
         <section
           id="thanos"
-          className="flex flex-col text-center justify-center items-center w-full h-fit -space-y-0.5"
+          className="flex flex-col text-center justify-center items-center w-full h-fit border -space-y-0.5"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1440 320"
+            className="h-fit"
+          >
             <path
               fill="#067E33"
               fillOpacity="1"
               d="M0,32L48,53.3C96,75,192,117,288,154.7C384,192,480,224,576,197.3C672,171,768,85,864,53.3C960,21,1056,43,1152,58.7C1248,75,1344,85,1392,90.7L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
             ></path>
           </svg>
-          <div className="bg-[#067E33] w-full min-h-[80vh] items-center flex justify-center">
+          <div className="bg-[#067E33] w-full min-h-[50vh] items-center flex justify-center">
             <div className="flex flex-col text-[#D0FFC7] items-center justify-center h-full text-center font-bold">
               <h1 className="text-[#D0FFC7] uppercase mb-10 text-2xl md:text-4xl">
                 Le projet sos aujourd'hui
@@ -77,10 +71,6 @@ export default function Home() {
             ></path>
           </svg>
         </section>
-
-        <div className="absolute bottom-0 left-0 w-full h-[100px] z-0 bg-red-500">
-          Bonsoir
-        </div>
 
         <section className="h-screen flex justify-center items-center max-w-screen relative">
           <div className="flex flex-col text-center justify-center items-center place-self-center md:w-lg w-fit max-w-md ">
