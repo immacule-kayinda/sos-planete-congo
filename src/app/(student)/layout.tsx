@@ -9,7 +9,7 @@ export default function StudentLayout({
   return (
     <div className="h-screen md:flex flex-col overflow-hidden">
       <main className="md:flex h-full">
-        <div className="z-40 md:h-full px-5 md:py-4 py-2 border-r md:w-2/12 gap-3 bg-red-500 w-screen absolute md:z-50 md:static h-fit bottom-0 border-t">
+        <div className="z-40 md:h-full px-5 md:py-4 py-2 border-r md:w-2/12 w-screen gap-3 bg-white absolute md:z-50 md:static h-fit bottom-0 border-t md:border-t-0">
           <h1 className="uppercase font-black text-2xl mb-5 hidden md:block">
             LOGO SOS
           </h1>

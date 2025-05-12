@@ -16,16 +16,19 @@ export default function LessonsList({
       <p className="text-xs text-gray-500">{subtitle}</p>
       <Progress
         value={progress}
-        className="w-full h-2 bg-gray-200 rounded my-2"
+        className="w-full h-5 rounded-full bg-gray-200 my-2"
       />
       {/* Liste des leçons */}
       <div className="flex flex-col gap-2">
         {/* Répéter ce bloc pour chaque leçon */}
-        <LessonItem
-          title="L'ANTILOPE TETSI"
-          subtitle="Philantomba"
-          stars={20}
-        />
+        {Array.from({ length: 3 }).map((_, index) => (
+          <LessonItem
+            key={index}
+            title="L'ANTILOPE TETSI"
+            subtitle="Philantomba"
+            stars={20}
+          />
+        ))}
       </div>
     </div>
   );
