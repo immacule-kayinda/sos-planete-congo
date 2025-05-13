@@ -48,15 +48,15 @@ export default function Finished({ onContinue }: FinishedProps) {
           {stats.map((s, i) => (
             <div
               key={i}
-              className={`rounded-lg ${s.bg} w-full md:w-64 max-w-xs p-0.5 flex flex-col `}
+              className={`rounded-xl ${s.bg} w-full md:w-64 max-w-xs p-1 flex flex-col `}
             >
               <span
-                className={`uppercase font-bold text-xs pl-2 py-2 tracking-wide text-white`}
+                className={`uppercase font-black text-sm pl-2 py-2 tracking-wide text-white`}
               >
                 {s.label}
               </span>
-              <div className="bg-white w-full rounded-b-lg py-4 px-2 flex flex-col items-center">
-                <span
+              <div className="bg-white w-full rounded-lg py-4 px-2 flex flex-col items-center">
+                <span 
                   className={`text-3xl md:text-4xl font-black mt-2 flex items-center gap-2 ${s.text}`}
                 >
                   {s.value}

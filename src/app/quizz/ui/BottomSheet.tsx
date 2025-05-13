@@ -16,9 +16,9 @@ export default function BottomSheet({
 }: BottomSheetProps) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/30">
-      <div className="w-full max-w-md md:max-w-lg bg-white rounded-t-2xl md:rounded-2xl shadow-lg p-6 md:p-10 animate-slide-up mb-0 md:mb-10">
-        <div className="flex flex-col items-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/10">
+      <div className="w-full bg-white p-6 md:p-10 animate-slide-up mb-0">
+        <div className="max-w-6xl w-full m-auto">
           {children}
           {showButton && (
             <button
