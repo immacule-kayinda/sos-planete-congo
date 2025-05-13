@@ -58,17 +58,19 @@ export default function LearnPage() {
       </div>
 
       {/* Quizz */}
-      <div className="bg-red-500 rounded-xl p-4 flex justify-between items-center text-white mt-4">
-        <div>
-          <h4 className="font-bold text-lg">QUIZZ</h4>
-          <p className="text-xs">
-            Près à tester ce que tu as appris et passer à l'étape suivante ?
-          </p>
+      <Link href="/quizz">
+        <div className="bg-red-500 rounded-xl p-4 flex justify-between items-center text-white mt-4">
+          <div>
+            <h4 className="font-bold text-lg">QUIZZ</h4>
+            <p className="text-xs">
+              Près à tester ce que tu as appris et passer à l'étape suivante ?
+            </p>
+          </div>
+          <button className="bg-white text-red-500 font-bold px-6 py-2 rounded-full">
+            ALLER
+          </button>
         </div>
-        <button className="bg-white text-red-500 font-bold px-6 py-2 rounded-full">
-          ALLER
-        </button>
-      </div>
+      </Link>
     </div>
   );
 }
