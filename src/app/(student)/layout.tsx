@@ -1,5 +1,6 @@
 import NavLinks from "@/components/ui/userDashboard/navLinks";
 import { Flame } from "lucide-react";
+import Image from "next/image";
 
 export default function StudentLayout({
   children,
@@ -10,9 +11,13 @@ export default function StudentLayout({
     <div className="h-screen md:flex flex-col overflow-hidden">
       <main className="md:flex h-full">
         <div className="z-40 md:h-full px-5 md:py-4 py-2 border-r md:w-2/12 w-screen gap-3 bg-white absolute md:z-50 md:static h-fit bottom-0 border-t md:border-t-0">
-          <h1 className="uppercase font-black text-2xl mb-5 hidden md:block">
-            LOGO SOS
-          </h1>
+          <Image
+            src="/logo.png"
+            alt="logo"
+            width={60}
+            height={60}
+            className="mb-5"
+          />
           <NavLinks />
         </div>
         <div className="md:w-8/12 w-screen px-5 md:px-10 md:py-4 pt-16 h-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] pb-16">

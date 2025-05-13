@@ -14,10 +14,10 @@ export default function Header({ className }: { className?: string }) {
           <Link href="/" className="hover:underline">
             Accueil
           </Link>
-          <Link href="/quizz" className="hover:underline">
+          <Link href="/store" className="hover:underline">
             Nos livres
           </Link>
-          <Link href="/learn" className="hover:underline">
+          <Link href="/courses" className="hover:underline">
             Nos cours
           </Link>
           <Link
