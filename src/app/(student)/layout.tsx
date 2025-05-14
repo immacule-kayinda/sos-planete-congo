@@ -16,11 +16,11 @@ export default function StudentLayout({
             alt="logo"
             width={60}
             height={60}
-            className="mb-5"
+            className="mb-5 hidden md:block"
           />
           <NavLinks />
         </div>
-        <div className="md:w-8/12 w-screen px-5 md:px-10 md:py-4 pt-16 h-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] pb-16">
+        <div className="md:w-8/12 w-screen px-5 md:px-10 md:py-4 pt-16 h-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] pb-20">
           <div className="lg:w-5/6 m-auto self-end items-end">{children}</div>
         </div>
         <div className="md:w-2/12 px-3 py-2 md:px-10 md:py-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] absolute right-0 top-0 w-full bg-white border-b md:border-b-0">
