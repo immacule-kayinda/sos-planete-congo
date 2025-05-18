@@ -28,11 +28,7 @@ export default function Signup() {
 
   return (
     <>
-      <header className="m-auto py-5 self-center w-screen md:flex fixed top-0 left-0 z-50 hidden">
-        <Link href={"/"} className="max-w-6xl m-auto w-full">
-          <h1>Logo</h1>
-        </Link>
-      </header>
+      
       <div className="min-h-screen flex items-center justify-center bg-white font-bold">
         <div className="w-full md:max-w-md md:w-full p-8 rounded-lg flex flex-col items-center md:border ">
           {/* Close icon */}
