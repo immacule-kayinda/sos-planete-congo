@@ -1,0 +1,131 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  role      Role      @default(STUDENT)
+  createdAt DateTime? @default(now())
+  updatedAt DateTime  @updatedAt
+  teacher   Teacher?
+  student   Student?
+  admin     Admin?
+}
+
+model Teacher {
+  id              String      @id @default(uuid())
+  userId          String      @unique
+  user            User        @relation(fields: [userId], references: [id])
+  firstName       String
+  lastName        String
+  address         String
+  phoneNumber     String
+  voterCardNumber String
+  school          String
+  teachingLevel   String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  students        Student[]
+  Classroom       Classroom[]
+}
+
+model Classroom {
+  id        String    @id @default(uuid())
+  name      String
+  teacherId String
+  teacher   Teacher   @relation(fields: [teacherId], references: [id])
+  students  Student[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Student {
+  id          String            @id @default(uuid())
+  userId      String            @unique
+  user        User              @relation(fields: [userId], references: [id])
+  age         Int
+  teacherId   String?
+  teacher     Teacher?          @relation(fields: [teacherId], references: [id])
+  performance Performance?
+  leaderboard LeaderboardEntry?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  Classroom   Classroom?        @relation(fields: [classroomId], references: [id])
+  classroomId String?
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Conte {
+  id        String    @id @default(uuid())
+  title     String
+  summary   String
+  imageUrl  String
+  chapters  Chapter[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Chapter {
+  id             String          @id @default(uuid())
+  title          String
+  content        String
+  audioUrl       String
+  conteId        String
+  conte          Conte           @relation(fields: [conteId], references: [id])
+  compteNarratif CompteNarratif?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model CompteNarratif {
+  id        String   @id @default(uuid())
+  chapterId String   @unique
+  chapter   Chapter  @relation(fields: [chapterId], references: [id])
+  text      String
+  audioUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Performance {
+  id          String   @id @default(uuid())
+  studentId   String   @unique
+  student     Student  @relation(fields: [studentId], references: [id])
+  dailyStreak Int      @default(0)
+  stars       Int      @default(0)
+  updatedAt   DateTime @updatedAt
+}
+
+model LeaderboardEntry {
+  id        String   @id @default(uuid())
+  studentId String   @unique
+  student   Student  @relation(fields: [studentId], references: [id])
+  classId   String?
+  score     Int      @default(0)
+  rank      Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
