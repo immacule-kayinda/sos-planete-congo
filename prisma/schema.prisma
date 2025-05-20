@@ -18,15 +18,21 @@ enum Role {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  password  String
-  role      Role      @default(STUDENT)
-  createdAt DateTime? @default(now())
-  updatedAt DateTime  @updatedAt
-  teacher   Teacher?
-  student   Student?
-  admin     Admin?
+  id                    String    @id @default(uuid())
+  email                 String    @unique
+  password              String
+  role                  Role      @default(STUDENT)
+  isEmailVerified       Boolean   @default(false)
+  emailVerificationToken String?
+  resetPasswordToken    String?
+  resetPasswordExpires  DateTime?
+  lastLogin            DateTime?
+  isActive             Boolean   @default(true)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  teacher              Teacher?
+  student              Student?
+  admin                Admin?
 }
 
 model Teacher {
@@ -46,29 +52,20 @@ model Teacher {
   Classroom       Classroom[]
 }
 
-model Classroom {
-  id        String    @id @default(uuid())
-  name      String
-  teacherId String
-  teacher   Teacher   @relation(fields: [teacherId], references: [id])
-  students  Student[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-
 model Student {
-  id          String            @id @default(uuid())
-  userId      String            @unique
-  user        User              @relation(fields: [userId], references: [id])
-  age         Int
-  teacherId   String?
-  teacher     Teacher?          @relation(fields: [teacherId], references: [id])
-  performance Performance?
-  leaderboard LeaderboardEntry?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  Classroom   Classroom?        @relation(fields: [classroomId], references: [id])
-  classroomId String?
+  id                     String                   @id @default(uuid())
+  userId                 String                   @unique
+  user                   User                     @relation(fields: [userId], references: [id])
+  age                    Int
+  teacherId              String?
+  teacher                Teacher?                 @relation(fields: [teacherId], references: [id])
+  performance            StudentPerformance?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  Classroom              Classroom?               @relation(fields: [classroomId], references: [id])
+  classroomId            String?
+  StudentChapterProgress StudentChapterProgress[]
+  StudentStreak          StudentStreak?
 }
 
 model Admin {
@@ -79,53 +76,119 @@ model Admin {
   updatedAt DateTime @updatedAt
 }
 
+model Module {
+  id                 String               @id @default(uuid())
+  title              String
+  description        String
+  conte              Conte?
+  chapters           Chapter[]
+  quizzes            Quiz[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  StudentPerformance StudentPerformance[]
+}
+
 model Conte {
-  id        String    @id @default(uuid())
-  title     String
-  summary   String
-  imageUrl  String
-  chapters  Chapter[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id         String   @id @default(uuid())
+  moduleId   String   @unique
+  module     Module   @relation(fields: [moduleId], references: [id])
+  text       String
+  audioUrl   String
+  imagesUrls String[] // Tableau d'URLs d'illustrations
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Chapter {
-  id             String          @id @default(uuid())
-  title          String
-  content        String
-  audioUrl       String
-  conteId        String
-  conte          Conte           @relation(fields: [conteId], references: [id])
-  compteNarratif CompteNarratif?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id        String                   @id @default(uuid())
+  moduleId  String
+  module    Module                   @relation(fields: [moduleId], references: [id])
+  title     String
+  content   String
+  createdAt DateTime                 @default(now())
+  updatedAt DateTime                 @updatedAt
+  progress  StudentChapterProgress[]
 }
 
-model CompteNarratif {
-  id        String   @id @default(uuid())
-  chapterId String   @unique
-  chapter   Chapter  @relation(fields: [chapterId], references: [id])
-  text      String
-  audioUrl  String
+model Quiz {
+  id        String     @id @default(uuid())
+  moduleId  String
+  module    Module     @relation(fields: [moduleId], references: [id])
+  title     String
+  questions Question[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Question {
+  id          String       @id @default(uuid())
+  quizId      String
+  quiz        Quiz         @relation(fields: [quizId], references: [id])
+  type        QuestionType
+  question    String
+  options     Option[]
+  correctText String? // pour les questions ouvertes
+}
+
+model Option {
+  id         String   @id @default(uuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id])
+  text       String
+  isCorrect  Boolean  @default(false)
+}
+
+enum QuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  TEXT
+}
+
+model StudentChapterProgress {
+  id        String  @id @default(uuid())
+  studentId String
+  chapterId String
+  isRead    Boolean @default(false)
+  isCurrent Boolean @default(false)
+
+  student Student @relation(fields: [studentId], references: [id])
+  chapter Chapter @relation(fields: [chapterId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([studentId, chapterId])
 }
 
-model Performance {
-  id          String   @id @default(uuid())
-  studentId   String   @unique
-  student     Student  @relation(fields: [studentId], references: [id])
-  dailyStreak Int      @default(0)
-  stars       Int      @default(0)
-  updatedAt   DateTime @updatedAt
-}
-
-model LeaderboardEntry {
+model StudentPerformance {
   id        String   @id @default(uuid())
   studentId String   @unique
+  moduleId  String
+  stars     Int      @default(0)
+  timeSpent Int      @default(0) // en secondes
+  accuracy  Float    @default(0) // entre 0 et 1
   student   Student  @relation(fields: [studentId], references: [id])
-  classId   String?
-  score     Int      @default(0)
-  rank      Int      @default(0)
+  module    Module   @relation(fields: [moduleId], references: [id])
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([studentId, moduleId])
+}
+
+model StudentStreak {
+  id            String   @id @default(uuid())
+  studentId     String   @unique
+  currentStreak Int      @default(0)
+  lastActive    DateTime
+
+  student Student @relation(fields: [studentId], references: [id])
+}
+
+model Classroom {
+  id        String    @id @default(uuid())
+  name      String // ex: "CM2A"
+  students  Student[]
+  createdAt DateTime  @default(now())
+  Teacher   Teacher?  @relation(fields: [teacherId], references: [id])
+  teacherId String?
 }
