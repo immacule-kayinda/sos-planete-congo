@@ -7,15 +7,9 @@ import { FaFacebookF, FaGoogle } from "react-icons/fa";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import SignInForm from "@/components/auth/sign-in-form";
 
 export default function Signin() {
-  const [showPassword, setShowPassword] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-white font-bold">
       <div className="w-full max-w-md p-8 rounded-lg flex flex-col items-center border ">
@@ -34,35 +28,7 @@ export default function Signin() {
           Connexion
         </h1>
         {/* Form */}
-        <form className="w-full flex flex-col gap-4">
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Nom d'utilisateur ou email"
-            className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
-          />
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Mot de passe"
-              className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:border-red-600 text-lg pr-12"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 cursor-pointer focus:outline-none"
-              tabIndex={-1}
-            >
-              {showPassword ? <FiEye size={22} /> : <FiEyeOff size={22} />}
-            </button>
-          </div>
-          <Button
-            type="submit"
-            className="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-3 rounded-lg text-xl mt-2 transition h-13"
-          >
-            Se connecter
-          </Button>
-        </form>
+        <SignInForm />
         {/* Separator */}
         <div className="flex items-center w-full my-6">
           <div className="flex-1 h-px bg-gray-300" />
@@ -101,10 +67,7 @@ export default function Signin() {
         {/* Signup link */}
         <div className="text-center mt-2">
           <span className="text-lg">Tu n'as pas encore de compte ? </span>
-          <a
-            href="/signup"
-            className="text-red-600 hover:underline text-lg"
-          >
+          <a href="/signup" className="text-red-600 hover:underline text-lg">
             Inscris-toi
           </a>
         </div>

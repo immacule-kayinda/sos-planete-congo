@@ -16,19 +16,15 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import TeacherSignUpForm from "@/components/auth/teacher-sign-up-form";
+import StudentSignUpForm from "@/components/auth/student-sign-up-form";
 
 export default function Signup() {
   const [role, setRole] = useState<"apprenant" | "enseignant">("apprenant");
   const [showPassword, setShowPassword] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, [role]);
 
   return (
     <>
-      
       <div className="min-h-screen flex items-center justify-center bg-white font-bold">
         <div className="w-full md:max-w-md md:w-full p-8 rounded-lg flex flex-col items-center md:border ">
           {/* Close icon */}
@@ -78,105 +74,9 @@ export default function Signup() {
           {/* Form */}
           <form className="w-full flex flex-col gap-4 **:placeholder:text-base **:h-auto">
             {role === "apprenant" ? (
-              <>
-                <Input
-                  ref={inputRef}
-                  type="number"
-                  max={500}
-                  min={0}
-                  placeholder="Age"
-                  className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
-                />
-                <Input
-                  type="text"
-                  placeholder="Nom complet"
-                  className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
-                />
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
-                />
-                <div className="relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Mot de passe"
-                    className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg pr-12"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 cursor-pointer focus:outline-none"
-                    tabIndex={-1}
-                  >
-                    {showPassword ? (
-                      <FiEye size={22} />
-                    ) : (
-                      <FiEyeOff size={22} />
-                    )}
-                  </button>
-                </div>
-              </>
+              <StudentSignUpForm />
             ) : (
-              <>
-                <Input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Nom complet"
-                  className="w-full px-4 py-3 h-auto border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
-                />
-                <Input
-                  type="text"
-                  placeholder="Numero de carte d'electeur"
-                  className="w-full px-4 py-3 border h-auto border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
-                />
-                <Input
-                  type="email"
-                  placeholder="Email Bonsoir"
-                  className="w-full px-4 py-3 border h-auto focus-visible: border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
-                />
-                <div className="flex gap-2 h-12">
-                  <Select>
-                    <SelectTrigger className="text-base h-auto adaptive py-6">
-                      <SelectValue placeholder="Niveau d'enseignement" />
-                    </SelectTrigger>
-                    <SelectContent className="">
-                      <SelectGroup className="">
-                        <SelectLabel>Niveau d'enseignement</SelectLabel>
-                        <div className="">
-                          <SelectItem value="primaire">Primaire</SelectItem>
-                          <SelectItem value="secondaire">Secondaire</SelectItem>
-                          <SelectItem value="superieur">Superieur</SelectItem>
-                        </div>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    type="text"
-                    placeholder="Nom de l'etablissement"
-                    className="flex-1 px-4 py-3 border h-auto border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg w-full"
-                  />
-                </div>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Mot de passe"
-                    className="w-full px-4 py-3 border h-auto border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg pr-12"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 cursor-pointer focus:outline-none"
-                    tabIndex={-1}
-                  >
-                    {showPassword ? (
-                      <FiEye size={22} />
-                    ) : (
-                      <FiEyeOff size={22} />
-                    )}
-                  </button>
-                </div>
-              </>
+              <TeacherSignUpForm />
             )}
             <Button
               type="submit"
