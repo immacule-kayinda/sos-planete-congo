@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import TeacherSignUpForm from "@/components/auth/teacher-sign-up-form";
 import StudentSignUpForm from "@/components/auth/student-sign-up-form";
+import { toast } from "sonner";
 
 export default function Signup() {
   const [role, setRole] = useState<"apprenant" | "enseignant">("apprenant");
@@ -71,20 +72,9 @@ export default function Signup() {
           <h1 className="text-5xl hidden md:text-6xl font-semibold text-black mb-8 text-center font-nunito">
             Inscription
           </h1>
-          {/* Form */}
-          <form className="w-full flex flex-col gap-4 **:placeholder:text-base **:h-auto">
-            {role === "apprenant" ? (
-              <StudentSignUpForm />
-            ) : (
-              <TeacherSignUpForm />
-            )}
-            <Button
-              type="submit"
-              className="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-3 rounded-lg text-xl mt-2 transition h-13"
-            >
-              S'inscrire
-            </Button>
-          </form>
+          {/* Forms */}
+          {role === "apprenant" ? <StudentSignUpForm /> : <TeacherSignUpForm />}
+
           {/* Separator */}
           <div className="flex items-center w-full my-6">
             <div className="flex-1 h-px bg-gray-300" />

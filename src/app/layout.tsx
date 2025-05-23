@@ -3,6 +3,7 @@ import { Montserrat, Nunito } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header";
 import { Toaster } from "@/components/ui/sonner";
+import { SessionProvider } from "next-auth/react";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -30,8 +31,10 @@ export default function RootLayout({
       <body
         className={`${nunito.className} ${montserrat.variable} antialiased`}
       >
-        {children}
-        <Toaster />
+        <SessionProvider>
+          {children}
+          <Toaster />
+        </SessionProvider>
       </body>
     </html>
   );

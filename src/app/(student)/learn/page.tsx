@@ -1,7 +1,11 @@
+"use client";
+
 import LessonsList from "@/components/ui/learn/lessonsList";
 import { Progress } from "@/components/ui/progress";
-import { Check, Flame, Notebook } from "lucide-react";
+import { Check } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
+
 export default function LearnPage() {
   return (
     <div className="flex flex-col gap-6">

@@ -135,4 +135,54 @@
   .header-hidden {
     transform: translateY(-100%);
   }
+
+  /* From Uiverse.io by wztd */
+  .loader {
+    position: relative;
+    width: 2.5em;
+    aspect-ratio: 1/2;
+    filter: url(#goo);
+  }
+
+  #goo {
+    display: none
+  }
+
+  .loader:before,
+  .loader:after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 100%;
+    aspect-ratio: 1/1;
+    animation: 1.5s ease-out infinite loader;
+    border-radius: 50%;
+  }
+
+  .loader:before {
+    background: linear-gradient(var(--primary), rgb(255, 187, 0))
+  }
+
+  .loader:after {
+    animation-delay: 0.75s;
+    background: linear-gradient(to top, rgb(255, 128, 9), var(--color-primary))
+  }
+
+  @keyframes loader {
+
+    0%,
+    50%,
+    100% {
+      transform: translateY(0)
+    }
+
+    25% {
+      transform: translateY(70%)
+    }
+
+    75% {
+      transform: translateY(-70%)
+    }
+  }
 }

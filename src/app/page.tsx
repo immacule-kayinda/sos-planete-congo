@@ -10,6 +10,7 @@ import { Book, Globe, School, Users } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
+import { toast } from "sonner";
 
 export default function Home() {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);

@@ -1,28 +1,32 @@
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectGroup,
-  SelectLabel,
-  SelectItem,
-} from "@radix-ui/react-select";
-import { FiEye, FiEyeOff } from "react-icons/fi";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { useEffect, useRef, useState } from "react";
-import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import {
+  StudentSignUpFormData,
+  teacherSignUpSchema,
+  type TeacherSignUpFormData,
+} from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signUp } from "@/lib/auth-client";
-import { teacherSignUpSchema, type TeacherSignUpFormData } from "@/lib/validations/auth";
+
+import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { FiEye, FiEyeOff } from "react-icons/fi";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import {
+  SelectTrigger,
+  SelectGroup,
+  Select,
+  SelectValue,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+} from "../ui/select";
+import { toast } from "sonner";
 
 export default function TeacherSignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -44,21 +48,41 @@ export default function TeacherSignUpForm() {
     inputRef.current?.focus();
   }, []);
 
-  const onSubmit = async (data: TeacherSignUpFormData) => {
+  const onSubmit = async (formData: TeacherSignUpFormData) => {
     try {
-      await signUp.email({
-        email: data.email,
-        password: data.password,
-        name: data.name,
+      const res = await fetch("/api/auth/register/teacher", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Une erreur est survenue", {
+          action: {
+            label: "Fermer",
+            onClick() {
+              console.log("Fermer");
+            },
+          },
+        });
+        return;
+      }
+
+      toast.success("Inscription réussie !");
+      // Rediriger ou faire autre chose après l'inscription réussie
     } catch (error) {
-      console.error("Erreur d'inscription:", error);
+      toast.error("Une erreur est survenue lors de l'inscription");
     }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full flex flex-col gap-4 **:placeholder:text-base **:h-auto">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="w-full flex flex-col gap-4 **:placeholder:text-base **:h-auto"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -117,7 +141,10 @@ export default function TeacherSignUpForm() {
             name="teachingLevel"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger className="text-base h-auto adaptive py-6">
                       <SelectValue placeholder="Niveau d'enseignement" />
@@ -173,7 +200,11 @@ export default function TeacherSignUpForm() {
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 cursor-pointer focus:outline-none"
                     tabIndex={-1}
                   >
-                    {showPassword ? <FiEye size={22} /> : <FiEyeOff size={22} />}
+                    {showPassword ? (
+                      <FiEye size={22} />
+                    ) : (
+                      <FiEyeOff size={22} />
+                    )}
                   </button>
                 </div>
               </FormControl>

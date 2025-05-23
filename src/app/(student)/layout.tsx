@@ -1,13 +1,36 @@
+"use client";
+
+import Loader from "@/components/loader";
 import NavLinks from "@/components/ui/userDashboard/navLinks";
+import { getRandomFunFact } from "@/lib/data";
 import { Flame } from "lucide-react";
+import { SessionProvider, useSession } from "next-auth/react";
 import Image from "next/image";
+import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function StudentLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
+  const { data: session, status } = useSession();
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      console.log("timer");
+      setIsLoading(true);
+    }, 4000);
+  }, []);
+
+  const [funFact, setFunFact] = useState(getRandomFunFact());
+
+  console.log(status);
+  if (status === "unauthenticated") redirect("/");
+  return !isLoading && status === "loading" ? (
+    <Loader funFact={funFact} />
+  ) : (
     <div className="h-screen md:flex flex-col overflow-hidden">
       <main className="md:flex h-full">
         <div className="z-40 md:h-full px-5 md:py-4 py-2 border-r md:w-2/12 w-screen gap-3 bg-white absolute md:z-50 md:static h-fit bottom-0 border-t md:border-t-0">
