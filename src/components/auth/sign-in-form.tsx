@@ -48,7 +48,7 @@ export default function SignInForm() {
         return;
       }
 
-      router.push("/dashboard");
+      router.push("/learn");
       router.refresh();
     } catch (error) {
       toast.error("Une erreur est survenue");
@@ -60,7 +60,10 @@ export default function SignInForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="w-full flex flex-col gap-4"
+      >
         <FormField
           control={form.control}
           name="email"
@@ -101,7 +104,11 @@ export default function SignInForm() {
                     tabIndex={-1}
                     disabled={isLoading}
                   >
-                    {showPassword ? <FiEye size={22} /> : <FiEyeOff size={22} />}
+                    {showPassword ? (
+                      <FiEye size={22} />
+                    ) : (
+                      <FiEyeOff size={22} />
+                    )}
                   </button>
                 </div>
               </FormControl>
