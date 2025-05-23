@@ -3,7 +3,7 @@ import { hashPassword } from "@/lib/utils";
 import { studentSignUpSchema, teacherSignUpSchema } from "@/lib/zod";
 import { NextResponse } from "next/server";
 import { toast } from "sonner";
-import { signIn } from "../../../../../auth";
+import { signIn } from "../../../../../../auth";
 
 export async function POST(req: Request) {
   try {

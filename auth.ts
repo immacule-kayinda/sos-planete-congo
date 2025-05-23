@@ -6,7 +6,7 @@ import NextAuth, { DefaultSession, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 import { ZodError } from "zod";
-import authConfig from "../auth.config";
+import authConfig from "./auth.config";
 
 declare module "next-auth" {
   interface User {
