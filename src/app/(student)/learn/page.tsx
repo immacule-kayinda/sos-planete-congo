@@ -1,12 +1,12 @@
-"use client";
-
 import LessonsList from "@/components/ui/learn/lessonsList";
 import { Progress } from "@/components/ui/progress";
 import { Check } from "lucide-react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { auth } from "../../../../auth";
 
-export default function LearnPage() {
+export default async function LearnPage() {
+  const session = await auth();
+  console.log(session);
   return (
     <div className="flex flex-col gap-6">
       {/* Header Chapitre */}

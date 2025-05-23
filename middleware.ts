@@ -1,16 +1,8 @@
-import { auth } from "./auth";
 
-export default auth((req) => {
-  console.log("Middleware - URL:", req.nextUrl.pathname);
-  console.log("Middleware - Auth:", req.auth);
-  console.log("Bonsoir");
+import NextAuth from "next-auth";
+import authConfig from "./auth.config";
 
-  if (!req.auth && req.nextUrl.pathname !== "/signin") {
-    console.log("Middleware - Redirecting to login");
-    const newUrl = new URL("/signin", req.nextUrl.origin);
-    return Response.redirect(newUrl);
-  }
-});
+export const { auth: middleware } = NextAuth(authConfig);
 
 export const config = {
   matcher: [
@@ -22,6 +14,6 @@ export const config = {
     "/learn",
     "/learn/:path*",
     "/profile/:path*",
-    "/dashboard/:path*",
+    "/learn/:path*",
   ],
 };
