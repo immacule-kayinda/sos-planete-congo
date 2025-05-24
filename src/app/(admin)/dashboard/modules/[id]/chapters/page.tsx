@@ -76,13 +76,13 @@ export default async function ModuleChaptersPage({ params }: { params: { id: str
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Chapters for {module.title}</h1>
-          <p className="text-muted-foreground">Manage chapters for this module.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Chapitres pour {module.title}</h1>
+          <p className="text-muted-foreground">Gérez les chapitres pour ce module.</p>
         </div>
         <Button asChild>
           <Link href={`/dashboard/chapters/new?moduleId=${module.id}`}>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add Chapter
+            Ajouter un chapitre
           </Link>
         </Button>
       </div>
@@ -92,9 +92,9 @@ export default async function ModuleChaptersPage({ params }: { params: { id: str
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Content Length</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead>Titre</TableHead>
+                <TableHead>Longueur du contenu</TableHead>
+                <TableHead>Créé</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -102,26 +102,26 @@ export default async function ModuleChaptersPage({ params }: { params: { id: str
               {chapters.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="h-24 text-center">
-                    No chapters found for this module.
+                    Aucuns chapitres trouvés pour ce module.
                   </TableCell>
                 </TableRow>
               ) : (
                 chapters.map((chapter) => (
                   <TableRow key={chapter.id}>
                     <TableCell className="font-medium">{chapter.title}</TableCell>
-                    <TableCell>{chapter.content.length} characters</TableCell>
+                    <TableCell>{chapter.content.length} caractères</TableCell>
                     <TableCell>{new Date(chapter.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button variant="outline" size="sm" asChild>
                           <Link href={`/dashboard/chapters/${chapter.id}`}>
                             <Edit className="mr-2 h-4 w-4" />
-                            Edit
+                            Modifier
                           </Link>
                         </Button>
                         <Button variant="destructive" size="sm">
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
+                          Supprimer
                         </Button>
                       </div>
                     </TableCell>

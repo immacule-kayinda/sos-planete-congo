@@ -8,20 +8,20 @@ export default function StudentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Students</h1>
-          <p className="text-muted-foreground">Manage student profiles and progress.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Étudiants</h1>
+          <p className="text-muted-foreground">Gérez les profils des étudiants et leur progression.</p>
         </div>
         <Button asChild>
           <Link href="/dashboard/students/new">
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add Student
+            Ajouter un étudiant
           </Link>
         </Button>
       </div>
 
       <Card className="p-6">
         <div className="text-center text-muted-foreground">
-          <p>Student management functionality coming soon...</p>
+          <p>La gestion des étudiants arrive bientôt...</p>
         </div>
       </Card>
     </div>

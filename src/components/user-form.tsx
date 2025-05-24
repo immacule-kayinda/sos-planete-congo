@@ -14,15 +14,15 @@ import { createUser } from "@/lib/actions"
 import { useToast } from "@/hooks/use-toast"
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  email: z.string().email({ message: "Veuillez entrer une adresse email valide." }),
   password: z
     .string()
-    .min(8, { message: "Password must be at least 8 characters." })
-    .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter." })
-    .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter." })
-    .regex(/[0-9]/, { message: "Password must contain at least one number." }),
+    .min(8, { message: "Le mot de passe doit contenir au moins 8 caractères." })
+    .regex(/[A-Z]/, { message: "Le mot de passe doit contenir au moins une lettre majuscule." })
+    .regex(/[a-z]/, { message: "Le mot de passe doit contenir au moins une lettre minuscule." })
+    .regex(/[0-9]/, { message: "Le mot de passe doit contenir au moins un chiffre." }),
   role: z.enum(["ADMIN", "TEACHER", "STUDENT"], {
-    required_error: "Please select a role.",
+    required_error: "Veuillez sélectionner un rôle.",
   }),
   isActive: z.boolean().default(true),
   isEmailVerified: z.boolean().default(false),
@@ -58,14 +58,14 @@ export function UserForm({ user = null }) {
       // In a real app, this would call a server action to create/update the user
       await createUser(values)
       toast({
-        title: user ? "User updated" : "User created",
-        description: user ? "The user has been successfully updated." : "The user has been successfully created.",
+        title: user ? "Utilisateur mis à jour" : "Utilisateur créé",
+        description: user ? "L'utilisateur a été mis à jour avec succès." : "L'utilisateur a été créé avec succès.",
       })
       router.push("/dashboard/users")
     } catch (error) {
       toast({
-        title: "Error",
-        description: `Failed to ${user ? "update" : "create"} user. Please try again.`,
+        title: "Erreur",
+        description: `Échec de la ${user ? "mise à jour" : "création"} de l'utilisateur. Veuillez réessayer.`,
         variant: "destructive",
       })
     } finally {
@@ -85,7 +85,7 @@ export function UserForm({ user = null }) {
               <FormControl>
                 <Input placeholder="user@example.com" {...field} />
               </FormControl>
-              <FormDescription>This will be used as the username for login.</FormDescription>
+              <FormDescription>Ceci sera utilisé comme nom d'utilisateur pour la connexion.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -96,14 +96,14 @@ export function UserForm({ user = null }) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{user ? "New Password" : "Password"}</FormLabel>
+              <FormLabel>{user ? "Nouveau mot de passe" : "Mot de passe"}</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="••••••••" {...field} />
               </FormControl>
               <FormDescription>
                 {user
-                  ? "Leave blank to keep the current password."
-                  : "Must be at least 8 characters with uppercase, lowercase, and numbers."}
+                  ? "Laissez vide pour conserver le mot de passe actuel."
+                  : "Doit contenir au moins 8 caractères avec des majuscules, des minuscules et des chiffres."}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -115,20 +115,20 @@ export function UserForm({ user = null }) {
           name="role"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Role</FormLabel>
+              <FormLabel>Rôle</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a role" />
+                    <SelectValue placeholder="Sélectionner un rôle" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="ADMIN">Admin</SelectItem>
-                  <SelectItem value="TEACHER">Teacher</SelectItem>
-                  <SelectItem value="STUDENT">Student</SelectItem>
+                  <SelectItem value="TEACHER">Enseignant</SelectItem>
+                  <SelectItem value="STUDENT">Étudiant</SelectItem>
                 </SelectContent>
               </Select>
-              <FormDescription>This determines the user's permissions and access level.</FormDescription>
+              <FormDescription>Détermine les permissions et le niveau d'accès de l'utilisateur.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -144,8 +144,8 @@ export function UserForm({ user = null }) {
                   <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
                 <div className="space-y-1 leading-none">
-                  <FormLabel>Active</FormLabel>
-                  <FormDescription>Inactive users cannot log in to the platform.</FormDescription>
+                  <FormLabel>Actif</FormLabel>
+                  <FormDescription>Les utilisateurs inactifs ne peuvent pas se connecter à la plateforme.</FormDescription>
                 </div>
               </FormItem>
             )}
@@ -160,8 +160,8 @@ export function UserForm({ user = null }) {
                   <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
                 <div className="space-y-1 leading-none">
-                  <FormLabel>Email Verified</FormLabel>
-                  <FormDescription>Mark as verified to bypass the email verification process.</FormDescription>
+                  <FormLabel>Email vérifié</FormLabel>
+                  <FormDescription>Cochez comme vérifié pour contourner le processus de vérification par email.</FormDescription>
                 </div>
               </FormItem>
             )}
@@ -170,10 +170,10 @@ export function UserForm({ user = null }) {
 
         <div className="flex justify-end gap-4">
           <Button type="button" variant="outline" onClick={() => router.push("/dashboard/users")}>
-            Cancel
+            Annuler
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : user ? "Update User" : "Create User"}
+            {isSubmitting ? "Enregistrement..." : user ? "Mettre à jour l'utilisateur" : "Créer un utilisateur"}
           </Button>
         </div>
       </form>

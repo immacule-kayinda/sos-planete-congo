@@ -41,8 +41,8 @@ export default async function EditModulePage({ params }: { params: { id: string 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Edit Module</h1>
-        <p className="text-muted-foreground">Update module details and content.</p>
+        <h1 className="text-3xl font-bold tracking-tight">Modifier le module</h1>
+        <p className="text-muted-foreground">Mettre à jour les détails et le contenu du module.</p>
       </div>
 
       <Card className="p-6">

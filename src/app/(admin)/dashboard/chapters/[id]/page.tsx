@@ -40,8 +40,8 @@ export default async function EditChapterPage({ params }: { params: { id: string
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Edit Chapter</h1>
-        <p className="text-muted-foreground">Update chapter details and content.</p>
+        <h1 className="text-3xl font-bold tracking-tight">Modifier le chapitre</h1>
+        <p className="text-muted-foreground">Mettre à jour les détails et le contenu du chapitre.</p>
       </div>
 
       <Card className="p-6">

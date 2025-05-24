@@ -61,8 +61,8 @@ export default async function EditContePage({ params }: { params: { id: string }
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Edit Conte</h1>
-        <p className="text-muted-foreground">Update conte text, audio, and images.</p>
+        <h1 className="text-3xl font-bold tracking-tight">Modifier le conte</h1>
+        <p className="text-muted-foreground">Mettre à jour le texte, l'audio et les images du conte.</p>
       </div>
 
       <Card className="p-6">

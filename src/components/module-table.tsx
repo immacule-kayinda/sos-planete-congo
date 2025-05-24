@@ -87,7 +87,7 @@ export function ModuleTable() {
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search modules..."
+            placeholder="Rechercher des modules..."
             className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -99,11 +99,11 @@ export function ModuleTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
+              <TableHead>Titre</TableHead>
               <TableHead>Description</TableHead>
-              <TableHead>Chapters</TableHead>
-              <TableHead>Content</TableHead>
-              <TableHead>Created</TableHead>
+              <TableHead>Chapitres</TableHead>
+              <TableHead>Contenu</TableHead>
+              <TableHead>Créé le</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -111,7 +111,7 @@ export function ModuleTable() {
             {filteredModules.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center">
-                  No modules found.
+                  Aucun module trouvé.
                 </TableCell>
               </TableRow>
             ) : (
@@ -124,7 +124,7 @@ export function ModuleTable() {
                     {module.hasContent ? (
                       <BookMarked className="h-5 w-5 text-green-500" />
                     ) : (
-                      <span className="text-muted-foreground">None</span>
+                      <span className="text-muted-foreground">Aucun</span>
                     )}
                   </TableCell>
                   <TableCell>{new Date(module.createdAt).toLocaleDateString()}</TableCell>
@@ -141,19 +141,19 @@ export function ModuleTable() {
                         <DropdownMenuItem asChild>
                           <Link href={`/dashboard/modules/${module.id}`}>
                             <Edit className="mr-2 h-4 w-4" />
-                            Edit
+                            Éditer
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href={`/dashboard/modules/${module.id}/chapters`}>
                             <FileText className="mr-2 h-4 w-4" />
-                            Manage Chapters
+                            Gérer les chapitres
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteModule(module.id)}>
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
+                          Supprimer
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

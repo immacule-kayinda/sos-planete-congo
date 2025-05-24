@@ -10,13 +10,13 @@ export default function UsersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Users</h1>
-          <p className="text-muted-foreground">Manage user accounts, roles, and permissions.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Utilisateurs</h1>
+          <p className="text-muted-foreground">Gérez les comptes utilisateurs, les rôles et les permissions.</p>
         </div>
         <Button asChild>
           <Link href="/dashboard/users/new">
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add User
+            Ajouter un utilisateur
           </Link>
         </Button>
       </div>

@@ -35,8 +35,8 @@ export default async function EditUserPage({ params }: { params: { id: string } 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Edit User</h1>
-        <p className="text-muted-foreground">Update user details, role, and status.</p>
+        <h1 className="text-3xl font-bold tracking-tight">Modifier l'utilisateur</h1>
+        <p className="text-muted-foreground">Mettre à jour les informations, le rôle et le statut de l'utilisateur.</p>
       </div>
 
       <Card className="p-6">

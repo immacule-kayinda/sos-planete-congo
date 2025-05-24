@@ -127,7 +127,7 @@ export function UserTable() {
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by email..."
+            placeholder="Rechercher par email..."
             className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -135,23 +135,23 @@ export function UserTable() {
         </div>
         <Select value={roleFilter} onValueChange={setRoleFilter}>
           <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="All roles" />
+            <SelectValue placeholder="Tous les rôles" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All roles</SelectItem>
+            <SelectItem value="all">Tous les rôles</SelectItem>
             <SelectItem value="ADMIN">Admin</SelectItem>
-            <SelectItem value="TEACHER">Teacher</SelectItem>
-            <SelectItem value="STUDENT">Student</SelectItem>
+            <SelectItem value="TEACHER">Enseignant</SelectItem>
+            <SelectItem value="STUDENT">Étudiant</SelectItem>
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="All statuses" />
+            <SelectValue placeholder="Tous les statuts" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="all">Tous les statuts</SelectItem>
+            <SelectItem value="active">Actif</SelectItem>
+            <SelectItem value="inactive">Inactif</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -161,10 +161,10 @@ export function UserTable() {
           <TableHeader>
             <TableRow>
               <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Verified</TableHead>
-              <TableHead>Created</TableHead>
+              <TableHead>Rôle</TableHead>
+              <TableHead>Statut</TableHead>
+              <TableHead>Vérifié</TableHead>
+              <TableHead>Créé le</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -172,7 +172,7 @@ export function UserTable() {
             {filteredUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center">
-                  No users found.
+                  Aucun utilisateur trouvé.
                 </TableCell>
               </TableRow>
             ) : (
@@ -198,14 +198,14 @@ export function UserTable() {
                         variant="default"
                         className="bg-green-200 hover:bg-green-600 text-green-800"
                       >
-                        Active
+                        Actif
                       </Badge>
                     ) : (
                       <Badge
                         variant="destructive"
                         className="bg-red-200 hover:bg-red-600 text-red-800"
                       >
-                        Inactive
+                        Inactif
                       </Badge>
                     )}
                   </TableCell>
@@ -223,7 +223,7 @@ export function UserTable() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
+                          <span className="sr-only">Ouvrir le menu</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -232,7 +232,7 @@ export function UserTable() {
                         <DropdownMenuItem asChild>
                           <Link href={`/dashboard/users/${user.id}`}>
                             <Edit className="mr-2 h-4 w-4" />
-                            Edit
+                            Éditer
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
@@ -240,7 +240,7 @@ export function UserTable() {
                             href={`/dashboard/users/${user.id}/reset-password`}
                           >
                             <Lock className="mr-2 h-4 w-4" />
-                            Reset Password
+                            Réinitialiser le mot de passe
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -249,7 +249,7 @@ export function UserTable() {
                           onClick={() => handleDeleteUser(user.id)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
+                          Supprimer
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

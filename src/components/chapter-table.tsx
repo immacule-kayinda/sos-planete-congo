@@ -101,7 +101,7 @@ export function ChapterTable() {
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search chapters..."
+            placeholder="Rechercher des chapitres..."
             className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -109,10 +109,10 @@ export function ChapterTable() {
         </div>
         <Select value={moduleFilter} onValueChange={setModuleFilter}>
           <SelectTrigger className="w-full sm:w-[250px]">
-            <SelectValue placeholder="All modules" />
+            <SelectValue placeholder="Tous les modules" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="All modules">All modules</SelectItem>
+            <SelectItem value="All modules">Tous les modules</SelectItem>
             {mockModules.map((module) => (
               <SelectItem key={module.id} value={module.title}>
                 {module.title}
@@ -126,10 +126,10 @@ export function ChapterTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
+              <TableHead>Titre</TableHead>
               <TableHead>Module</TableHead>
-              <TableHead>Content Length</TableHead>
-              <TableHead>Created</TableHead>
+              <TableHead>Longueur du contenu</TableHead>
+              <TableHead>Créé le</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -137,7 +137,7 @@ export function ChapterTable() {
             {filteredChapters.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
-                  No chapters found.
+                  Aucun chapitre trouvé.
                 </TableCell>
               </TableRow>
             ) : (
@@ -145,7 +145,7 @@ export function ChapterTable() {
                 <TableRow key={chapter.id}>
                   <TableCell className="font-medium">{chapter.title}</TableCell>
                   <TableCell>{chapter.moduleTitle}</TableCell>
-                  <TableCell>{chapter.contentLength} characters</TableCell>
+                  <TableCell>{chapter.contentLength} caractères</TableCell>
                   <TableCell>{new Date(chapter.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
@@ -160,13 +160,13 @@ export function ChapterTable() {
                         <DropdownMenuItem asChild>
                           <Link href={`/dashboard/chapters/${chapter.id}`}>
                             <Edit className="mr-2 h-4 w-4" />
-                            Edit
+                            Éditer
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteChapter(chapter.id)}>
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
+                          Supprimer
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
