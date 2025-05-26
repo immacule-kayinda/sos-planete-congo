@@ -1,69 +1,26 @@
-/*
-  Warnings:
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('ADMIN', 'TEACHER', 'STUDENT');
 
-  - You are about to drop the column `audioUrl` on the `Chapter` table. All the data in the column will be lost.
-  - You are about to drop the column `conteId` on the `Chapter` table. All the data in the column will be lost.
-  - You are about to drop the column `imageUrl` on the `Conte` table. All the data in the column will be lost.
-  - You are about to drop the column `summary` on the `Conte` table. All the data in the column will be lost.
-  - You are about to drop the column `title` on the `Conte` table. All the data in the column will be lost.
-  - You are about to drop the `CompteNarratif` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `LeaderboardEntry` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Performance` table. If the table is not empty, all the data it contains will be lost.
-  - A unique constraint covering the columns `[moduleId]` on the table `Conte` will be added. If there are existing duplicate values, this will fail.
-  - Added the required column `moduleId` to the `Chapter` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `audioUrl` to the `Conte` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `moduleId` to the `Conte` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `text` to the `Conte` table without a default value. This is not possible if the table is not empty.
-
-*/
 -- CreateEnum
 CREATE TYPE "QuestionType" AS ENUM ('SINGLE_CHOICE', 'MULTIPLE_CHOICE', 'TEXT');
 
--- DropForeignKey
-ALTER TABLE "Chapter" DROP CONSTRAINT "Chapter_conteId_fkey";
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "role" "Role" NOT NULL DEFAULT 'STUDENT',
+    "isEmailVerified" BOOLEAN NOT NULL DEFAULT false,
+    "emailVerificationToken" TEXT,
+    "resetPasswordToken" TEXT,
+    "resetPasswordExpires" TIMESTAMP(3),
+    "lastLogin" TIMESTAMP(3),
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
--- DropForeignKey
-ALTER TABLE "CompteNarratif" DROP CONSTRAINT "CompteNarratif_chapterId_fkey";
-
--- DropForeignKey
-ALTER TABLE "LeaderboardEntry" DROP CONSTRAINT "LeaderboardEntry_studentId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Performance" DROP CONSTRAINT "Performance_studentId_fkey";
-
--- AlterTable
-ALTER TABLE "Chapter" DROP COLUMN "audioUrl",
-DROP COLUMN "conteId",
-ADD COLUMN     "moduleId" TEXT NOT NULL;
-
--- AlterTable
-ALTER TABLE "Conte" DROP COLUMN "imageUrl",
-DROP COLUMN "summary",
-DROP COLUMN "title",
-ADD COLUMN     "audioUrl" TEXT NOT NULL,
-ADD COLUMN     "imagesUrls" TEXT[],
-ADD COLUMN     "moduleId" TEXT NOT NULL,
-ADD COLUMN     "text" TEXT NOT NULL;
-
--- AlterTable
-ALTER TABLE "Student" ADD COLUMN     "classroomId" TEXT;
-
--- AlterTable
-ALTER TABLE "User" ADD COLUMN     "emailVerificationToken" TEXT,
-ADD COLUMN     "isActive" BOOLEAN NOT NULL DEFAULT true,
-ADD COLUMN     "isEmailVerified" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "lastLogin" TIMESTAMP(3),
-ADD COLUMN     "resetPasswordExpires" TIMESTAMP(3),
-ADD COLUMN     "resetPasswordToken" TEXT;
-
--- DropTable
-DROP TABLE "CompteNarratif";
-
--- DropTable
-DROP TABLE "LeaderboardEntry";
-
--- DropTable
-DROP TABLE "Performance";
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Account" (
@@ -117,6 +74,46 @@ CREATE TABLE "Authenticator" (
 );
 
 -- CreateTable
+CREATE TABLE "Teacher" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "firstName" TEXT NOT NULL,
+    "lastName" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "phoneNumber" TEXT NOT NULL,
+    "voterCardNumber" TEXT NOT NULL,
+    "school" TEXT NOT NULL,
+    "teachingLevel" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Teacher_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Student" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "age" INTEGER NOT NULL,
+    "teacherId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "classroomId" TEXT,
+
+    CONSTRAINT "Student_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Admin" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Admin_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Module" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
@@ -125,6 +122,31 @@ CREATE TABLE "Module" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Module_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Conte" (
+    "id" TEXT NOT NULL,
+    "moduleId" TEXT NOT NULL,
+    "text" TEXT NOT NULL,
+    "audioUrl" TEXT NOT NULL,
+    "imagesUrls" TEXT[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Conte_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Chapter" (
+    "id" TEXT NOT NULL,
+    "moduleId" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Chapter_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -176,7 +198,7 @@ CREATE TABLE "StudentChapterProgress" (
 CREATE TABLE "StudentPerformance" (
     "id" TEXT NOT NULL,
     "studentId" TEXT NOT NULL,
-    "moduleId" TEXT NOT NULL,
+    "chapterId" TEXT NOT NULL,
     "stars" INTEGER NOT NULL DEFAULT 0,
     "timeSpent" INTEGER NOT NULL DEFAULT 0,
     "accuracy" DOUBLE PRECISION NOT NULL DEFAULT 0,
@@ -207,25 +229,34 @@ CREATE TABLE "Classroom" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Authenticator_credentialID_key" ON "Authenticator"("credentialID");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "StudentChapterProgress_studentId_chapterId_key" ON "StudentChapterProgress"("studentId", "chapterId");
+CREATE UNIQUE INDEX "Teacher_userId_key" ON "Teacher"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "StudentPerformance_studentId_key" ON "StudentPerformance"("studentId");
+CREATE UNIQUE INDEX "Student_userId_key" ON "Student"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "StudentPerformance_studentId_moduleId_key" ON "StudentPerformance"("studentId", "moduleId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "StudentStreak_studentId_key" ON "StudentStreak"("studentId");
+CREATE UNIQUE INDEX "Admin_userId_key" ON "Admin"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Conte_moduleId_key" ON "Conte"("moduleId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "StudentChapterProgress_studentId_chapterId_key" ON "StudentChapterProgress"("studentId", "chapterId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "StudentPerformance_studentId_chapterId_key" ON "StudentPerformance"("studentId", "chapterId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "StudentStreak_studentId_key" ON "StudentStreak"("studentId");
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -237,7 +268,19 @@ ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "Authenticator" ADD CONSTRAINT "Authenticator_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Teacher" ADD CONSTRAINT "Teacher_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Student" ADD CONSTRAINT "Student_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Student" ADD CONSTRAINT "Student_teacherId_fkey" FOREIGN KEY ("teacherId") REFERENCES "Teacher"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Student" ADD CONSTRAINT "Student_classroomId_fkey" FOREIGN KEY ("classroomId") REFERENCES "Classroom"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Admin" ADD CONSTRAINT "Admin_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Conte" ADD CONSTRAINT "Conte_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -264,7 +307,7 @@ ALTER TABLE "StudentChapterProgress" ADD CONSTRAINT "StudentChapterProgress_chap
 ALTER TABLE "StudentPerformance" ADD CONSTRAINT "StudentPerformance_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "StudentPerformance" ADD CONSTRAINT "StudentPerformance_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "StudentPerformance" ADD CONSTRAINT "StudentPerformance_chapterId_fkey" FOREIGN KEY ("chapterId") REFERENCES "Chapter"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "StudentStreak" ADD CONSTRAINT "StudentStreak_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
