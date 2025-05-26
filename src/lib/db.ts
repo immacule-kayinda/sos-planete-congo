@@ -18,3 +18,32 @@ export async function validateUser(email: string, password: string) {
 
   return user;
 }
+
+export async function getStudentData(userId: string) {
+  const student = await prisma.student.findFirst({
+    where: { userId },
+    include: {
+      performance: {
+        include: {
+          chapter: {
+            include: {
+              module: true,
+            },
+          },
+        },
+      },
+    },
+  });
+  return student;
+}
+
+export async function getModules() {
+  const modules = await prisma.module.findMany({
+    include: {
+      conte: true,
+      chapters: true,
+      quizzes: true,
+    },
+  });
+  return modules;
+}
