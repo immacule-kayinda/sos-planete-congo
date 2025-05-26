@@ -196,14 +196,14 @@ export function UserTable() {
                     {user.isActive ? (
                       <Badge
                         variant="default"
-                        className="bg-green-200 hover:bg-green-600 text-green-800"
+                        className="bg-green-200 hover:bg-green-500 text-green-600"
                       >
                         Actif
                       </Badge>
                     ) : (
                       <Badge
                         variant="destructive"
-                        className="bg-red-200 hover:bg-red-600 text-red-800"
+                        className="bg-red-200 hover:bg-red-500 text-red-600"
                       >
                         Inactif
                       </Badge>
