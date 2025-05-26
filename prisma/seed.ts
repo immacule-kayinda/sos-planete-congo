@@ -118,7 +118,7 @@ async function main() {
       const module = await prisma.module.create({
         data: {
           title: faker.lorem.words(3),
-          description: faker.lorem.paragraph(),
+          description: "Subtitle",
           conte: {
             create: {
               text: faker.lorem.paragraphs(3),
@@ -167,9 +167,9 @@ async function main() {
     for (const module of modules) {
       // Récupérer tous les chapitres du module
       const chapters = await prisma.chapter.findMany({
-        where: { moduleId: module.id }
+        where: { moduleId: module.id },
       });
-      
+
       // Créer une performance pour chaque chapitre
       for (const chapter of chapters) {
         await prisma.studentPerformance.create({

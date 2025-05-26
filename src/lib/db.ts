@@ -47,3 +47,17 @@ export async function getModules() {
   });
   return modules;
 }
+
+export async function getModuleWithChapters(moduleId: string) {
+  const module = await prisma.module.findUnique({
+    where: {
+      id: moduleId,
+    },
+    include: {
+      conte: true,
+      chapters: true,
+      quizzes: true,
+    },
+  });
+  return module;
+}

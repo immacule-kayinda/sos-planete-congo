@@ -22,11 +22,11 @@ export default function DashboardLayout({
           <UserNav />
         </div>
       </header>
-      <div className="flex flex-1">
-        <aside className="w-64 border-r bg-muted/40">
+      <div className="flex flex-1 flex-col md:flex-row">
+        <aside className="w-fit md:w-64 border-r bg-red/40 max-w-fit md:max-w-max">
           <DashboardNav />
         </aside>
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-4 md:p-6 pb-20">
           <Suspense fallback={<div>Chargement...</div>}>{children}</Suspense>
         </main>
       </div>

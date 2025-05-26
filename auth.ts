@@ -79,14 +79,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
+      const userExists = await prisma.user.findUnique({
+        where: { id: token.id },
+        select: { id: true, isActive: true },
+      });
+
+      console.log(userExists);
+
+      if (!userExists || !userExists.isActive) {
+        return session;
+      }
+
       if (session.user) {
         session.user.id = token.id;
         session.user.role = token.role;
       }
       return session;
     },
-    async authorized(params) {
-      return !!params.auth;
+    async authorized({ auth }) {
+      return !!auth;
     },
   },
 });
