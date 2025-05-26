@@ -117,7 +117,7 @@ model Student {
   age                    Int
   teacherId              String?
   teacher                Teacher?                 @relation(fields: [teacherId], references: [id])
-  performance            StudentPerformance?
+  performance            StudentPerformance[]
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
   Classroom              Classroom?               @relation(fields: [classroomId], references: [id])
@@ -143,7 +143,6 @@ model Module {
   quizzes            Quiz[]
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
-  StudentPerformance StudentPerformance[]
 }
 
 model Conte {
@@ -166,6 +165,7 @@ model Chapter {
   createdAt DateTime                 @default(now())
   updatedAt DateTime                 @updatedAt
   progress  StudentChapterProgress[]
+  performance StudentPerformance[]
 }
 
 model Quiz {
@@ -220,17 +220,17 @@ model StudentChapterProgress {
 
 model StudentPerformance {
   id        String   @id @default(uuid())
-  studentId String   @unique
-  moduleId  String
+  studentId String
+  chapterId String
   stars     Int      @default(0)
   timeSpent Int      @default(0) // en secondes
   accuracy  Float    @default(0) // entre 0 et 1
   student   Student  @relation(fields: [studentId], references: [id])
-  module    Module   @relation(fields: [moduleId], references: [id])
+  chapter   Chapter  @relation(fields: [chapterId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([studentId, moduleId])
+  @@unique([studentId, chapterId])
 }
 
 model StudentStreak {
