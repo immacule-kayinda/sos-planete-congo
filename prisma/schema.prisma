@@ -134,22 +134,36 @@ model Admin {
   updatedAt DateTime @updatedAt
 }
 
+model Section {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  order       Int      @default(autoincrement())
+  conte       Conte?
+  modules     Module[]
+  quizz       Quiz     @relation(fields: [quizId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  quizId      String   @unique
+}
+
 model Module {
-  id                 String               @id @default(uuid())
-  title              String
-  description        String
-  conte              Conte?
-  chapters           Chapter[]
-  quizzes            Quiz[]
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
+  id        String    @id @default(uuid())
+  title     String
+  subtitle  String
+  sectionId String
+  order     Int       @default(autoincrement())
+  section   Section   @relation(fields: [sectionId], references: [id])
+  chapters  Chapter[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Conte {
   id         String   @id @default(uuid())
-  moduleId   String   @unique
-  module     Module   @relation(fields: [moduleId], references: [id])
-  text       String
+  sectionId  String   @unique
+  section    Section  @relation(fields: [sectionId], references: [id])
+  title      String
   audioUrl   String
   imagesUrls String[] // Tableau d'URLs d'illustrations
   createdAt  DateTime @default(now())
@@ -157,25 +171,27 @@ model Conte {
 }
 
 model Chapter {
-  id        String                   @id @default(uuid())
-  moduleId  String
-  module    Module                   @relation(fields: [moduleId], references: [id])
-  title     String
-  content   String
-  createdAt DateTime                 @default(now())
-  updatedAt DateTime                 @updatedAt
-  progress  StudentChapterProgress[]
+  id          String                   @id @default(uuid())
+  moduleId    String
+  module      Module                   @relation(fields: [moduleId], references: [id])
+  title       String
+  subtitle    String
+  order       Int                      @default(autoincrement())
+  content     String
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  progress    StudentChapterProgress[]
   performance StudentPerformance[]
 }
 
 model Quiz {
   id        String     @id @default(uuid())
-  moduleId  String
-  module    Module     @relation(fields: [moduleId], references: [id])
+  sectionId String?
   title     String
   questions Question[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+  Section   Section?
 }
 
 model Question {

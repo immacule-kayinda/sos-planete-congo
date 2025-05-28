@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import { hashPassword } from "@/lib/utils";
 import { faker } from "@faker-js/faker";
 
 interface Teacher {
@@ -33,13 +33,15 @@ async function main() {
     prisma.studentChapterProgress.deleteMany(),
     prisma.option.deleteMany(),
     prisma.question.deleteMany(),
-    prisma.quiz.deleteMany(),
     prisma.chapter.deleteMany(),
     prisma.conte.deleteMany(),
     prisma.module.deleteMany(),
+    prisma.section.deleteMany(),
+    prisma.quiz.deleteMany(),
     prisma.student.deleteMany(),
     prisma.teacher.deleteMany(),
     prisma.admin.deleteMany(),
+    prisma.session.deleteMany(),
     prisma.user.deleteMany(),
   ]);
 
@@ -47,7 +49,7 @@ async function main() {
   const adminUser = await prisma.user.create({
     data: {
       email: "admin@example.com",
-      password: await bcrypt.hash("admin123", 10),
+      password: await hashPassword("admin123"),
       role: "ADMIN",
       isEmailVerified: true,
       admin: {
@@ -61,8 +63,8 @@ async function main() {
     Array.from({ length: 5 }).map(async () => {
       const user = await prisma.user.create({
         data: {
-          email: faker.internet.email(),
-          password: await bcrypt.hash("password123", 10),
+          email: faker.internet.email().toLowerCase(),
+          password: await hashPassword("password123"),
           role: "TEACHER",
           isEmailVerified: true,
           teacher: {
@@ -93,8 +95,8 @@ async function main() {
     Array.from({ length: 20 }).map(async () => {
       const user = await prisma.user.create({
         data: {
-          email: faker.internet.email(),
-          password: await bcrypt.hash("password123", 10),
+          email: faker.internet.email().toLowerCase(),
+          password: await hashPassword("password123"),
           role: "STUDENT",
           isEmailVerified: true,
           student: {
@@ -112,66 +114,89 @@ async function main() {
     })
   );
 
-  // Créer des modules
-  const modules = await Promise.all(
-    Array.from({ length: 3 }).map(async () => {
-      const module = await prisma.module.create({
+  // Créer des sections avec leurs modules et contes
+  const sections = await Promise.all(
+    Array.from({ length: 3 }).map(async (_, sectionIndex) => {
+      // Créer d'abord le quiz
+      const quiz = await prisma.quiz.create({
         data: {
           title: faker.lorem.words(3),
-          description: "Subtitle",
+          sectionId: "", // Temporaire, sera mis à jour après la création de la section
+          questions: {
+            create: Array.from({ length: 5 }).map(() => ({
+              type: faker.helpers.arrayElement([
+                "SINGLE_CHOICE",
+                "MULTIPLE_CHOICE",
+                "TEXT",
+              ]),
+              question: faker.lorem.sentence(),
+              options: {
+                create: Array.from({ length: 4 }).map((_, index) => ({
+                  text: faker.lorem.sentence(),
+                  isCorrect: index === 0,
+                })),
+              },
+              correctText: faker.lorem.sentence(),
+            })),
+          },
+        },
+      });
+
+      const section = await prisma.section.create({
+        data: {
+          title: faker.lorem.words(3),
+          description: faker.lorem.sentence(),
+          order: sectionIndex + 1,
+          quizId: quiz.id,
           conte: {
             create: {
-              text: faker.lorem.paragraphs(3),
+              title: faker.lorem.words(3),
               audioUrl: faker.internet.url(),
               imagesUrls: Array.from({ length: 3 }).map(() =>
                 faker.image.url()
               ),
             },
           },
-          chapters: {
-            create: Array.from({ length: 5 }).map(() => ({
+          modules: {
+            create: Array.from({ length: 3 }).map((_, moduleIndex) => ({
               title: faker.lorem.words(3),
-              content: faker.lorem.paragraphs(2),
-            })),
-          },
-          quizzes: {
-            create: Array.from({ length: 2 }).map(() => ({
-              title: faker.lorem.words(3),
-              questions: {
-                create: Array.from({ length: 5 }).map(() => ({
-                  type: faker.helpers.arrayElement([
-                    "SINGLE_CHOICE",
-                    "MULTIPLE_CHOICE",
-                    "TEXT",
-                  ]),
-                  question: faker.lorem.sentence(),
-                  options: {
-                    create: Array.from({ length: 4 }).map((_, index) => ({
-                      text: faker.lorem.sentence(),
-                      isCorrect: index === 0,
-                    })),
-                  },
-                  correctText: faker.lorem.sentence(),
+              subtitle: faker.lorem.sentence(),
+              order: moduleIndex + 1,
+              chapters: {
+                create: Array.from({ length: 5 }).map((_, chapterIndex) => ({
+                  title: faker.lorem.words(3),
+                  subtitle: faker.lorem.sentence(),
+                  content: faker.lorem.paragraphs(2),
+                  order: chapterIndex + 1,
                 })),
               },
             })),
           },
         },
       });
-      return module;
+
+      // Mettre à jour le quiz avec l'ID de la section
+      await prisma.quiz.update({
+        where: { id: quiz.id },
+        data: { sectionId: section.id },
+      });
+
+      return section;
     })
   );
+
+  // Récupérer tous les modules pour créer les performances
+  const modules = await prisma.module.findMany({
+    include: {
+      chapters: true,
+    },
+  });
 
   // Créer des performances d'étudiants
   for (const student of students) {
     for (const module of modules) {
-      // Récupérer tous les chapitres du module
-      const chapters = await prisma.chapter.findMany({
-        where: { moduleId: module.id },
-      });
-
       // Créer une performance pour chaque chapitre
-      for (const chapter of chapters) {
+      for (const chapter of module.chapters) {
         await prisma.studentPerformance.create({
           data: {
             studentId: student.id,
