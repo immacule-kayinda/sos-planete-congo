@@ -2,24 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import Finished from "./ui/Finished";
-import BottomSheet from "./ui/BottomSheet";
 import { CheckCircleIcon } from "lucide-react";
-
-const questions = [
-  {
-    question: "Qui est le hero principal ?",
-    answers: ["Tetsi", "Totsi", "Mosi", "Betsi"],
-    correct: 0,
-  },
-  {
-    question: "Quel est le pays le plus peuplé d'Afrique ?",
-    answers: ["Nigeria", "Congo", "Kenya", "Afrique du Sud"],
-    correct: 0,
-  },
-];
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import BottomSheet from "../ui/BottomSheet";
+import Finished from "../ui/Finished";
+import { QuizQuestion } from "@/lib/db";
+import Loader from "@/components/loader";
+import { getRandomFunFact } from "@/lib/data";
 
 export default function QuizPage() {
   const [current, setCurrent] = useState(0);
@@ -27,18 +17,40 @@ export default function QuizPage() {
   const [showCongrats, setShowCongrats] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [startTime] = useState(Date.now());
+  const [correctAnswers, setCorrectAnswers] = useState(0);
   const router = useRouter();
+  const { quizzId } = useParams<{ quizzId: string }>();
+
+  useEffect(() => {
+    const loadQuestions = async () => {
+      if (quizzId) {
+        try {
+          const response = await fetch(`/api/quizz/${quizzId}`);
+          if (!response.ok) throw new Error("Failed to fetch questions");
+          const data = await response.json();
+          setQuestions(data);
+        } catch (error) {
+          console.error("Error loading questions:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    loadQuestions();
+  }, [quizzId]);
+
+  if (loading) return <Loader funFact={getRandomFunFact()} />;
+  if (questions.length === 0) return <div>Aucune question trouvée</div>;
+
   const q = questions[current];
   const progress = ((current + 1) / questions.length) * 100;
 
   const handleAnswer = (i: number) => {
-    if (selected !== null) return;
+    if (showCongrats) return;
     setSelected(i);
-    const correct = i === q.correct;
-    setIsCorrect(correct);
-    setTimeout(() => {
-      setShowCongrats(true);
-    }, 300);
   };
 
   const handleCloseSheet = () => {
@@ -52,8 +64,41 @@ export default function QuizPage() {
     }
   };
 
+  const handleValidate = () => {
+    if (selected === null) return;
+    
+    let correct = false;
+    if (q.type === "OPEN_ENDED") {
+      correct =
+        q.answers[selected].toLowerCase() ===
+        (q.correctAnswer as string).toLowerCase();
+    } else {
+      correct = selected === q.correctAnswer;
+    }
+
+    if (correct) {
+      setCorrectAnswers((prev) => prev + 1);
+    }
+
+    setIsCorrect(correct);
+    setShowCongrats(true);
+  };
+
   if (finished) {
-    return <Finished onContinue={() => router.push("/learn")} />;
+    const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+    const accuracy = (correctAnswers / questions.length) * 100;
+    const stars = Math.round((correctAnswers / questions.length) * 200); // 200 étoiles max
+
+    return (
+      <Finished
+        onContinue={() => router.push("/learn")}
+        stats={{
+          timeSpent,
+          stars,
+          accuracy,
+        }}
+      />
+    );
   }
 
   return (
@@ -76,7 +121,11 @@ export default function QuizPage() {
         <h2 className="text-2xl md:text-3xl font-black text-center mb-10 mt-10">
           {q.question}
         </h2>
-        <div className="grid grid-cols-2 gap-4 w-full max-w-md px-4">
+        <div
+          className={`grid ${
+            q.type === "TRUE_FALSE" ? "grid-cols-2" : "grid-cols-1"
+          } gap-4 w-full max-w-md px-4`}
+        >
           {q.answers.map((a, i) => {
             let border = "border-gray-400";
             let bg = "bg-white";
@@ -102,7 +151,7 @@ export default function QuizPage() {
                 key={i}
                 className={`border border-b-4 ${border} rounded-lg py-4 px-2 text-lg hover:bg-cyan-50 hover:border-cyan-500 hover:text-cyan-800 font-bold ${bg} ${text} focus:outline-none transition-all duration-200`}
                 onClick={() => handleAnswer(i)}
-                disabled={selected !== null}
+                disabled={showCongrats}
               >
                 {a}
               </button>
@@ -122,8 +171,11 @@ export default function QuizPage() {
             Passer
           </Button>
           <Button
-            className={`bg-primary hover:bg-primary/90 text-white font-bold rounded-xl py-3 px-8 text-lg transition shadow h-fit`}
-            onClick={handleCloseSheet}
+            className={`w-full md:w-fit bg-primary hover:bg-primary/90 text-white font-bold rounded-xl py-3 px-8 text-lg transition shadow h-fit ${
+              selected === null ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            onClick={handleValidate}
+            disabled={selected === null}
           >
             Valider
           </Button>
@@ -151,9 +203,9 @@ export default function QuizPage() {
             >
               {isCorrect ? "Félicitations !" : "Mauvaise réponse"}
             </div>
-            {/* <div className="text-lg">
-              {isCorrect ? "Bonne réponse 🎉" : "Essaie encore !"}
-            </div> */}
+            {q.explanation && (
+              <div className="text-lg text-gray-600 mt-2">{q.explanation}</div>
+            )}
           </div>
           <div className="w-full md:w-auto flex gap-4 mt-6">
             <Button
