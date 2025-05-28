@@ -1,14 +1,11 @@
 import { Lock } from "lucide-react";
+import { LessonItemProps } from "./LessonItem";
 
 export default function BlockedLesson({
   title,
   subtitle,
   stars,
-}: {
-  title: string;
-  subtitle: string;
-  stars: number;
-}) {
+}: LessonItemProps) {
   return (
     <div className="bg-gray-100 rounded-xl p-4 flex justify-between items-center">
       <div className="flex items-center gap-5">
@@ -18,8 +15,10 @@ export default function BlockedLesson({
           </div>
         </div>
         <div>
-          <p className="font-black text-lg uppercase">{title}</p>
-          <span className="text-lg text-gray-500 font-bold">{subtitle}</span>
+          <p className="font-black uppercase">{title}</p>
+          <span className="text-gray-500 font-bold">
+            {subtitle.substring(0, 10)}...
+          </span>
         </div>
       </div>
       <span className="text-yellow-500 font-bold">★{stars}</span>

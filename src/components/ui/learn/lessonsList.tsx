@@ -1,3 +1,6 @@
+"use client";
+
+import Link from "next/link";
 import { Chapter } from "../../../../generated/prisma";
 import { Progress } from "../progress";
 import LessonItem from "./LessonItem";
@@ -7,12 +10,15 @@ export default function LessonsList({
   subtitle,
   progress,
   chapters,
+  moduleId,
 }: {
+  moduleId: string;
   title: string;
   subtitle: string;
   progress: number;
   chapters: Chapter[];
 }) {
+  // console.log(chapters[0]);
   return (
     <div className="bg-white rounded-xl p-4 border-2 border-gray-200">
       <h3 className="font-bold">{title}</h3>
@@ -30,6 +36,8 @@ export default function LessonsList({
             subtitle={subtitle}
             stars={20}
             state={index === 0 ? "CURRENT" : index < 2 ? "FINISHED" : "BLOKED"}
+            moduleId={moduleId}
+            chapterId={chapter.id}
           />
         ))}
       </div>
