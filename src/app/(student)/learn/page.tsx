@@ -75,7 +75,8 @@ export default async function LearnPage() {
           <div>
             <h4 className="font-bold text-lg">QUIZZ</h4>
             <p className="text-xs">
-              Près à tester ce que tu as appris et passer à l'étape suivante ?
+              Près à tester ce que tu as appris et passer à l&apos;étape
+              suivante ?
             </p>
           </div>
           <Link
@@ -86,6 +87,10 @@ export default async function LearnPage() {
           </Link>
         </div>
       </Link>
+
+      <p className="text-muted-foreground">
+        Commencez votre voyage d&apos;apprentissage.
+      </p>
     </div>
   );
 }

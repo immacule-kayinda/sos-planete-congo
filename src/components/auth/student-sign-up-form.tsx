@@ -7,13 +7,12 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { studentSignUpSchema, type StudentSignUpFormData } from "@/lib/zod";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { signIn } from "next-auth/react";
 
 export default function StudentSignUpForm() {
@@ -65,7 +64,11 @@ export default function StudentSignUpForm() {
         callbackUrl: "/learn",
       });
     } catch (error) {
-      toast.error("Une erreur est survenue lors de l'inscription");
+      toast.error(
+        `Une erreur est survenue lors de l'inscription: ${
+          error instanceof Error ? error.message : "Erreur inconnue"
+        }`
+      );
     }
   };
 
@@ -166,10 +169,14 @@ export default function StudentSignUpForm() {
             type="submit"
             className="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-3 rounded-lg text-xl mt-2 transition h-13"
           >
-            S'inscrire
+            S&apos;inscrire
           </Button>
         </form>
       </Form>
+      <p className="text-sm text-muted-foreground">
+        En vous inscrivant, vous acceptez nos conditions d&apos;utilisation et
+        notre politique de confidentialité.
+      </p>
     </>
   );
 }

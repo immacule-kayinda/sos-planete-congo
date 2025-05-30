@@ -1,13 +1,12 @@
-import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
 import { auth } from "../../../../../auth";
-import type { Prisma } from "@prisma/client";
 
 export async function GET(request: Request) {
   try {
     const session = await auth();
     if (!session || session.user.role !== "ADMIN") {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse(`Unauthorized`, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);

@@ -1,9 +1,7 @@
 import prisma from "@/lib/prisma";
 import { hashPassword } from "@/lib/utils";
-import { studentSignUpSchema, teacherSignUpSchema } from "@/lib/zod";
+import { teacherSignUpSchema } from "@/lib/zod";
 import { NextResponse } from "next/server";
-import { toast } from "sonner";
-import { signIn } from "../../../../../../auth";
 
 export async function POST(req: Request) {
   try {
@@ -49,7 +47,7 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error) {
-    // console.error("Erreur lors de l'inscription:", error);
+    console.error("Erreur lors de l'inscription:", error);
     return NextResponse.json(
       { message: "Erreur lors de l'inscription" },
       { status: 500 }

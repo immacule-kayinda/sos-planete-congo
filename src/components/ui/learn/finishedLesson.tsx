@@ -8,7 +8,6 @@ export default function FinishedLesson({
   chapterId,
   moduleId,
   stars,
-  state,
 }: LessonItemProps) {
   return (
     <Link href={`/learn/${moduleId}/chapter/${chapterId}`}>
@@ -27,7 +26,7 @@ export default function FinishedLesson({
             </span>
           </div>
         </div>
-        <span className="text-yellow-500 font-bold">★20</span>
+        <span className="text-yellow-500 font-bold">★{stars}</span>
       </div>
     </Link>
   );

@@ -4,7 +4,6 @@ import { SessionProvider } from "next-auth/react";
 import { Montserrat, Nunito } from "next/font/google";
 import { auth } from "../../auth";
 import "./globals.css";
-import { redirect } from "next/navigation";
 
 const nunito = Nunito({
   variable: "--font-nunito",

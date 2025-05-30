@@ -1,17 +1,31 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createConte, updateConte } from "@/lib/actions"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { createConte, updateConte } from "@/lib/actions";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock modules for the select dropdown
 const mockModules = [
@@ -19,19 +33,33 @@ const mockModules = [
   { id: "2", title: "French Grammar" },
   { id: "3", title: "Science Basics" },
   { id: "4", title: "History of Africa" },
-]
+];
 
 const formSchema = z.object({
   moduleId: z.string({ required_error: "Please select a module." }),
   text: z.string().min(50, { message: "Text must be at least 50 characters." }),
-  audioUrl: z.string().url({ message: "Please enter a valid URL for the audio file." }).optional().or(z.literal("")),
+  audioUrl: z
+    .string()
+    .url({ message: "Please enter a valid URL for the audio file." })
+    .optional()
+    .or(z.literal("")),
   imagesUrls: z.string().optional(),
-})
+});
 
-export function ConteForm({ conte = null }) {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+interface ConteFormProps {
+  conte?: {
+    id: string;
+    moduleId: string;
+    text: string;
+    audioUrl: string;
+    imagesUrls: string[];
+  } | null;
+}
+
+export function ConteForm({ conte = null }: ConteFormProps) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,39 +76,44 @@ export function ConteForm({ conte = null }) {
           audioUrl: "",
           imagesUrls: "",
         },
-  })
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
       // Process imagesUrls from newline-separated string to array
       const processedValues = {
         ...values,
-        imagesUrls: values.imagesUrls ? values.imagesUrls.split("\n").filter((url) => url.trim() !== "") : [],
-      }
+        imagesUrls: values.imagesUrls
+          ? values.imagesUrls.split("\n").filter((url) => url.trim() !== "")
+          : [],
+      };
 
       if (conte) {
-        await updateConte(conte.id, processedValues)
+        await updateConte(conte.id, processedValues);
         toast({
           title: "Conte updated",
           description: "The conte has been successfully updated.",
-        })
+        });
       } else {
-        await createConte(processedValues)
+        await createConte(processedValues);
         toast({
           title: "Conte created",
           description: "The conte has been successfully created.",
-        })
+        });
       }
-      router.push("/dashboard/contes")
+      router.push("/dashboard/contes");
     } catch (error) {
+      console.error("Failed to save conte:", error);
       toast({
         title: "Error",
-        description: `Failed to ${conte ? "update" : "create"} conte. Please try again.`,
+        description: `Failed to ${
+          conte ? "update" : "create"
+        } conte. Please try again.`,
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
@@ -107,7 +140,9 @@ export function ConteForm({ conte = null }) {
                   ))}
                 </SelectContent>
               </Select>
-              <FormDescription>The module this conte belongs to.</FormDescription>
+              <FormDescription>
+                The module this conte belongs to.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -120,7 +155,11 @@ export function ConteForm({ conte = null }) {
             <FormItem>
               <FormLabel>Text</FormLabel>
               <FormControl>
-                <Textarea placeholder="Once upon a time..." className="min-h-64" {...field} />
+                <Textarea
+                  placeholder="Once upon a time..."
+                  className="min-h-64"
+                  {...field}
+                />
               </FormControl>
               <FormDescription>The story text of this conte.</FormDescription>
               <FormMessage />
@@ -137,7 +176,9 @@ export function ConteForm({ conte = null }) {
               <FormControl>
                 <Input placeholder="https://example.com/audio.mp3" {...field} />
               </FormControl>
-              <FormDescription>URL to the audio narration of this conte (optional).</FormDescription>
+              <FormDescription>
+                URL to the audio narration of this conte (optional).
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -156,21 +197,31 @@ export function ConteForm({ conte = null }) {
                   {...field}
                 />
               </FormControl>
-              <FormDescription>Enter one image URL per line for illustrations (optional).</FormDescription>
+              <FormDescription>
+                Enter one image URL per line for illustrations (optional).
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
         <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={() => router.push("/dashboard/contes")}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/dashboard/contes")}
+          >
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : conte ? "Update Conte" : "Create Conte"}
+            {isSubmitting
+              ? "Saving..."
+              : conte
+              ? "Update Conte"
+              : "Create Conte"}
           </Button>
         </div>
       </form>
     </Form>
-  )
+  );
 }

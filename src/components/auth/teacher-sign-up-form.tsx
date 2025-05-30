@@ -5,28 +5,24 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  StudentSignUpFormData,
-  teacherSignUpSchema,
-  type TeacherSignUpFormData,
-} from "@/lib/zod";
+import { teacherSignUpSchema, type TeacherSignUpFormData } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import {
-  SelectTrigger,
-  SelectGroup,
-  Select,
-  SelectValue,
-  SelectContent,
-  SelectLabel,
-  SelectItem,
-} from "../ui/select";
 import { toast } from "sonner";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 export default function TeacherSignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -73,7 +69,11 @@ export default function TeacherSignUpForm() {
       toast.success("Inscription réussie !");
       // Rediriger ou faire autre chose après l'inscription réussie
     } catch (error) {
-      toast.error("Une erreur est survenue lors de l'inscription");
+      toast.error(
+        `Une erreur est survenue lors de l'inscription: ${
+          error instanceof Error ? error.message : "Erreur inconnue"
+        }`
+      );
     }
   };
 
@@ -218,6 +218,13 @@ export default function TeacherSignUpForm() {
         >
           S'inscrire
         </Button>
+        <p className="text-sm text-muted-foreground">
+          En vous inscrivant, vous acceptez nos conditions d&apos;utilisation et
+          notre politique de confidentialité.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Vous recevrez un email de confirmation à l&apos;adresse fournie.
+        </p>
       </form>
     </Form>
   );

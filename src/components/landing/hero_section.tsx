@@ -1,6 +1,5 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function HeroSection() {
   return (
@@ -18,7 +17,7 @@ export default function HeroSection() {
             Sos planete congo
           </h1>
           <p className="text-[#A87878]">
-            La plateforme éducative et ludique pour explorer l’environnement et
+            La plateforme éducative et ludique pour explorer l'environnement et
             la culture de la RDC. Des outils interactifs et bilingues (français
             et langues nationales) pour les élèves et enseignants.
           </p>
@@ -37,6 +36,12 @@ export default function HeroSection() {
             J'ai déjà un compte
           </Link>
         </div>
+        <p className="text-sm text-muted-foreground">
+          Commencez votre voyage d&apos;apprentissage aujourd&apos;hui.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Découvrez nos modules d&apos;apprentissage interactifs.
+        </p>
       </div>
     </section>
   );

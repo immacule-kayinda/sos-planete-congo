@@ -1,15 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +10,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -28,17 +19,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Lock,
-  Search,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
+import { deleteUser } from "@/lib/actions";
+import {
   CheckCircle,
+  Edit,
+  Lock,
+  MoreHorizontal,
+  Search,
+  Trash2,
   XCircle,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { deleteUser } from "@/lib/actions";
-import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
+import { useState } from "react";
 
 // Mock data - in a real app, this would come from your database
 const mockUsers = [
@@ -112,7 +112,7 @@ export function UserTable() {
         title: "User deleted",
         description: "The user has been successfully deleted.",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to delete user. Please try again.",

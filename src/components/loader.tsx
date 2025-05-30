@@ -1,6 +1,3 @@
-import { getRandomFunFact } from "@/lib/data";
-import { useEffect, useState } from "react";
-
 export default function Loader({ funFact }: { funFact: string }) {
   return (
     <div className="w-screen h-screen gap-10 flex justify-center items-center flex-col text-center">

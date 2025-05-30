@@ -8,26 +8,11 @@ import { Button } from "@/components/ui/button";
 import Footer from "@/components/ui/footer";
 import { Book, Globe, School, Users } from "lucide-react";
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import { useInView } from "react-intersection-observer";
-import { toast } from "sonner";
 
 export default function Home() {
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const [isThanosVisible, setIsThanosVisible] = useState(true);
-  const [ref, inView] = useInView({
-    threshold: 0,
-  });
-
-  useEffect(() => {}, []);
-
   return (
     <div>
-      <Header
-        className={`header-transition ${
-          !isHeaderVisible ? "header-hidden" : ""
-        }`}
-      />
+      <Header />
       <main className="">
         <HeroSection />
         <Presentation />
@@ -49,7 +34,7 @@ export default function Home() {
           <div className="bg-[#067E33] w-full min-h-[50vh] items-center flex justify-center">
             <div className="flex flex-col text-[#D0FFC7] items-center justify-center h-full text-center font-bold">
               <h1 className="text-[#D0FFC7] uppercase mb-10 text-2xl md:text-4xl">
-                Le projet sos aujourd'hui
+                Le projet sos aujourd&apos;hui
               </h1>
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 {stats.map((stat) => (
@@ -79,7 +64,7 @@ export default function Home() {
               Commence à explorer dès maintenant
             </h1>
             <Button size={"lg"} className="w-3xs ">
-              C'est parti!!
+              C&apos;est parti!!
             </Button>
           </div>
           <Image

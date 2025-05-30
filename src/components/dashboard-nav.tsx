@@ -1,22 +1,19 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import {
-  Users,
-  BookOpen,
-  FileText,
   BookMarked,
+  BookOpen,
+  Ellipsis,
+  FileText,
+  GraduationCap,
   HelpCircle,
   School,
-  GraduationCap,
-  Settings,
-  User,
-  LogOut,
-  Dot,
-  Ellipsis,
+  Users,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,8 +23,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Button } from "./ui/button";
-import { Avatar, AvatarFallback } from "./ui/avatar";
 
 const navItems = [
   {
@@ -107,9 +102,9 @@ export function DashboardNav() {
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">Plus d'options</p>
-              {/* <p className="text-xs leading-none text-muted-foreground">
-                admin@example.com
-              </p> */}
+              <p className="text-sm text-muted-foreground">
+                Bienvenue dans votre espace d&apos;administration.
+              </p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />

@@ -3,7 +3,10 @@ import { auth } from "../../auth";
 import prisma from "./prisma";
 import { comparePasswords } from "./utils";
 
-export async function validateUser(email: string, password: string): Promise<User | null> {
+export async function validateUser(
+  email: string,
+  password: string
+): Promise<User | null> {
   const user = await prisma.user.findUnique({
     where: { email },
     include: {
@@ -44,7 +47,7 @@ export async function getChapterWithUserPerformances(
       },
     });
 
-    return;
+    return chapter;
   }
 
   return null;
@@ -163,7 +166,12 @@ export async function getSectionWithModules(sectionId: string = "") {
   return firstSection;
 }
 
-export type QuestionType = 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'OPEN_ENDED' | 'SINGLE_CHOICE' | 'TEXT';
+export type QuestionType =
+  | "MULTIPLE_CHOICE"
+  | "TRUE_FALSE"
+  | "OPEN_ENDED"
+  | "SINGLE_CHOICE"
+  | "TEXT";
 
 export interface QuizQuestion {
   id: string;
@@ -174,49 +182,51 @@ export interface QuizQuestion {
   explanation?: string;
 }
 
-export async function getQuizQuestions(quizId: string): Promise<QuizQuestion[]> {
+export async function getQuizQuestions(
+  quizId: string
+): Promise<QuizQuestion[]> {
   const quiz = await prisma.quiz.findUnique({
     where: { id: quizId },
     include: {
       questions: {
         include: {
-          options: true
-        }
-      }
-    }
+          options: true,
+        },
+      },
+    },
   });
 
   if (!quiz?.questions) return [];
 
-  return quiz.questions.map(q => {
+  return quiz.questions.map((q) => {
     const formattedQuestion: QuizQuestion = {
       id: q.id,
       type: q.type as QuestionType,
       question: q.question,
-      answers: q.options.map(o => o.text),
-      correctAnswer: q.options.findIndex(o => o.isCorrect),
-      explanation: q.correctText || undefined
+      answers: q.options.map((o) => o.text),
+      correctAnswer: q.options.findIndex((o) => o.isCorrect),
+      explanation: q.correctText || undefined,
     };
 
     // Format based on question type
     switch (q.type) {
-      case 'MULTIPLE_CHOICE':
+      case "MULTIPLE_CHOICE":
         return formattedQuestion;
-      
-      case 'SINGLE_CHOICE':
+
+      case "SINGLE_CHOICE":
         return {
           ...formattedQuestion,
-          answers: q.options.map(o => o.text),
-          correctAnswer: q.options.findIndex(o => o.isCorrect)
+          answers: q.options.map((o) => o.text),
+          correctAnswer: q.options.findIndex((o) => o.isCorrect),
         };
-      
-      case 'TEXT':
+
+      case "TEXT":
         return {
           ...formattedQuestion,
-          answers: q.options.map(o => o.text),
-          correctAnswer: q.correctText || ''
+          answers: q.options.map((o) => o.text),
+          correctAnswer: q.correctText || "",
         };
-      
+
       default:
         return formattedQuestion;
     }

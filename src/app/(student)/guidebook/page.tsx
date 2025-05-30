@@ -1,6 +1,5 @@
 import Chapter from "@/components/ui/guidebook/chapter";
 import CompletedChapter from "@/components/ui/guidebook/completedChapter";
-import { Progress } from "@/components/ui/progress";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -16,9 +15,9 @@ export default function Guidebook() {
       </Link>
       <div className="flex flex-col gap-4">
         <CompletedChapter />
-        {chapters.map((chapter) => {
-          return <Chapter {...chapter} />;
-        })}
+        {chapters.map((chapter) => (
+          <Chapter key={chapter.title} {...chapter} />
+        ))}
       </div>
     </div>
   );

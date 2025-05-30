@@ -1,14 +1,27 @@
-import { Suspense } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { PlusCircle, Edit, Trash2 } from "lucide-react"
-import { Skeleton } from "@/components/ui/skeleton"
-import { notFound } from "next/navigation"
+import { Suspense } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { PlusCircle, Edit, Trash2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { notFound } from "next/navigation";
+
+interface Module {
+  id: string;
+  title: string;
+  description: string;
+}
 
 // Mock function to get module by ID - in a real app, this would fetch from your database
-async function getModuleById(id: string) {
+async function getModuleById(id: string): Promise<Module | null> {
   // Mock data
   const modules = {
     "1": {
@@ -21,9 +34,9 @@ async function getModuleById(id: string) {
       title: "French Grammar",
       description: "Essential grammar rules for French language learners",
     },
-  }
+  } as const;
 
-  return modules[id] || null
+  return (modules as Record<string, Module>)[id] || null;
 }
 
 // Mock function to get chapters by module ID - in a real app, this would fetch from your database
@@ -58,29 +71,36 @@ async function getChaptersByModuleId(moduleId: string) {
       content: "Adjectives describe nouns...",
       createdAt: "2023-02-20T00:00:00.000Z",
     },
-  ]
+  ];
 
-  return allChapters.filter((chapter) => chapter.moduleId === moduleId)
+  return allChapters.filter((chapter) => chapter.moduleId === moduleId);
 }
 
-export default async function ModuleChaptersPage({ params }: { params: { id: string } }) {
-  const module = await getModuleById(params.id)
+export default async function ModuleChaptersPage(props: {
+  params: Promise<{ id: string }>;
+}) {
+  const params = await props.params;
+  const moduleData = await getModuleById(params.id);
 
-  if (!module) {
-    notFound()
+  if (!moduleData) {
+    notFound();
   }
 
-  const chapters = await getChaptersByModuleId(params.id)
+  const chapters = await getChaptersByModuleId(params.id);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Chapitres pour {module.title}</h1>
-          <p className="text-muted-foreground">Gérez les chapitres pour ce module.</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Chapitres pour {moduleData.title}
+          </h1>
+          <p className="text-muted-foreground">
+            Gérez les chapitres pour ce module.
+          </p>
         </div>
         <Button asChild>
-          <Link href={`/dashboard/chapters/new?moduleId=${module.id}`}>
+          <Link href={`/dashboard/chapters/new?moduleId=${moduleData.id}`}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Ajouter un chapitre
           </Link>
@@ -108,9 +128,13 @@ export default async function ModuleChaptersPage({ params }: { params: { id: str
               ) : (
                 chapters.map((chapter) => (
                   <TableRow key={chapter.id}>
-                    <TableCell className="font-medium">{chapter.title}</TableCell>
+                    <TableCell className="font-medium">
+                      {chapter.title}
+                    </TableCell>
                     <TableCell>{chapter.content.length} caractères</TableCell>
-                    <TableCell>{new Date(chapter.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      {new Date(chapter.createdAt).toLocaleDateString()}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button variant="outline" size="sm" asChild>
@@ -133,5 +157,5 @@ export default async function ModuleChaptersPage({ params }: { params: { id: str
         </Suspense>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,11 +1,19 @@
-import { ConteForm } from "@/components/conte-form"
-import { Card } from "@/components/ui/card"
-import { notFound } from "next/navigation"
+import { ConteForm } from "@/components/conte-form";
+import { Card } from "@/components/ui/card";
+import { notFound } from "next/navigation";
+
+interface Conte {
+  id: string;
+  moduleId: string;
+  text: string;
+  audioUrl: string;
+  imagesUrls: string[];
+}
 
 // Mock function to get conte by ID - in a real app, this would fetch from your database
-async function getConteById(id: string) {
+async function getConteById(id: string): Promise<Conte | null> {
   // Mock data
-  const contes = {
+  const contes: Record<string, Conte> = {
     "1": {
       id: "1",
       moduleId: "1",
@@ -46,28 +54,33 @@ async function getConteById(id: string) {
         "https://example.com/image16.jpg",
       ],
     },
-  }
+  };
 
-  return contes[id] || null
+  return contes[id] || null;
 }
 
-export default async function EditContePage({ params }: { params: { id: string } }) {
-  const conte = await getConteById(params.id)
+export default async function EditContePage(props: {
+  params: Promise<{ id: string }>;
+}) {
+  const params = await props.params;
+  const conte = await getConteById(params.id);
 
   if (!conte) {
-    notFound()
+    notFound();
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Modifier le conte</h1>
-        <p className="text-muted-foreground">Mettre à jour le texte, l'audio et les images du conte.</p>
+        <p className="text-muted-foreground">
+          Mettre à jour les détails et le contenu du conte.
+        </p>
       </div>
 
       <Card className="p-6">
         <ConteForm conte={conte} />
       </Card>
     </div>
-  )
+  );
 }

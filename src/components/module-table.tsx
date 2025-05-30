@@ -1,8 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useState } from "react";
+import Link from "next/link";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,12 +17,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { MoreHorizontal, Edit, Trash2, FileText, Search, BookMarked } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { deleteModule } from "@/lib/actions"
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  FileText,
+  Search,
+  BookMarked,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { deleteModule } from "@/lib/actions";
 
 // Mock data - in a real app, this would come from your database
 const mockModules = [
@@ -51,35 +65,36 @@ const mockModules = [
     chaptersCount: 10,
     createdAt: "2023-04-20T00:00:00.000Z",
   },
-]
+];
 
 export function ModuleTable() {
-  const { toast } = useToast()
-  const [searchTerm, setSearchTerm] = useState("")
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Filter modules based on search term
   const filteredModules = mockModules.filter(
     (module) =>
       module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      module.description.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      module.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleDeleteModule = async (moduleId: string) => {
     try {
       // In a real app, this would call a server action to delete the module
-      await deleteModule(moduleId)
+      await deleteModule(moduleId);
       toast({
         title: "Module deleted",
         description: "The module has been successfully deleted.",
-      })
+      });
     } catch (error) {
+      console.error("Failed to delete module:", error);
       toast({
         title: "Error",
         description: "Failed to delete module. Please try again.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -127,7 +142,9 @@ export function ModuleTable() {
                       <span className="text-muted-foreground">Aucun</span>
                     )}
                   </TableCell>
-                  <TableCell>{new Date(module.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {new Date(module.createdAt).toLocaleDateString()}
+                  </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -145,13 +162,18 @@ export function ModuleTable() {
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href={`/dashboard/modules/${module.id}/chapters`}>
+                          <Link
+                            href={`/dashboard/modules/${module.id}/chapters`}
+                          >
                             <FileText className="mr-2 h-4 w-4" />
                             Gérer les chapitres
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteModule(module.id)}>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDeleteModule(module.id)}
+                        >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Supprimer
                         </DropdownMenuItem>
@@ -165,5 +187,5 @@ export function ModuleTable() {
         </Table>
       </div>
     </div>
-  )
+  );
 }

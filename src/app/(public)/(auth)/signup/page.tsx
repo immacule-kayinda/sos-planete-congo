@@ -1,28 +1,14 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { FiEye, FiEyeOff } from "react-icons/fi";
 import { AiOutlineArrowLeft } from "react-icons/ai";
-import {
-  Select,
-  SelectContent,
-  SelectValue,
-  SelectGroup,
-  SelectTrigger,
-  SelectLabel,
-  SelectItem,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import TeacherSignUpForm from "@/components/auth/teacher-sign-up-form";
 import StudentSignUpForm from "@/components/auth/student-sign-up-form";
-import { toast } from "sonner";
 
 export default function Signup() {
   const [role, setRole] = useState<"apprenant" | "enseignant">("apprenant");
-  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <>
