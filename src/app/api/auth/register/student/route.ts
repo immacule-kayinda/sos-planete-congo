@@ -2,7 +2,6 @@ import prisma from "@/lib/prisma";
 import { hashPassword } from "@/lib/utils";
 import { studentSignUpSchema } from "@/lib/zod";
 import { NextResponse } from "next/server";
-import { toast } from "sonner";
 
 export async function POST(req: Request) {
   try {
@@ -14,7 +13,7 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    const { email, name, password, age } = parseResult.data;
+    const { email, password, age } = parseResult.data;
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return NextResponse.json(

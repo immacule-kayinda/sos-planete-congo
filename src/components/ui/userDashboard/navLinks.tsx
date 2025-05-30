@@ -1,40 +1,17 @@
 "use client";
+
 import clsx from "clsx";
 import {
   BarChart2,
-  Book,
   BookOpen,
+  Brain,
   Gamepad2,
   MoreHorizontal,
   ShoppingBag,
   User,
 } from "lucide-react";
-
-import { Brain } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-export default function NavLinks() {
-  const pathname = usePathname();
-  return (
-    <nav className="flex md:flex-col gap-y-2 justify-between md::w-fit overflow-hidden">
-      {links.map((link, index) => (
-        <Link
-          href={link.href ?? "#"}
-          key={index}
-          className={clsx(
-            "flex items-center gap-2 p-3 xl:w-full hover:bg-red-200 md:justify-start rounded-md justify-center w-fit hover:text-red-500 lg:w-fit",
-            pathname === link.href &&
-              "bg-red-200 text-red-500 border-2 border-red-500"
-          )}
-        >
-          {link.icon}
-          <span className="font-black uppercase text-sm hidden lg:block">{link.label}</span>
-        </Link>
-      ))}
-    </nav>
-  );
-}
 
 const links: { href?: string; icon: React.ReactNode; label: string }[] = [
   {
@@ -73,3 +50,27 @@ const links: { href?: string; icon: React.ReactNode; label: string }[] = [
     label: "Boutique ",
   },
 ];
+
+export default function NavLinks() {
+  const pathname = usePathname();
+  return (
+    <nav className="flex md:flex-col gap-y-2 justify-between md::w-fit overflow-hidden">
+      {links.map((link, index) => (
+        <Link
+          href={link.href ?? "#"}
+          key={index}
+          className={clsx(
+            "flex items-center gap-2 p-3 xl:w-full hover:bg-red-200 md:justify-start rounded-md justify-center w-fit hover:text-red-500 lg:w-fit",
+            pathname === link.href &&
+              "bg-red-200 text-red-500 border-2 border-red-500"
+          )}
+        >
+          {link.icon}
+          <span className="font-black uppercase text-sm hidden lg:block">
+            {link.label}
+          </span>
+        </Link>
+      ))}
+    </nav>
+  );
+}

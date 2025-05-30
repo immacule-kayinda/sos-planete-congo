@@ -1,8 +1,16 @@
+import Image from "next/image";
+
+interface Course {
+  image: string;
+  titre: string;
+  description: string;
+}
+
 export default function CourseItem({
   compte,
   idx,
 }: {
-  compte: any;
+  compte: Course;
   idx: number;
 }) {
   return (
@@ -10,9 +18,11 @@ export default function CourseItem({
       key={idx}
       className="bg-white rounded-xl border border-gray- overflow-hidden flex flex-col"
     >
-      <img
+      <Image
         src={compte.image}
         alt="illustration"
+        width={400}
+        height={192}
         className="w-full h-48 object-cover"
       />
       <div className="p-5 flex-1 flex flex-col">

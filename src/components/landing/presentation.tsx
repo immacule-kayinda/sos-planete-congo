@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import PresentationItem from "../presentationItem";
 
 export default function Presentation() {

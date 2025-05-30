@@ -25,7 +25,7 @@ export default function Profile() {
             <span className="text-3xl">🔥</span>
             <div>
               <div className="text-xl font-bold">5</div>
-              <div className="text-gray-500 text-sm">Jours d'affilé</div>
+              <div className="text-gray-500 text-sm">Jours d&apos;affilé</div>
             </div>
           </div>
           <div className="flex items-center gap-4 flex-1 min-w-[200px] bg-gray-50 border-2 border-gray-200 rounded-xl p-5">
@@ -46,11 +46,20 @@ export default function Profile() {
             <span className="text-3xl text-yellow-400">⭐</span>
             <div>
               <div className="text-base font-bold">4j 4h 50min</div>
-              <div className="text-gray-500 text-sm">Temps d'apprentissage</div>
+              <div className="text-gray-500 text-sm">
+                Temps d&apos;apprentissage
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <p className="text-muted-foreground">
+        Gérez vos informations personnelles et vos préférences
+        d&apos;apprentissage.
+      </p>
+      <p className="text-muted-foreground">
+        Suivez votre progression et vos réalisations d&apos;apprentissage.
+      </p>
     </div>
   );
 }

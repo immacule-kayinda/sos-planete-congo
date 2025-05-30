@@ -1,8 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useState } from "react";
+import Link from "next/link";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,13 +17,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MoreHorizontal, Edit, Trash2, Search } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { deleteChapter } from "@/lib/actions"
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MoreHorizontal, Edit, Trash2, Search } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { deleteChapter } from "@/lib/actions";
 
 // Mock data - in a real app, this would come from your database
 const mockChapters = [
@@ -55,7 +68,7 @@ const mockChapters = [
     contentLength: 3200,
     createdAt: "2023-04-25T00:00:00.000Z",
   },
-]
+];
 
 // Mock modules for filtering
 const mockModules = [
@@ -63,37 +76,41 @@ const mockModules = [
   { id: "2", title: "French Grammar" },
   { id: "3", title: "Science Basics" },
   { id: "4", title: "History of Africa" },
-]
+];
 
 export function ChapterTable() {
-  const { toast } = useToast()
-  const [searchTerm, setSearchTerm] = useState("")
-  const [moduleFilter, setModuleFilter] = useState("All modules")
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [moduleFilter, setModuleFilter] = useState("All modules");
 
   // Filter chapters based on search term and module filter
   const filteredChapters = mockChapters.filter((chapter) => {
-    const matchesSearch = chapter.title.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesModule = moduleFilter === "All modules" || chapter.moduleTitle === moduleFilter
+    const matchesSearch = chapter.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesModule =
+      moduleFilter === "All modules" || chapter.moduleTitle === moduleFilter;
 
-    return matchesSearch && matchesModule
-  })
+    return matchesSearch && matchesModule;
+  });
 
   const handleDeleteChapter = async (chapterId: string) => {
     try {
       // In a real app, this would call a server action to delete the chapter
-      await deleteChapter(chapterId)
+      await deleteChapter(chapterId);
       toast({
         title: "Chapter deleted",
         description: "The chapter has been successfully deleted.",
-      })
+      });
     } catch (error) {
+      console.error("Failed to delete chapter:", error);
       toast({
         title: "Error",
         description: "Failed to delete chapter. Please try again.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -146,7 +163,9 @@ export function ChapterTable() {
                   <TableCell className="font-medium">{chapter.title}</TableCell>
                   <TableCell>{chapter.moduleTitle}</TableCell>
                   <TableCell>{chapter.contentLength} caractères</TableCell>
-                  <TableCell>{new Date(chapter.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {new Date(chapter.createdAt).toLocaleDateString()}
+                  </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -164,7 +183,10 @@ export function ChapterTable() {
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteChapter(chapter.id)}>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDeleteChapter(chapter.id)}
+                        >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Supprimer
                         </DropdownMenuItem>
@@ -178,5 +200,5 @@ export function ChapterTable() {
         </Table>
       </div>
     </div>
-  )
+  );
 }

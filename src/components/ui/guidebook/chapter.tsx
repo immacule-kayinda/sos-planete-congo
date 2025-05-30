@@ -1,10 +1,11 @@
+import Image from "next/image";
 import { Progress } from "../progress";
 
 export default function Chapter({
   title,
-  image,
   progress,
   total,
+  image,
 }: {
   title: string;
   image: string;
@@ -16,6 +17,13 @@ export default function Chapter({
       <div className="bg-[#e6e6e6] p-4">
         <h2 className="text-xl font-black uppercase">{title}</h2>
       </div>
+      <Image
+        src={image}
+        alt="Chapter Image"
+        width={800}
+        height={400}
+        className="w-full h-64 object-cover hidden"
+      />
       <div className="bg-[#e6e6e6] flex items-center justify-center py-12">
         <p className="text-gray-500">Image pilote du chapitre</p>
       </div>

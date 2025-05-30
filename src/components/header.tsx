@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 export default function Header({ className }: { className?: string }) {
@@ -27,6 +26,9 @@ export default function Header({ className }: { className?: string }) {
             S'inscrire
           </Link>
         </nav>
+        <p className="text-sm text-muted-foreground">
+          Découvrez notre plateforme d&apos;apprentissage interactive.
+        </p>
       </div>
     </header>
   );

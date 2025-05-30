@@ -1,8 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useState } from "react";
+import Link from "next/link";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,12 +17,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { MoreHorizontal, Edit, Trash2, Search, Music, ImageIcon } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { deleteConte } from "@/lib/actions"
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Search,
+  Music,
+  ImageIcon,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { deleteConte } from "@/lib/actions";
 
 // Mock data - in a real app, this would come from your database
 const mockContes = [
@@ -43,35 +57,36 @@ const mockContes = [
     imagesCount: 8,
     createdAt: "2023-04-20T00:00:00.000Z",
   },
-]
+];
 
 export function ConteTable() {
-  const { toast } = useToast()
-  const [searchTerm, setSearchTerm] = useState("")
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Filter contes based on search term
   const filteredContes = mockContes.filter(
     (conte) =>
       conte.moduleTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      conte.text.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      conte.text.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleDeleteConte = async (conteId: string) => {
     try {
       // In a real app, this would call a server action to delete the conte
-      await deleteConte(conteId)
+      await deleteConte(conteId);
       toast({
         title: "Conte deleted",
         description: "The conte has been successfully deleted.",
-      })
+      });
     } catch (error) {
+      console.error("Failed to delete conte:", error);
       toast({
         title: "Error",
         description: "Failed to delete conte. Please try again.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -109,8 +124,12 @@ export function ConteTable() {
             ) : (
               filteredContes.map((conte) => (
                 <TableRow key={conte.id}>
-                  <TableCell className="font-medium">{conte.moduleTitle}</TableCell>
-                  <TableCell className="max-w-[200px] truncate">{conte.text}</TableCell>
+                  <TableCell className="font-medium">
+                    {conte.moduleTitle}
+                  </TableCell>
+                  <TableCell className="max-w-[200px] truncate">
+                    {conte.text}
+                  </TableCell>
                   <TableCell>
                     {conte.hasAudio ? (
                       <Music className="h-5 w-5 text-green-500" />
@@ -124,7 +143,9 @@ export function ConteTable() {
                       <span>{conte.imagesCount}</span>
                     </div>
                   </TableCell>
-                  <TableCell>{new Date(conte.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {new Date(conte.createdAt).toLocaleDateString()}
+                  </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -142,7 +163,10 @@ export function ConteTable() {
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteConte(conte.id)}>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDeleteConte(conte.id)}
+                        >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Delete
                         </DropdownMenuItem>
@@ -156,5 +180,5 @@ export function ConteTable() {
         </Table>
       </div>
     </div>
-  )
+  );
 }

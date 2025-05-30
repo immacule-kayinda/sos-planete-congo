@@ -1,4 +1,3 @@
-import Finished from "@/app/quizz/ui/Finished";
 import BlockedLesson from "./blockedLesson";
 import CurrentLesson from "./currentLesson";
 import FinishedLesson from "./finishedLesson";

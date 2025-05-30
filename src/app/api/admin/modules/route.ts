@@ -15,17 +15,13 @@ export async function GET(request: Request) {
     const modules = await prisma.module.findMany({
       where: search
         ? {
-            OR: [
-              { title: { contains: search, mode: "insensitive" } },
-              { description: { contains: search, mode: "insensitive" } },
-            ],
+            title: { contains: search, mode: "insensitive" },
           }
         : undefined,
       include: {
         _count: {
           select: {
             chapters: true,
-            quizzes: true,
           },
         },
       },
@@ -51,7 +47,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { title, description, conte } = body;
 
-    const module = await prisma.module.create({
+    const newModule = await prisma.module.create({
       data: {
         title,
         description,
@@ -63,7 +59,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(module);
+    return NextResponse.json(newModule);
   } catch (error) {
     console.error("Error creating module:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
