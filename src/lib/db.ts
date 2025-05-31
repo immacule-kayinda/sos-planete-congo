@@ -185,7 +185,7 @@ export interface QuizQuestion {
 export async function getQuizQuestions(
   quizId: string
 ): Promise<QuizQuestion[]> {
-  const quiz = await prisma.quiz.findUnique({
+  const quizz = await prisma.quizz.findUnique({
     where: { id: quizId },
     include: {
       questions: {
@@ -196,9 +196,9 @@ export async function getQuizQuestions(
     },
   });
 
-  if (!quiz?.questions) return [];
+  if (!quizz?.questions) return [];
 
-  return quiz.questions.map((q) => {
+  return quizz.questions.map((q) => {
     const formattedQuestion: QuizQuestion = {
       id: q.id,
       type: q.type as QuestionType,

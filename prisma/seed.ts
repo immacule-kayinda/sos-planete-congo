@@ -37,7 +37,7 @@ async function main() {
     prisma.conte.deleteMany(),
     prisma.module.deleteMany(),
     prisma.section.deleteMany(),
-    prisma.quiz.deleteMany(),
+    prisma.quizz.deleteMany(),
     prisma.student.deleteMany(),
     prisma.teacher.deleteMany(),
     prisma.admin.deleteMany(),
@@ -118,7 +118,7 @@ async function main() {
   const sections = await Promise.all(
     Array.from({ length: 3 }).map(async (_, sectionIndex) => {
       // Créer d'abord le quiz
-      const quiz = await prisma.quiz.create({
+      const quizz = await prisma.quizz.create({
         data: {
           title: faker.lorem.words(3),
           sectionId: "", // Temporaire, sera mis à jour après la création de la section
@@ -147,7 +147,7 @@ async function main() {
           title: faker.lorem.words(3),
           description: faker.lorem.sentence(),
           order: sectionIndex + 1,
-          quizId: quiz.id,
+          quizId: quizz.id,
           conte: {
             create: {
               title: faker.lorem.words(3),
@@ -176,8 +176,8 @@ async function main() {
       });
 
       // Mettre à jour le quiz avec l'ID de la section
-      await prisma.quiz.update({
-        where: { id: quiz.id },
+      await prisma.quizz.update({
+        where: { id: quizz.id },
         data: { sectionId: section.id },
       });
 

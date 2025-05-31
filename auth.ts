@@ -36,7 +36,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: {},
         password: {},
       },
-      async authorize(credentials, request) {
+      async authorize(credentials) {
         try {
           const { email, password } = await signInSchema.parseAsync(
             credentials
@@ -92,4 +92,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return !!auth;
     },
   },
+  trustHost: true,
 });

@@ -8,20 +8,20 @@ export default function QuizzesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Quiz</h1>
-          <p className="text-muted-foreground">Gérez les quiz et les questions pour les modules éducatifs.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Quizz</h1>
+          <p className="text-muted-foreground">Gérez les quizz et les questions pour les modules éducatifs.</p>
         </div>
         <Button asChild>
           <Link href="/dashboard/quizzes/new">
             <PlusCircle className="mr-2 h-4 w-4" />
-            Ajouter un quiz
+            Ajouter un quizz
           </Link>
         </Button>
       </div>
 
       <Card className="p-6">
         <div className="text-center text-muted-foreground">
-          <p>La gestion des quiz arrive bientôt...</p>
+          <p>La gestion des quizz arrive bientôt...</p>
         </div>
       </Card>
     </div>
