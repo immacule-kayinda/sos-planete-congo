@@ -1,11 +1,16 @@
 import PresentationItem from "../presentationItem";
+import { ScrollReveal } from "../ui/scroll-reveal";
 
 export default function Presentation() {
   return (
     <div className="text-center container m-auto py-10 flex flex-col gap-20 px-7">
-      {sections.map((section, index) => (
-        <PresentationItem index={index} key={index} {...section} />
-      ))}
+      <ScrollReveal>
+        {sections.map((section, index) => (
+          <ScrollReveal key={index} delay={index * 0.1}>
+            <PresentationItem index={index} key={index} {...section} />
+          </ScrollReveal>
+        ))}
+      </ScrollReveal>
     </div>
   );
 }
