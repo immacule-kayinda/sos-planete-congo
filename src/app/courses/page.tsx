@@ -32,8 +32,8 @@ export default function Courses() {
   return (
     <div className="min-h-screen flex flex-col bg-[#fafbfc]">
       <Header />
-      <div className="w-full bg-[url('/aboutbanner.png')] bg-cover relative h-[500px] ">
-        <div className="max-w-6xl mx-auto px-4 pt-16 pb-10 h-full flex flex-col justify-center">
+      <div className="w-full bg-[url('/aboutbanner.png')] bg-cover relative h-[500px] bg-no-repeat bg-center">
+        <div className="container mx-auto px-4 pt-16 pb-10 h-full flex flex-col justify-center">
           <h1 className="text-4xl md:text-5xl font-black text-white mb-2 drop-shadow-lg font-nunito">
             A propos de nous
           </h1>
@@ -42,7 +42,11 @@ export default function Courses() {
           </p>
         </div>
         <div className="absolute left-0 right-0 bottom-0 hidden md:block">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1440 320"
+            className="w-full"
+          >
             <path
               fill="#ffffff"
               fillOpacity="1"
@@ -51,7 +55,7 @@ export default function Courses() {
           </svg>
         </div>
       </div>
-      <div className="flex-1 w-full max-w-6xl mx-auto px-20 py-10">
+      <div className="flex-1 w-full container mx-auto px-20 py-10">
         <CourseList comptes={comptes} />
       </div>
       <footer className="w-full bg-red-600 py-4 mt-10">

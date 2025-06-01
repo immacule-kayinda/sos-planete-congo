@@ -2,7 +2,7 @@ import PresentationItem from "../presentationItem";
 
 export default function Presentation() {
   return (
-    <div className="text-center max-w-6xl m-auto py-10 flex flex-col gap-10 px-7">
+    <div className="text-center container m-auto py-10 flex flex-col gap-20 px-7">
       {sections.map((section, index) => (
         <PresentationItem index={index} key={index} {...section} />
       ))}
@@ -25,7 +25,7 @@ const sections: {
     text: `Des outils prêts à l’emploi pour vos cours ! <br />
             Téléchargez des cahiers d'exercices inspirés de notre livre S.O.S
             Planète Congo et enrichissez vos leçons en toute simplicité`,
-    buttonText: "Creer une classe",
+    // buttonText: "Creer une classe",
   },
   {
     title: "Des activités en plus, rien que pour toi",
@@ -33,7 +33,7 @@ const sections: {
     imgUrl: "/grenouille.png",
     text: `Apprendre les langues nationalesInitiez-vous au lingala, kikongo, 
     swahili et tshiluba grâce à des cours interactifs pensés pour petits et grands.`,
-    buttonText: "Explorer les activités",
+    // buttonText: "Explorer les activités",
   },
   {
     title: "Offrez vous le livre",

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function HeroSection() {
   return (
-    <section className="md:px-7 sm:px-3 px-10 py-24 flex w-full max-w-6xl m-auto gap-6 justify-center items-center flex-col md:flex-row">
+    <section className="md:px-7 sm:px-3 px-10 py-24 flex w-full container m-auto gap-6 justify-center items-center flex-col md:flex-row">
       <Image
         src="/landing/hero-image.png"
         alt="Hero Image"
@@ -36,12 +36,6 @@ export default function HeroSection() {
             J'ai déjà un compte
           </Link>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Commencez votre voyage d&apos;apprentissage aujourd&apos;hui.
-        </p>
-        <p className="text-sm text-muted-foreground">
-          Découvrez nos modules d&apos;apprentissage interactifs.
-        </p>
       </div>
     </section>
   );

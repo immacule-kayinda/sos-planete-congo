@@ -9,7 +9,7 @@ export default function AuthLayout({
   return (
     <div>
       <header className="m-auto py-5 self-center w-screen md:flex fixed top-0 left-0 z-50 hidden">
-        <Link href={"/"} className="max-w-6xl m-auto w-full">
+        <Link href={"/"} className="container m-auto w-full">
           <Image
             src="/logo.png"
             alt="logo"

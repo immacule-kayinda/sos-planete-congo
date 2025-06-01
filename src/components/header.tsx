@@ -5,7 +5,7 @@ export default function Header({ className }: { className?: string }) {
     <header
       className={`w-full flex justify-between border-b-2 sticky top-0 left-0 bg-white z-50 ${className}`}
     >
-      <div className="max-w-6xl w-full m-auto justify-between items-center flex py-4 px-2">
+      <div className="container w-full m-auto justify-between items-center flex py-4 px-2">
         <Link href="/">
           <Image src="/logo.png" alt="logo" width={60} height={60} />
         </Link>
@@ -26,9 +26,6 @@ export default function Header({ className }: { className?: string }) {
             S'inscrire
           </Link>
         </nav>
-        <p className="text-sm text-muted-foreground">
-          Découvrez notre plateforme d&apos;apprentissage interactive.
-        </p>
       </div>
     </header>
   );

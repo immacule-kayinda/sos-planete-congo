@@ -66,7 +66,7 @@ export default function QuizPage() {
 
   const handleValidate = () => {
     if (selected === null) return;
-    
+
     let correct = false;
     if (q.type === "OPEN_ENDED") {
       correct =
@@ -102,7 +102,7 @@ export default function QuizPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-white max-w-6xl m-auto">
+    <div className="min-h-screen flex flex-col justify-between bg-white container m-auto">
       {/* Header: Close + Progress */}
       <div className="flex flex-col w-full px-6 pt-6">
         <div className="flex items-center justify-between mb-2">
@@ -162,7 +162,7 @@ export default function QuizPage() {
 
       {/* Footer: Passer / Continuer */}
       <div className="fixed bottom-0 left-0 right-0 border-t">
-        <div className="w-full flex flex-col md:flex-row md:justify-between gap-4 my-6 h-28 items-center max-w-6xl mx-auto">
+        <div className="w-full flex flex-col md:flex-row md:justify-between gap-4 my-6 h-28 items-center container mx-auto">
           <Button
             variant="outline"
             className="border-2 hidden md:block border-b-4 border-gray-300 text-gray-400 font-bold rounded-xl py-3 w-auto px-8 text-lg hover:bg-gray-50 hover:text-accent-foreground/50 transition h-fit"

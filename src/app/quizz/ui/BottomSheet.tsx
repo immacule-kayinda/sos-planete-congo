@@ -17,7 +17,7 @@ export default function BottomSheet({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/10">
       <div className="w-full bg-white p-6 md:p-10 animate-slide-up mb-0">
-        <div className="max-w-6xl w-full m-auto">
+        <div className="container w-full m-auto">
           {children}
           {showButton && (
             <button
