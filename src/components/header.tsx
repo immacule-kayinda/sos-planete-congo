@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Header({ className }: { className?: string }) {
   return (
     <header
-      className={`w-full flex justify-between border-b-2 sticky top-0 left-0 bg-white z-50 ${className}`}
+      className={`w-full flex justify-between border-b sticky top-0 left-0 bg-white z-50 ${className}`}
     >
       <div className="container w-full m-auto justify-between items-center flex py-4 px-2">
         <Link href="/">
