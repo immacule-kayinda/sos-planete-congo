@@ -1,42 +1,58 @@
 import Image from "next/image";
-import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 export default function HeroSection() {
   return (
-    <section className="md:px-7 sm:px-3 px-10 py-24 flex w-full container m-auto gap-6 justify-center items-center flex-col md:flex-row">
-      <Image
-        src="/landing/hero-image.png"
-        alt="Hero Image"
-        width={600}
-        height={700}
-        className="w-full md:w-6/12 h-auto m-auto"
-      />
-      <div className="w-full md:w-4/12 text-center md:text-start">
-        <div className="">
-          <h1 className={`uppercase font-bold text-3xl text-primary mb-4`}>
-            Sos planete congo
-          </h1>
-          <p className="text-[#A87878]">
-            La plateforme éducative et ludique pour explorer l'environnement et
-            la culture de la RDC. Des outils interactifs et bilingues (français
-            et langues nationales) pour les élèves et enseignants.
-          </p>
-        </div>
-        <div className="flex flex-col gap-2 mt-5">
-          <Link
-            href="/signup"
-            className="bg-primary text-center font-montserrat text-white px-5 py-1 rounded-md border border-b-4 border-red-800 font-semibold"
-          >
-            S'inscrire
-          </Link>
-          <Link
-            href="/signin"
-            className="bg-white font-montserrat text-primary text-center px-5 py-1 rounded-md border border-b-4 border-red-800 font-semibold"
-          >
-            J'ai déjà un compte
-          </Link>
-        </div>
+    <div className="h-fit relative overflow-hidden">
+      <div className="absolute h-full -z-40 min-w-screen">
+        <div className="bg-orange-200 w-80 h-80 rounded-full absolute top-1 right-72"></div>
+        <div className="bg-red-700 w-32 h-32 rounded-full absolute left-10 bottom-30"></div>
       </div>
-    </section>
+      <section className="h-full flex items-center backdrop-blur-3xl bg-white/1">
+        <div className="absolute inset-0 bg-[url('/images/pattern.png')] opacity-5"></div>
+        <div className="container mx-auto px-4 py-16 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <ScrollReveal>
+              <div className="text-center lg:text-left">
+                <h1 className="text-5xl md:text-6xl font-bold text-primary mb-6">
+                  SOS Planète Congo
+                </h1>
+                <p className="text-lg text-neutral-600 mb-8 max-w-xl">
+                  La plateforme éducative et ludique pour explorer
+                  l'environnement et la culture de la RDC. Des outils
+                  interactifs et bilingues (français et langues nationales) pour
+                  les élèves et enseignants.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                  <Button size="lg" className="bg-primary hover:bg-primary/90">
+                    S'inscrire
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-primary text-primary hover:bg-primary/10"
+                  >
+                    J'ai déjà un compte
+                  </Button>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal>
+              <div className="relative aspect-square max-w-xl mx-auto">
+                <Image
+                  src="/landing/hero-image.png"
+                  alt="Hero Image"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }

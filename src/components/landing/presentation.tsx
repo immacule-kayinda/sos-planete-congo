@@ -3,7 +3,7 @@ import { ScrollReveal } from "../ui/scroll-reveal";
 
 export default function Presentation() {
   return (
-    <div className="text-center container m-auto py-10 flex flex-col gap-20 px-7">
+    <div className="text-center container m-auto py-10 flex flex-col gap-20 px-7 my-52">
       <ScrollReveal>
         {sections.map((section, index) => (
           <ScrollReveal key={index} delay={index * 0.1}>
@@ -48,7 +48,7 @@ const sections: {
               l'environnement et la culture de la RDC. <br />
               Des outils interactifs et bilingues (français et langues nationales)
               pour les élèves et enseignants`,
-    imgUrl: "/landing/bookimage.png",
+    imgUrl: "/landing/bookimage-removebg-preview.png",
     buttonText: "Acheter le livre",
   },
 ];

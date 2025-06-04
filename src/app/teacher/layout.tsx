@@ -16,7 +16,7 @@ export default function RootLayout({
   return (
     <div className="md:flex min-h-screen bg-gray-50">
       <TeacherSidebar />
-      <main className="flex-1 max-h-screen overflow-y-auto">{children}</main>
+      <main className="flex-1 max-h-screen overflow-y-auto ">{children}</main>
     </div>
   );
 }

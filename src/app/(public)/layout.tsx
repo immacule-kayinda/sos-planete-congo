@@ -8,5 +8,5 @@ export default async function PublicLayout({
 }>) {
   const session = await auth();
   if (session) redirect("/learn");
-  return <div>{children}</div>;
+  return <div className="">{children}</div>;
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import { Timeline } from "@/components/timeline";
 
 export default function HistoryPage() {
   const timeline = [
@@ -44,39 +44,9 @@ export default function HistoryPage() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-8">Notre Histoire</h1>
 
-      <div className="relative">
-        {/* Timeline line */}
-        <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-green-600"></div>
+      <Timeline items={timeline} />
 
-        {/* Timeline items */}
-        <div className="space-y-12">
-          {timeline.map((item, index) => (
-            <div key={index} className="relative">
-              <div
-                className={`flex items-center ${
-                  index % 2 === 0 ? "flex-row" : "flex-row-reverse"
-                }`}
-              >
-                <div className="w-1/2 px-8">
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <h3 className="text-2xl font-bold text-green-600 mb-2">
-                      {item.year}
-                    </h3>
-                    <h4 className="text-xl font-semibold mb-2">{item.title}</h4>
-                    <p className="text-gray-600">{item.description}</p>
-                  </div>
-                </div>
-                <div className="w-1/2 flex justify-center">
-                  <div className="w-8 h-8 rounded-full bg-green-600 border-4 border-white"></div>
-                </div>
-                <div className="w-1/2"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-16 bg-gray-50 rounded-lg p-8">
+      <div className="bg-gray-100 rounded-lg p-8 w-1/2 mx-auto">
         <h2 className="text-2xl font-semibold mb-4">
           Notre Vision pour l'Avenir
         </h2>
