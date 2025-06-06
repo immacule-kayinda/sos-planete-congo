@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function Supporters() {
   return (
-    <section className="py-20 bg-gradient-to-b from-amber-50 to-white">
+    <section className="py-20 bg-neutral-100">
       <div className="container mx-auto px-4">
         <ScrollReveal>
           <div className="text-center mb-16">

@@ -4,9 +4,9 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 export default function HeroSection() {
   return (
-    <div className="h-fit relative overflow-hidden">
-      <div className="absolute h-full -z-40 min-w-screen">
-        <div className="bg-orange-200 w-80 h-80 rounded-full absolute top-1 right-72"></div>
+    <div className="h-fit relative overflow-hidden pt-16 md:pt-0">
+      <div className="absolute h-full -z-40 min-w-screen w-full">
+        <div className="bg-orange-200 w-96 h-96 rounded-full absolute top-10 right-3/6"></div>
         <div className="bg-red-700 w-32 h-32 rounded-full absolute left-10 bottom-30"></div>
       </div>
       <section className="h-full flex items-center backdrop-blur-3xl bg-white/1">

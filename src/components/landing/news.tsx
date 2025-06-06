@@ -9,7 +9,9 @@ export default function News() {
       <div className="container mx-auto px-4">
         <ScrollReveal>
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Nos Actualités</h2>
+            <h2 className="text-4xl font-bold mb-4 font-montserrat uppercase">
+              Nos Actualités
+            </h2>
             <p className="text-neutral-600 max-w-2xl mx-auto">
               Découvrez les dernières nouvelles et événements de SOS Planète
               Congo
@@ -36,7 +38,7 @@ export default function News() {
                             <Calendar className="w-4 h-4 text-primary" />
                             <span>{item.date}</span>
                           </div>
-                          <h3 className="text-2xl font-bold mb-4 group-hover:text-primary transition-colors line-clamp-2">
+                          <h3 className="text-2xl font-bold mb-4 group-hover:text-primary transition-colors line-clamp-2 uppercase font-montserrat">
                             {item.title}
                           </h3>
                           <p className="text-neutral-600 line-clamp-3 mb-6">
@@ -75,7 +77,7 @@ const news = [
     excerpt:
       "Découvrez la nouvelle version enrichie de notre livre avec plus d'activités et de ressources pédagogiques. Une édition spéciale qui célèbre notre engagement pour l'éducation environnementale en RDC.",
     date: "15 Mars 2024",
-    image: "/images/news/book-launch.jpg",
+    image: "https://placehold.co/600x400",
     link: "/news/book-launch",
   },
   {
@@ -83,7 +85,7 @@ const news = [
     excerpt:
       "Plus de 100 enseignants formés à l'utilisation de nos ressources pédagogiques pour l'année scolaire 2024. Une journée riche en échanges et en apprentissages pour une meilleure transmission des connaissances.",
     date: "10 Mars 2024",
-    image: "/images/news/teacher-training.jpg",
+    image: "https://placehold.co/600x400",
     link: "/news/teacher-training",
   },
 ];

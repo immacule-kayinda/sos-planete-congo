@@ -2,22 +2,28 @@
 
 import Header from "@/components/header";
 import HeroSection from "@/components/landing/hero_section";
+import News from "@/components/landing/news";
 import Presentation from "@/components/landing/presentation";
 import StatCard from "@/components/landing/stat_card";
 import Supporters from "@/components/landing/supporters";
 import Testimonials from "@/components/landing/testimonials";
-import News from "@/components/landing/news";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/ui/footer";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { useScroll } from "@/hooks/use-scroll";
 import { Book, Globe, School, Users } from "lucide-react";
 import Image from "next/image";
-import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import Link from "next/link";
 
 export default function Home() {
+  const scrollY = useScroll();
+  const isScrolled = scrollY > 704;
+
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <Header
+        className={isScrolled ? "backdrop-blur-3xl bg-white/20" : undefined}
+      />
       <main className="flex-1">
         <HeroSection />
         <Presentation />
@@ -26,12 +32,12 @@ export default function Home() {
         <News />
 
         {/* Section Interactive */}
-        <section className="relative py-20 from-amber-50 to-primary">
+        <section className="relative py-20 pt-40">
           <div className="absolute inset-0 bg-[url('/images/pattern.png')] opacity-5"></div>
           <div className="container mx-auto px-4 relative">
             <ScrollReveal>
               <div className="text-center mb-16">
-                <h1 className="text-4xl font-bold mb-6 text-primary">
+                <h1 className="text-4xl font-bold mb-6 text-sky-700 uppercase">
                   Explorez SOS Planète Congo
                 </h1>
                 <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
@@ -65,7 +71,7 @@ export default function Home() {
               <ScrollReveal>
                 <div className="relative aspect-square rounded-3xl overflow-hidden shadow-xl">
                   <Image
-                    src="/images/explore.jpg"
+                    src="https://placehold.co/1200x768"
                     alt="Explorez SOS Planète Congo"
                     fill
                     className="object-cover"
@@ -89,12 +95,12 @@ export default function Home() {
         </section>
         {/* Section Statistiques */}
         <section className="relative w-full">
-          <div className="bg-primary w-full py-20">
+          <div className="w-full overflow-hidden bg-gradient-to-b from-sky-200 to-transparent py-20">
             <ScrollReveal>
               <div className="container mx-auto">
-                <div className="flex flex-col text-white items-center justify-center text-center">
-                  <h2 className="text-3xl md:text-4xl font-bold mb-12">
-                    Le projet SOS aujourd&apos;hui
+                <div className="flex flex-col text-primary items-center justify-center text-center">
+                  <h2 className="text-3xl md:text-4xl font-black mb-12 font-montserrat text-sky-700 uppercase md:w-1/2">
+                    Le projet SOS PLANETE CONGO aujourd&apos;hui
                   </h2>
                   <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
                     {stats.map((stat, index) => (
@@ -107,7 +113,7 @@ export default function Home() {
                       </ScrollReveal>
                     ))}
                   </div>
-                  <p className="text-white/80 mt-12 bg-accent/20 px-6 py-2 rounded-full border border-white/20">
+                  <p className="text-sky-600 mt-12 bg-white/50 font-bold px-6 py-2 rounded-full border border-sky-100">
                     Depuis le 30 Décembre 2024
                   </p>
                 </div>
@@ -116,25 +122,34 @@ export default function Home() {
           </div>
         </section>
         {/* Section Call to Action */}
-        <section className="relative py-20 bg-primary">
+        <section className="relative py-20 bg-white h-auto">
           <div className="absolute inset-0 bg-[url('/images/pattern.png')] opacity-10"></div>
           <div className="container mx-auto px-4 relative">
             <ScrollReveal>
-              <div className="max-w-4xl mx-auto text-center text-white">
-                <h2 className="text-4xl font-bold mb-8">
+              <div className="max-w-4xl mx-auto text-center text-primary">
+                <h2 className="text-4xl font-bold mb-8 font-montserrat">
                   Rejoignez l'aventure
                 </h2>
-                <p className="text-lg mb-12 text-white/80">
+                <p className="text-lg mb-12 text-primary/80">
                   Ensemble, construisons un avenir durable pour la RDC
                 </p>
                 <Link
                   href={"/signIn"}
-                  className="bg-white w-full text-primary hover:bg-white/90 text-lg font-semibold font-montserrat rounded-lg px-8 py-4 transition-colors"
+                  className="text-white w-full bg-primary hover:bg-primary/90 text-base font-semibold font-montserrat rounded-lg px-8 py-4 transition-colors"
                 >
                   C'est parti !!!
                 </Link>
               </div>
             </ScrollReveal>
+          </div>
+          <div className="absolute h-fit bottom-0 w-screen flex">
+            <Image
+              src={"/landing/canyon.svg"}
+              width={100}
+              height={100}
+              alt="Canyon"
+              className="w-screen h-auto object-cover"
+            />
           </div>
         </section>
       </main>

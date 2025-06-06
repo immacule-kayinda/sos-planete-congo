@@ -25,7 +25,7 @@ export default function PresentationItem({
   return (
     <section
       className={clsx(
-        "flex text-center justify-between md:items-start w-full gap-10 flex-col h-[80vh]",
+        "flex text-center justify-between md:items-start w-full gap-10 flex-col py-40",
         index % 2 !== 0 ? "md:flex-row" : "md:flex-row-reverse",
         `order-2 ${index % 2 === 0 ? "lg:order-1" : "lg:order-2"}`
       )}
