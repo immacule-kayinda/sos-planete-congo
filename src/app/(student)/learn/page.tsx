@@ -70,23 +70,21 @@ export default async function LearnPage() {
       ))}
 
       {/* Quizz */}
-      <Link href="/quizz">
-        <div className="bg-red-500 rounded-xl p-4 flex justify-between items-center text-white mt-4">
-          <div>
-            <h4 className="font-bold text-lg">QUIZZ</h4>
-            <p className="text-xs">
-              Près à tester ce que tu as appris et passer à l&apos;étape
-              suivante ?
-            </p>
-          </div>
-          <Link
-            href={`/quizz/${section.quizz.id}`}
-            className="bg-white text-red-500 font-bold px-6 py-2 rounded-full"
-          >
-            ALLER
-          </Link>
+      <div className="bg-red-500 rounded-xl p-4 flex justify-between items-center text-white mt-4">
+        <div>
+          <h4 className="font-bold text-lg">QUIZZ</h4>
+          <p className="text-xs">
+            Près à tester ce que tu as appris et passer à l&apos;étape suivante
+            ?
+          </p>
         </div>
-      </Link>
+        <Link
+          href={`/quizz/${section.quizz.id}`}
+          className="bg-white text-red-500 font-bold px-6 py-2 rounded-full"
+        >
+          ALLER
+        </Link>
+      </div>
 
       <p className="text-muted-foreground">
         Commencez votre voyage d&apos;apprentissage.

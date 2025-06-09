@@ -127,14 +127,14 @@ export default function Home() {
           <div className="container mx-auto px-4 relative">
             <ScrollReveal>
               <div className="max-w-4xl mx-auto text-center text-primary">
-                <h2 className="text-4xl font-bold mb-8 font-montserrat">
+                <h2 className="text-4xl font-bold mb-24 font-montserrat">
                   Rejoignez l'aventure
                 </h2>
-                <p className="text-lg mb-12 text-primary/80">
+                {/* <p className="text-lg mb-12 text-primary/80">
                   Ensemble, construisons un avenir durable pour la RDC
-                </p>
+                </p> */}
                 <Link
-                  href={"/signIn"}
+                  href={"/signin"}
                   className="text-white w-full bg-primary hover:bg-primary/90 text-base font-semibold font-montserrat rounded-lg px-8 py-4 transition-colors"
                 >
                   C'est parti !!!
