@@ -1,40 +1,54 @@
 import { ModuleForm } from "@/components/module-form";
 import { Card } from "@/components/ui/card";
 import { notFound } from "next/navigation";
+import prisma from "@/lib/prisma";
 
 type ModuleData = {
   id: string;
   title: string;
-  description: string;
+  subtitle: string;
+  sectionId: string;
+  order: number;
+  section?: {
+    id: string;
+    title: string;
+  };
+  chapters?: {
+    id: string;
+    title: string;
+  }[];
 };
 
-// Mock function to get module by ID - in a real app, this would fetch from your database
 async function getModuleById(id: string): Promise<ModuleData | null> {
-  // Mock data
-  const modules = {
-    "1": {
-      id: "1",
-      title: "Introduction to Mathematics",
-      description: "Learn the basics of mathematics...",
-    },
-    "2": {
-      id: "2",
-      title: "French Grammar",
-      description: "Master French grammar rules...",
-    },
-    "3": {
-      id: "3",
-      title: "Science Basics",
-      description: "Explore fundamental scientific concepts...",
-    },
-    "4": {
-      id: "4",
-      title: "History of Africa",
-      description: "Discover the rich history of Africa...",
-    },
-  } as const;
+  try {
+    const moduleData = await prisma.module.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        section: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        chapters: {
+          select: {
+            id: true,
+            title: true,
+          },
+          orderBy: {
+            order: "asc",
+          },
+        },
+      },
+    });
 
-  return (modules as Record<string, ModuleData>)[id] || null;
+    return moduleData;
+  } catch (error) {
+    console.error("Error fetching module:", error);
+    return null;
+  }
 }
 
 export default async function EditModulePage(props: {
@@ -51,7 +65,7 @@ export default async function EditModulePage(props: {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">
-          Modifier le module
+          Modifier le Module
         </h1>
         <p className="text-muted-foreground">
           Mettre à jour les détails et le contenu du module.

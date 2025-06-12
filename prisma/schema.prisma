@@ -89,6 +89,7 @@ model Teacher {
   voterCardNumber String
   school          String
   teachingLevel   String
+  isApproved      Boolean     @default(false)
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   Classroom       Classroom[]
@@ -146,14 +147,28 @@ model Module {
 }
 
 model Conte {
-  id         String   @id @default(uuid())
-  audioUrl   String
-  imagesUrls String[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  sectionId  String   @unique
-  title      String
-  section    Section  @relation(fields: [sectionId], references: [id])
+  id        String   @id @default(cuid())
+  title     String
+  audioUrl  String
+  pages     Page[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  section   Section  @relation(fields: [sectionId], references: [id])
+  sectionId String   @unique
+}
+
+model Page {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  caption   String
+  duration  Int // Duration in milliseconds
+  order     Int // To maintain the sequence of pages
+  conte     Conte    @relation(fields: [conteId], references: [id], onDelete: Cascade)
+  conteId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([conteId])
 }
 
 model Chapter {
@@ -238,6 +253,7 @@ model StudentStreak {
 model Classroom {
   id        String    @id @default(uuid())
   name      String
+  classCode String    @unique
   createdAt DateTime  @default(now())
   teacherId String?
   Teacher   Teacher?  @relation(fields: [teacherId], references: [id])

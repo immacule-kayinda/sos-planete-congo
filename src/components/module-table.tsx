@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Table,
@@ -18,6 +18,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -26,79 +33,121 @@ import {
   Trash2,
   FileText,
   Search,
-  BookMarked,
+  Layers,
+  Filter,
+  X,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { deleteModule } from "@/lib/actions";
+import { toast } from "sonner";
 
-// Mock data - in a real app, this would come from your database
-const mockModules = [
-  {
-    id: "1",
-    title: "Introduction to Mathematics",
-    description: "Basic mathematical concepts for beginners",
-    hasContent: true,
-    chaptersCount: 5,
-    createdAt: "2023-01-15T00:00:00.000Z",
-  },
-  {
-    id: "2",
-    title: "French Grammar",
-    description: "Essential grammar rules for French language learners",
-    hasContent: true,
-    chaptersCount: 8,
-    createdAt: "2023-02-10T00:00:00.000Z",
-  },
-  {
-    id: "3",
-    title: "Science Basics",
-    description: "Introduction to scientific concepts for young learners",
-    hasContent: false,
-    chaptersCount: 6,
-    createdAt: "2023-03-05T00:00:00.000Z",
-  },
-  {
-    id: "4",
-    title: "History of Africa",
-    description: "Comprehensive overview of African history",
-    hasContent: true,
-    chaptersCount: 10,
-    createdAt: "2023-04-20T00:00:00.000Z",
-  },
-];
+interface Module {
+  id: string;
+  title: string;
+  subtitle: string;
+  order: number;
+  sectionId: string;
+  section: {
+    id: string;
+    title: string;
+  };
+  chapters: {
+    id: string;
+    title: string;
+  }[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface Section {
+  id: string;
+  title: string;
+}
 
 export function ModuleTable() {
-  const { toast } = useToast();
+  const [modules, setModules] = useState<Module[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSectionId, setSelectedSectionId] = useState<string>("all");
+  const [loading, setLoading] = useState(true);
+  const [loadingSections, setLoadingSections] = useState(true);
 
-  // Filter modules based on search term
-  const filteredModules = mockModules.filter(
-    (module) =>
-      module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      module.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    fetchModules();
+    fetchSections();
+  }, []);
 
-  const handleDeleteModule = async (moduleId: string) => {
+  const fetchModules = async () => {
     try {
-      // In a real app, this would call a server action to delete the module
-      await deleteModule(moduleId);
-      toast({
-        title: "Module deleted",
-        description: "The module has been successfully deleted.",
-      });
+      const response = await fetch("/api/modules");
+      if (!response.ok) throw new Error("Failed to fetch modules");
+      const data = await response.json();
+      setModules(data);
     } catch (error) {
-      console.error("Failed to delete module:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete module. Please try again.",
-        variant: "destructive",
-      });
+      console.error("Error fetching modules:", error);
+      toast.error("Erreur lors du chargement des modules");
+    } finally {
+      setLoading(false);
     }
   };
 
+  const fetchSections = async () => {
+    try {
+      const response = await fetch("/api/sections");
+      if (!response.ok) throw new Error("Failed to fetch sections");
+      const data = await response.json();
+      setSections(data);
+    } catch (error) {
+      console.error("Error fetching sections:", error);
+      toast.error("Erreur lors du chargement des sections");
+    } finally {
+      setLoadingSections(false);
+    }
+  };
+
+  const handleDeleteModule = async (moduleId: string) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer ce module ?")) return;
+
+    try {
+      const response = await fetch(`/api/modules/${moduleId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete module");
+
+      setModules(modules.filter((module) => module.id !== moduleId));
+      toast.success("Module supprimé avec succès");
+    } catch (error) {
+      console.error("Error deleting module:", error);
+      toast.error("Erreur lors de la suppression");
+    }
+  };
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedSectionId("all");
+  };
+
+  // Filter modules based on search term and selected section
+  const filteredModules = modules.filter((module) => {
+    const matchesSearch =
+      module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      module.subtitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      module.section.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesSection =
+      selectedSectionId === "all" || module.sectionId === selectedSectionId;
+
+    return matchesSearch && matchesSection;
+  });
+
+  const hasActiveFilters = searchTerm !== "" || selectedSectionId !== "all";
+
+  if (loading) {
+    return <div>Chargement...</div>;
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -108,16 +157,67 @@ export function ModuleTable() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+
+        <div className="flex gap-2">
+          <Select
+            value={selectedSectionId}
+            onValueChange={setSelectedSectionId}
+          >
+            <SelectTrigger className="w-[200px]">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                <SelectValue placeholder="Filtrer par section" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes les sections</SelectItem>
+              {sections.map((section) => (
+                <SelectItem key={section.id} value={section.id}>
+                  {section.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearFilters}
+              className="flex items-center gap-1"
+            >
+              <X className="h-4 w-4" />
+              Effacer
+            </Button>
+          )}
+        </div>
       </div>
+
+      {hasActiveFilters && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>
+            {filteredModules.length} module
+            {filteredModules.length !== 1 ? "s" : ""} trouvé
+            {filteredModules.length !== 1 ? "s" : ""}
+          </span>
+          {selectedSectionId !== "all" && (
+            <span className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-1 text-xs">
+              <Layers className="h-3 w-3" />
+              {sections.find((s) => s.id === selectedSectionId)?.title}
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Titre</TableHead>
-              <TableHead>Description</TableHead>
+              <TableHead>Sous-titre</TableHead>
+              <TableHead>Section</TableHead>
+              <TableHead>Ordre</TableHead>
               <TableHead>Chapitres</TableHead>
-              <TableHead>Contenu</TableHead>
               <TableHead>Créé le</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -125,25 +225,34 @@ export function ModuleTable() {
           <TableBody>
             {filteredModules.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  Aucun module trouvé.
+                <TableCell colSpan={7} className="h-24 text-center">
+                  {hasActiveFilters
+                    ? "Aucun module ne correspond aux filtres."
+                    : "Aucun module trouvé."}
                 </TableCell>
               </TableRow>
             ) : (
               filteredModules.map((module) => (
                 <TableRow key={module.id}>
                   <TableCell className="font-medium">{module.title}</TableCell>
-                  <TableCell>{module.description}</TableCell>
-                  <TableCell>{module.chaptersCount}</TableCell>
-                  <TableCell>
-                    {module.hasContent ? (
-                      <BookMarked className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <span className="text-muted-foreground">Aucun</span>
-                    )}
+                  <TableCell className="max-w-xs truncate">
+                    {module.subtitle}
                   </TableCell>
                   <TableCell>
-                    {new Date(module.createdAt).toLocaleDateString()}
+                    <div className="flex items-center gap-1">
+                      <Layers className="h-4 w-4" />
+                      <span className="truncate">{module.section.title}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{module.order}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <FileText className="h-4 w-4" />
+                      <span>{module.chapters.length}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {new Date(module.createdAt).toLocaleDateString("fr-FR")}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
@@ -158,7 +267,7 @@ export function ModuleTable() {
                         <DropdownMenuItem asChild>
                           <Link href={`/dashboard/modules/${module.id}`}>
                             <Edit className="mr-2 h-4 w-4" />
-                            Éditer
+                            Modifier
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
