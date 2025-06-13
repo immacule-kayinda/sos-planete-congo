@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { hashPassword } from "@/lib/utils";
 import { faker } from "@faker-js/faker";
+import { StudentAccountStatus } from "../generated/prisma";
 
 interface Teacher {
   id: string;
@@ -23,6 +24,11 @@ interface Student {
   age: number;
   teacherId: string | null;
   classroomId: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  classCode: string | null;
+  accountStatus: StudentAccountStatus;
+  hasClassroomAccess: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -126,6 +132,15 @@ async function main() {
         (t) => t.id === randomClassroom.teacherId
       );
 
+      // Simuler différents types d'étudiants
+      const hasClassCode = faker.datatype.boolean(0.7); // 70% ont un code de classe
+      const accountStatus = hasClassCode
+        ? StudentAccountStatus.ACTIVE
+        : faker.helpers.arrayElement([
+            StudentAccountStatus.LIMITED_ACCESS,
+            StudentAccountStatus.PENDING_ACTIVATION,
+          ]);
+
       const user = await prisma.user.create({
         data: {
           email: faker.internet.email().toLowerCase(),
@@ -135,8 +150,13 @@ async function main() {
           student: {
             create: {
               age: faker.number.int({ min: 6, max: 18 }),
-              teacherId: teacher?.id,
-              classroomId: randomClassroom.id,
+              teacherId: hasClassCode ? teacher?.id : null,
+              classroomId: hasClassCode ? randomClassroom.id : null,
+              firstName: faker.person.firstName(),
+              lastName: faker.person.lastName(),
+              classCode: hasClassCode ? randomClassroom.classCode : null,
+              accountStatus,
+              hasClassroomAccess: accountStatus === StudentAccountStatus.ACTIVE,
             },
           },
         },
