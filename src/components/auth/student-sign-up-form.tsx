@@ -26,6 +26,7 @@ export default function StudentSignUpForm() {
       name: "",
       email: "",
       password: "",
+      classCode: "",
     },
   });
 
@@ -55,7 +56,23 @@ export default function StudentSignUpForm() {
         return;
       }
 
-      toast.success("Inscription réussie !");
+      // Message de succès personnalisé selon le statut du compte
+      if (data.accountStatus === "ACTIVE") {
+        toast.success("Inscription réussie ! Votre compte est actif.", {
+          description:
+            "Vous avez accès à toutes les fonctionnalités de la plateforme.",
+        });
+      } else if (data.accountStatus === "LIMITED_ACCESS") {
+        toast.success("Inscription réussie !", {
+          description:
+            "Vous avez accès au premier conte. Pour un accès complet, contactez-nous avec votre email.",
+        });
+      } else {
+        toast.success("Inscription réussie !", {
+          description: "Votre compte est en attente d'activation.",
+        });
+      }
+
       // Connexion automatique après l'inscription
       await signIn("credentials", {
         email: formData.email,
@@ -113,6 +130,28 @@ export default function StudentSignUpForm() {
                     className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="classCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="text"
+                    placeholder="Code de classe (optionnel)"
+                    className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
+                  />
+                </FormControl>
+                <p className="text-sm text-muted-foreground mt-1">
+                  💡 Si vous avez un code de classe de votre enseignant,
+                  saisissez-le ici. Sans code, vous aurez accès limité au
+                  premier conte uniquement.
+                </p>
                 <FormMessage />
               </FormItem>
             )}

@@ -105,6 +105,11 @@ model Student {
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
   classroomId            String?
+  firstName              String?
+  lastName               String?
+  classCode              String? // Code de classe saisi à l'inscription
+  accountStatus          StudentAccountStatus     @default(PENDING_ACTIVATION)
+  hasClassroomAccess     Boolean                  @default(false) // True si inscrit avec un code de classe valide
   Classroom              Classroom?               @relation(fields: [classroomId], references: [id])
   teacher                Teacher?                 @relation(fields: [teacherId], references: [id])
   user                   User                     @relation(fields: [userId], references: [id])
@@ -270,4 +275,10 @@ enum QuestionType {
   SINGLE_CHOICE
   MULTIPLE_CHOICE
   TEXT
+}
+
+enum StudentAccountStatus {
+  PENDING_ACTIVATION // En attente d'activation manuelle
+  LIMITED_ACCESS // Accès limité au premier conte uniquement
+  ACTIVE // Accès complet à la plateforme
 }

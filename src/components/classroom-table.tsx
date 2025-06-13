@@ -58,7 +58,7 @@ interface Classroom {
   name: string;
   classCode: string;
   teacherId: string | null;
-  teacher?: {
+  Teacher?: {
     id: string;
     firstName: string;
     lastName: string;
@@ -179,8 +179,8 @@ export function ClassroomTable() {
     (classroom) =>
       classroom.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       classroom.classCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (classroom.teacher &&
-        `${classroom.teacher.firstName} ${classroom.teacher.lastName}`
+      (classroom.Teacher &&
+        `${classroom.Teacher.firstName} ${classroom.Teacher.lastName}`
           .toLowerCase()
           .includes(searchTerm.toLowerCase()))
   );
@@ -227,7 +227,12 @@ export function ClassroomTable() {
               filteredClassrooms.map((classroom) => (
                 <TableRow key={classroom.id}>
                   <TableCell className="font-medium">
-                    {classroom.name}
+                    <Link
+                      href={`/dashboard/classrooms/${classroom.id}`}
+                      className="hover:underline"
+                    >
+                      {classroom.name}
+                    </Link>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -245,19 +250,19 @@ export function ClassroomTable() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {classroom.teacher ? (
+                    {classroom.Teacher ? (
                       <div className="flex items-center gap-1">
                         <CheckCircle className="h-4 w-4 text-green-500" />
                         <span>
-                          {classroom.teacher.firstName}{" "}
-                          {classroom.teacher.lastName}
+                          {classroom.Teacher.firstName}{" "}
+                          {classroom.Teacher.lastName}
                         </span>
                       </div>
                     ) : (
                       <span className="text-muted-foreground">Non assigné</span>
                     )}
                   </TableCell>
-                  <TableCell>{classroom.teacher?.school || "-"}</TableCell>
+                  <TableCell>{classroom.Teacher?.school || "-"}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Users className="h-4 w-4" />

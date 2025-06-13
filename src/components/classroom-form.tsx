@@ -136,9 +136,14 @@ export function ClassroomForm({ classroom = null }: ClassroomFormProps) {
       );
       router.refresh();
       router.push("/dashboard/classrooms");
-    } catch (error: any) {
-      console.error("Classroom submission error:", error);
-      toast.error(error.message || "Une erreur est survenue");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Classroom submission error:", error);
+        toast.error(error.message || "Une erreur est survenue");
+      } else {
+        console.error("Classroom submission error:", error);
+        toast.error("Une erreur est survenue");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -236,8 +241,8 @@ export function ClassroomForm({ classroom = null }: ClassroomFormProps) {
             {isSubmitting
               ? "Sauvegarde..."
               : classroom
-              ? "Mettre à jour"
-              : "Créer"}
+                ? "Mettre à jour"
+                : "Créer"}
           </Button>
         </div>
       </form>
