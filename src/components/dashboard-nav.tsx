@@ -11,6 +11,7 @@ import {
   School,
   Users,
   Layers,
+  Building,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -65,6 +66,11 @@ const navItems = [
     title: "Enseignants",
     href: "/dashboard/teachers",
     icon: School,
+  },
+  {
+    title: "Classes",
+    href: "/dashboard/classrooms",
+    icon: Building,
   },
   {
     title: "Étudiants",
