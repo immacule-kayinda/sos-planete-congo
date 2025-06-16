@@ -53,11 +53,23 @@ export default function LessonsList({
 
   return (
     <div className="bg-white rounded-xl p-4 border-2 border-gray-200">
-      <h3 className="font-bold">{title}</h3>
-      <p className="text-xs text-gray-500">{subtitle}</p>
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <h3 className="font-bold">{title}</h3>
+          <p className="text-xs text-gray-500">{subtitle}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-gray-500">
+            {completedChapters}/{chapters.length} chapitres
+          </p>
+          <p className="text-xs font-semibold text-[#5B4FFF]">
+            {Math.round(progressPercentage)}% terminé
+          </p>
+        </div>
+      </div>
       <Progress
         value={progressPercentage}
-        className="w-full h-3 rounded-full bg-gray-200 my-2"
+        className="w-full h-3 rounded-full bg-gray-200 my-3"
       />
       {/* Liste des leçons */}
       <div className="flex flex-col gap-2">
@@ -68,7 +80,7 @@ export default function LessonsList({
           );
 
           // Déterminer l'état du chapitre
-          let state: "BLOKED" | "CURRENT" | "FINISHED" = "BLOKED";
+          let state: "BLOKED" | "CURRENT" | "FINISHED" | "AVAILABLE" = "BLOKED";
 
           if (chapterProgress?.isRead) {
             // Chapitre terminé
@@ -82,8 +94,8 @@ export default function LessonsList({
             // 1. C'est le premier chapitre du module
             // 2. Tous les chapitres précédents sont terminés
             if (index === 0) {
-              // Premier chapitre, toujours débloqué (mais pas forcément current)
-              state = "CURRENT";
+              // Premier chapitre, débloqué mais pas forcément current
+              state = chapter.id === currentChapterId ? "CURRENT" : "AVAILABLE";
             } else {
               // Vérifier si tous les chapitres précédents sont terminés
               const allPreviousCompleted = sortedChapters
@@ -97,8 +109,25 @@ export default function LessonsList({
 
               if (allPreviousCompleted) {
                 // Tous les chapitres précédents sont terminés, celui-ci peut être débloqué
-                // Mais il n'est "CURRENT" que s'il correspond au currentChapterId
-                state = chapter.id === currentChapterId ? "CURRENT" : "BLOKED";
+                // Si c'est le premier chapitre non-lu et qu'il n'y a pas de chapitre current défini,
+                // ou si c'est le chapitre current, alors il est "CURRENT", sinon "AVAILABLE"
+                if (chapter.id === currentChapterId) {
+                  state = "CURRENT";
+                } else {
+                  // Vérifier si c'est le prochain chapitre logique à faire
+                  const isNextLogicalChapter =
+                    !currentChapterId &&
+                    sortedChapters.slice(0, index + 1).every((prevChapter) => {
+                      const prevProgress = moduleProgressData.find(
+                        (p) => p.chapter.id === prevChapter.id
+                      );
+                      return (
+                        prevChapter.id === chapter.id || prevProgress?.isRead
+                      );
+                    });
+
+                  state = isNextLogicalChapter ? "CURRENT" : "AVAILABLE";
+                }
               } else {
                 // Des chapitres précédents ne sont pas terminés
                 state = "BLOKED";

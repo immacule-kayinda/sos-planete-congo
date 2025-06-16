@@ -1,9 +1,10 @@
+import ConteCard from "@/components/ui/conte-card";
+import ErrorDisplay from "@/components/ui/error-display";
 import LessonsList from "@/components/ui/learn/lessonsList";
 import { getStudentData } from "@/lib/db";
-import { Check } from "lucide-react";
+import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { auth } from "../../../../auth";
-import prisma from "@/lib/prisma";
 
 interface Module {
   id: string;
@@ -202,12 +203,26 @@ async function getCurrentSection(studentId: string) {
 export default async function LearnPage() {
   const session = await auth();
 
-  if (!session?.user?.id) return <div>You are not authenticated</div>;
+  if (!session?.user?.id) {
+    return (
+      <ErrorDisplay
+        title="Authentification requise"
+        message="Vous devez être connecté pour accéder à cette page."
+        showRetryButton={false}
+      />
+    );
+  }
 
   const student = await getStudentData(session.user.id);
 
   if (!student) {
-    return <div>Student not found</div>;
+    return (
+      <ErrorDisplay
+        title="Étudiant non trouvé"
+        message="Aucun profil étudiant n'a été trouvé pour votre compte. Contactez l'administrateur."
+        showRetryButton={false}
+      />
+    );
   }
 
   try {
@@ -220,7 +235,13 @@ export default async function LearnPage() {
     console.log("Current chapter:", currentSectionData.currentChapter);
 
     if (!section) {
-      return <div>No section available</div>;
+      return (
+        <ErrorDisplay
+          title="Aucune section disponible"
+          message="Aucun contenu d'apprentissage n'est actuellement disponible. Les cours seront bientôt ajoutés."
+          showRetryButton={false}
+        />
+      );
     }
 
     return (
@@ -246,23 +267,10 @@ export default async function LearnPage() {
 
         {/* Conte de la section */}
         {section.conte && (
-          <div className="bg-white rounded-xl p-4 flex justify-between items-center border-2 border-gray-200">
-            <div className="flex items-center gap-5">
-              <div className="h-14 w-14 rounded-full ring-green-500 ring-4 p-1 relative">
-                <div className="p-1 bg-green-500 rounded-full flex items-center justify-center absolute -bottom-3 left-4">
-                  <Check className="text-white w-4 h-4" />
-                </div>
-                <div className="w-full h-full bg-neutral-200 rounded-full"></div>
-              </div>
-              <div>
-                <p className="font-black text-lg uppercase">
-                  {section.conte.title.substring(0, 30)}...
-                </p>
-                <span className="text-lg text-gray-500 font-bold">Conte</span>
-              </div>
-            </div>
-            <span className="text-yellow-500 font-bold">★20</span>
-          </div>
+          <ConteCard 
+            conteId={section.conte.id}
+            title={section.conte.title}
+          />
         )}
 
         {/* Chapitres du module */}
@@ -296,14 +304,15 @@ export default async function LearnPage() {
             </Link>
           </div>
         )}
-
-        <p className="text-muted-foreground">
-          Commencez votre voyage d&apos;apprentissage.
-        </p>
       </div>
     );
   } catch (error) {
     console.error("Error loading current section:", error);
-    return <div>Error loading your current section. Please try again.</div>;
+    return (
+      <ErrorDisplay
+        title="Erreur de chargement"
+        message="Impossible de charger votre section actuelle. Vérifiez votre connexion et réessayez."
+      />
+    );
   }
 }

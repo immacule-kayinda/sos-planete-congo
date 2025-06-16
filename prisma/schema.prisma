@@ -114,6 +114,7 @@ model Student {
   teacher                Teacher?                 @relation(fields: [teacherId], references: [id])
   user                   User                     @relation(fields: [userId], references: [id])
   StudentChapterProgress StudentChapterProgress[]
+  StudentConteProgress   StudentConteProgress[]
   performance            StudentPerformance[]
   StudentStreak          StudentStreak?
 }
@@ -152,14 +153,15 @@ model Module {
 }
 
 model Conte {
-  id        String   @id @default(cuid())
-  title     String
-  audioUrl  String
-  pages     Page[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  section   Section  @relation(fields: [sectionId], references: [id])
-  sectionId String   @unique
+  id                   String                 @id @default(cuid())
+  title                String
+  audioUrl             String
+  pages                Page[]
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  section              Section                @relation(fields: [sectionId], references: [id])
+  sectionId            String                 @unique
+  StudentConteProgress StudentConteProgress[]
 }
 
 model Page {
@@ -263,6 +265,20 @@ model Classroom {
   teacherId String?
   Teacher   Teacher?  @relation(fields: [teacherId], references: [id])
   students  Student[]
+}
+
+model StudentConteProgress {
+  id          String    @id @default(uuid())
+  studentId   String
+  conteId     String
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  conte       Conte     @relation(fields: [conteId], references: [id])
+  student     Student   @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, conteId])
 }
 
 enum Role {
