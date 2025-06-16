@@ -3,7 +3,6 @@
 import { Chapter } from "../../../../generated/prisma";
 import { Progress } from "../progress";
 import LessonItem from "./LessonItem";
-import { useEffect, useState } from "react";
 
 interface ChapterProgress {
   id: string;
@@ -14,6 +13,12 @@ interface ChapterProgress {
     title: string;
     subtitle: string;
     order: number;
+    module: {
+      id: string;
+      section: {
+        id: string;
+      };
+    };
   };
 }
 
@@ -22,42 +27,29 @@ export default function LessonsList({
   subtitle,
   chapters,
   moduleId,
+  currentChapterId,
+  progressData = [],
 }: {
   moduleId: string;
   title: string;
   subtitle: string;
   progress?: number;
   chapters: Chapter[];
+  currentChapterId: string;
+  progressData?: ChapterProgress[];
 }) {
-  const [progressData, setProgressData] = useState<ChapterProgress[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  console.log(loading);
-
-  useEffect(() => {
-    const fetchProgress = async () => {
-      try {
-        const response = await fetch(
-          `/api/student/progress/module/${moduleId}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setProgressData(data);
-        }
-      } catch (error) {
-        console.error("Erreur lors du chargement de la progression:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProgress();
-  }, [moduleId]);
+  // Filtrer les données de progression pour ce module uniquement
+  const moduleProgressData = progressData.filter(
+    (progress) => progress.chapter.module.id === moduleId
+  );
 
   // Calculer la progression pour ce module
-  const completedChapters = progressData.filter((p) => p.isRead).length;
+  const completedChapters = moduleProgressData.filter((p) => p.isRead).length;
   const progressPercentage =
     chapters.length > 0 ? (completedChapters / chapters.length) * 100 : 0;
+
+  // Trier les chapitres par ordre pour la logique de déblocage
+  const sortedChapters = [...chapters].sort((a, b) => a.order - b.order);
 
   return (
     <div className="bg-white rounded-xl p-4 border-2 border-gray-200">
@@ -69,20 +61,48 @@ export default function LessonsList({
       />
       {/* Liste des leçons */}
       <div className="flex flex-col gap-2">
-        {chapters.map((chapter) => {
+        {sortedChapters.map((chapter, index) => {
           // Trouver la progression pour ce chapitre
-          const chapterProgress = progressData.find(
+          const chapterProgress = moduleProgressData.find(
             (p) => p.chapter.id === chapter.id
           );
 
           // Déterminer l'état du chapitre
           let state: "BLOKED" | "CURRENT" | "FINISHED" = "BLOKED";
 
-          if (chapterProgress) {
-            if (chapterProgress.isRead) {
-              state = "FINISHED";
-            } else if (chapterProgress.isCurrent) {
+          if (chapterProgress?.isRead) {
+            // Chapitre terminé
+            state = "FINISHED";
+          } else if (chapter.id === currentChapterId) {
+            // Chapitre actuel
+            state = "CURRENT";
+          } else {
+            // Vérifier si le chapitre peut être débloqué
+            // Un chapitre est débloqué si :
+            // 1. C'est le premier chapitre du module
+            // 2. Tous les chapitres précédents sont terminés
+            if (index === 0) {
+              // Premier chapitre, toujours débloqué (mais pas forcément current)
               state = "CURRENT";
+            } else {
+              // Vérifier si tous les chapitres précédents sont terminés
+              const allPreviousCompleted = sortedChapters
+                .slice(0, index)
+                .every((prevChapter) => {
+                  const prevProgress = moduleProgressData.find(
+                    (p) => p.chapter.id === prevChapter.id
+                  );
+                  return prevProgress?.isRead;
+                });
+
+              if (allPreviousCompleted) {
+                // Tous les chapitres précédents sont terminés, celui-ci peut être débloqué
+                // Mais il n'est "CURRENT" que s'il correspond au currentChapterId
+                state = chapter.id === currentChapterId ? "CURRENT" : "BLOKED";
+              } else {
+                // Des chapitres précédents ne sont pas terminés
+                state = "BLOKED";
+              }
             }
           }
 

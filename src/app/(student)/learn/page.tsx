@@ -86,6 +86,7 @@ async function getCurrentSection(studentId: string) {
       section: currentChapterProgress.chapter.module.section as Section,
       currentModule: currentChapterProgress.chapter.module,
       currentChapter: currentChapterProgress.chapter,
+      progressData: student.StudentChapterProgress,
     };
   }
 
@@ -115,14 +116,78 @@ async function getCurrentSection(studentId: string) {
   const firstChapter = firstModule.chapters[0];
 
   if (firstChapter) {
-    await prisma.studentChapterProgress.create({
-      data: {
-        studentId: student.id,
-        chapterId: firstChapter.id,
-        isCurrent: true,
-        isRead: false,
+    // Vérifier si une progression existe déjà pour ce chapitre
+    const existingProgress = await prisma.studentChapterProgress.findUnique({
+      where: {
+        studentId_chapterId: {
+          studentId: student.id,
+          chapterId: firstChapter.id,
+        },
       },
     });
+
+    if (existingProgress) {
+      // Mettre à jour la progression existante
+      await prisma.studentChapterProgress.update({
+        where: {
+          id: existingProgress.id,
+        },
+        data: {
+          isCurrent: true,
+        },
+      });
+    } else {
+      // Créer une nouvelle progression
+      await prisma.studentChapterProgress.create({
+        data: {
+          studentId: student.id,
+          chapterId: firstChapter.id,
+          isCurrent: true,
+          isRead: false,
+        },
+      });
+    }
+
+    // Désactiver isCurrent pour tous les autres chapitres
+    await prisma.studentChapterProgress.updateMany({
+      where: {
+        studentId: student.id,
+        chapterId: {
+          not: firstChapter.id,
+        },
+      },
+      data: {
+        isCurrent: false,
+      },
+    });
+
+    // Récupérer les données de progression mises à jour
+    const updatedStudent = await prisma.student.findUnique({
+      where: { userId: studentId },
+      include: {
+        StudentChapterProgress: {
+          include: {
+            chapter: {
+              include: {
+                module: {
+                  include: {
+                    section: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      sectionId: firstSection.id,
+      section: firstSection as Section,
+      currentModule: firstModule,
+      currentChapter: firstChapter,
+      progressData: updatedStudent?.StudentChapterProgress || [],
+    };
   }
 
   return {
@@ -130,6 +195,7 @@ async function getCurrentSection(studentId: string) {
     section: firstSection as Section,
     currentModule: firstModule,
     currentChapter: firstChapter,
+    progressData: student.StudentChapterProgress,
   };
 }
 
@@ -206,7 +272,9 @@ export default async function LearnPage() {
             title={module.title.toUpperCase()}
             subtitle={module.subtitle}
             chapters={module.chapters}
+            currentChapterId={currentSectionData.currentChapter?.id || ""}
             key={module.id}
+            progressData={currentSectionData.progressData}
           />
         ))}
 
