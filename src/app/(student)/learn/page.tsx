@@ -6,39 +6,78 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { auth } from "../../../../auth";
 
-interface Module {
+// Types optimisés basés sur le schéma Prisma
+interface ChapterProgress {
   id: string;
-  title: string;
-  subtitle: string;
-  chapters: Array<{
+  isRead: boolean;
+  isCurrent: boolean;
+  chapter: {
     id: string;
     title: string;
     subtitle: string;
-    createdAt: Date;
-    updatedAt: Date;
-    content: string;
-    moduleId: string;
     order: number;
-  }>;
+    module: {
+      id: string;
+      title: string;
+      subtitle: string;
+      section: {
+        id: string;
+      };
+    };
+  };
 }
 
-interface Section {
+interface ConteProgress {
+  id: string;
+  isCompleted: boolean;
+  completedAt: Date | null;
+  conte: {
+    id: string;
+    title: string;
+  };
+}
+
+interface SectionData {
   id: string;
   title: string;
   description: string;
   order: number;
-  quizId: string;
   conte?: {
     id: string;
     title: string;
   } | null;
-  quizz?: {
+  quizz: {
     id: string;
-  } | null;
-  modules: Module[];
+  };
+  modules: Array<{
+    id: string;
+    title: string;
+    subtitle: string;
+    order: number;
+    chapters: Array<{
+      id: string;
+      title: string;
+      subtitle: string;
+      order: number;
+      content: string;
+      moduleId: string;
+      createdAt: Date;
+      updatedAt: Date;
+    }>;
+  }>;
 }
 
-async function getCurrentSection(studentId: string) {
+interface CurrentSectionResult {
+  section: SectionData;
+  currentChapterId: string | null;
+  progressData: ChapterProgress[];
+  conteProgress: ConteProgress | null;
+}
+
+async function getCurrentSection(
+  studentId: string
+): Promise<CurrentSectionResult> {
+  // Requête optimisée : récupérer tout en une seule fois
   const student = await prisma.student.findUnique({
     where: { userId: studentId },
     include: {
@@ -48,22 +87,24 @@ async function getCurrentSection(studentId: string) {
             include: {
               module: {
                 include: {
-                  section: {
-                    include: {
-                      conte: true,
-                      quizz: true,
-                      modules: {
-                        include: {
-                          chapters: {
-                            orderBy: { order: "asc" },
-                          },
-                        },
-                        orderBy: { order: "asc" },
-                      },
-                    },
-                  },
+                  section: true,
                 },
               },
+            },
+          },
+        },
+        orderBy: {
+          chapter: {
+            order: "asc",
+          },
+        },
+      },
+      StudentConteProgress: {
+        include: {
+          conte: {
+            select: {
+              id: true,
+              title: true,
             },
           },
         },
@@ -75,28 +116,71 @@ async function getCurrentSection(studentId: string) {
     throw new Error("Student not found");
   }
 
-  // Trouver le chapitre actuel (isCurrent = true)
-  const currentChapterProgress = student.StudentChapterProgress.find(
-    (progress) => progress.isCurrent
+  // Trouver le chapitre actuel
+  const currentProgress = student.StudentChapterProgress.find(
+    (p) => p.isCurrent
   );
 
-  if (currentChapterProgress) {
-    // Retourner la section du chapitre actuel
+  if (currentProgress) {
+    // Récupérer la section complète avec tous les modules et chapitres
+    const section = await prisma.section.findUnique({
+      where: { id: currentProgress.chapter.module.section.id },
+      include: {
+        conte: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        quizz: {
+          select: {
+            id: true,
+          },
+        },
+        modules: {
+          include: {
+            chapters: {
+              orderBy: { order: "asc" },
+            },
+          },
+          orderBy: { order: "asc" },
+        },
+      },
+    });
+
+    if (!section) {
+      throw new Error("Section not found");
+    }
+
+    // Trouver la progression du conte pour cette section
+    const conteProgress =
+      student.StudentConteProgress.find(
+        (p) => p.conte.id === section.conte?.id
+      ) || null;
+
     return {
-      sectionId: currentChapterProgress.chapter.module.section.id,
-      section: currentChapterProgress.chapter.module.section as Section,
-      currentModule: currentChapterProgress.chapter.module,
-      currentChapter: currentChapterProgress.chapter,
+      section: section as SectionData,
+      currentChapterId: currentProgress.chapter.id,
       progressData: student.StudentChapterProgress,
+      conteProgress,
     };
   }
 
-  // Si aucun chapitre n'est marqué comme actuel, trouver la première section
+  // Si aucun chapitre actuel, prendre la première section
   const firstSection = await prisma.section.findFirst({
     orderBy: { order: "asc" },
     include: {
-      conte: true,
-      quizz: true,
+      conte: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
+      quizz: {
+        select: {
+          id: true,
+        },
+      },
       modules: {
         include: {
           chapters: {
@@ -108,95 +192,80 @@ async function getCurrentSection(studentId: string) {
     },
   });
 
-  if (!firstSection || !firstSection.modules.length) {
-    throw new Error("No section available");
+  if (
+    !firstSection ||
+    !firstSection.modules.length ||
+    !firstSection.modules[0].chapters.length
+  ) {
+    throw new Error("No content available");
   }
 
-  // Marquer le premier chapitre de la première section comme actuel
-  const firstModule = firstSection.modules[0];
-  const firstChapter = firstModule.chapters[0];
+  const firstChapter = firstSection.modules[0].chapters[0];
 
-  if (firstChapter) {
-    // Vérifier si une progression existe déjà pour ce chapitre
-    const existingProgress = await prisma.studentChapterProgress.findUnique({
-      where: {
-        studentId_chapterId: {
-          studentId: student.id,
-          chapterId: firstChapter.id,
-        },
-      },
-    });
-
-    if (existingProgress) {
-      // Mettre à jour la progression existante
-      await prisma.studentChapterProgress.update({
-        where: {
-          id: existingProgress.id,
-        },
-        data: {
-          isCurrent: true,
-        },
-      });
-    } else {
-      // Créer une nouvelle progression
-      await prisma.studentChapterProgress.create({
-        data: {
-          studentId: student.id,
-          chapterId: firstChapter.id,
-          isCurrent: true,
-          isRead: false,
-        },
-      });
-    }
-
-    // Désactiver isCurrent pour tous les autres chapitres
-    await prisma.studentChapterProgress.updateMany({
-      where: {
+  // Créer ou mettre à jour la progression pour le premier chapitre
+  await prisma.studentChapterProgress.upsert({
+    where: {
+      studentId_chapterId: {
         studentId: student.id,
-        chapterId: {
-          not: firstChapter.id,
-        },
+        chapterId: firstChapter.id,
       },
-      data: {
-        isCurrent: false,
-      },
-    });
+    },
+    update: {
+      isCurrent: true,
+    },
+    create: {
+      studentId: student.id,
+      chapterId: firstChapter.id,
+      isCurrent: true,
+      isRead: false,
+    },
+  });
 
-    // Récupérer les données de progression mises à jour
-    const updatedStudent = await prisma.student.findUnique({
-      where: { userId: studentId },
-      include: {
-        StudentChapterProgress: {
-          include: {
-            chapter: {
-              include: {
-                module: {
-                  include: {
-                    section: true,
-                  },
-                },
-              },
+  // Désactiver isCurrent pour tous les autres chapitres
+  await prisma.studentChapterProgress.updateMany({
+    where: {
+      studentId: student.id,
+      chapterId: {
+        not: firstChapter.id,
+      },
+    },
+    data: {
+      isCurrent: false,
+    },
+  });
+
+  // Récupérer les données de progression mises à jour
+  const updatedProgress = await prisma.studentChapterProgress.findMany({
+    where: { studentId: student.id },
+    include: {
+      chapter: {
+        include: {
+          module: {
+            include: {
+              section: true,
             },
           },
         },
       },
-    });
+    },
+    orderBy: {
+      chapter: {
+        order: "asc",
+      },
+    },
+  });
 
-    return {
-      sectionId: firstSection.id,
-      section: firstSection as Section,
-      currentModule: firstModule,
-      currentChapter: firstChapter,
-      progressData: updatedStudent?.StudentChapterProgress || [],
-    };
-  }
+  // Trouver la progression du conte pour cette section
+  const conteProgress =
+    student.StudentConteProgress.find(
+      (p) => p.conte.id === firstSection.conte?.id
+    ) || null;
 
   return {
-    sectionId: firstSection.id,
-    section: firstSection as Section,
-    currentModule: firstModule,
-    currentChapter: firstChapter,
-    progressData: student.StudentChapterProgress,
+    section: firstSection as SectionData,
+    currentChapterId: firstChapter.id,
+    progressData: updatedProgress,
+    conteProgress,
   };
 }
 
@@ -224,25 +293,10 @@ export default async function LearnPage() {
       />
     );
   }
-
   try {
-    // Récupérer la section actuelle de l'étudiant
-    const currentSectionData = await getCurrentSection(session.user.id);
-    const section = currentSectionData.section;
-
-    console.log("Current section:", section);
-    console.log("Current module:", currentSectionData.currentModule);
-    console.log("Current chapter:", currentSectionData.currentChapter);
-
-    if (!section) {
-      return (
-        <ErrorDisplay
-          title="Aucune section disponible"
-          message="Aucun contenu d'apprentissage n'est actuellement disponible. Les cours seront bientôt ajoutés."
-          showRetryButton={false}
-        />
-      );
-    }
+    const { section, currentChapterId, progressData, conteProgress } =
+      await getCurrentSection(session.user.id);
+    console.log(conteProgress, "IS completed");
 
     return (
       <div className="flex flex-col gap-6">
@@ -251,9 +305,14 @@ export default async function LearnPage() {
           <div>
             <h2 className="font-bold text-lg">{section.title.toUpperCase()}</h2>
             <p>{section.description}</p>
-            {currentSectionData.currentChapter && (
+            {currentChapterId && (
               <p className="text-sm mt-1 opacity-90">
-                Chapitre actuel: {currentSectionData.currentChapter.title}
+                Chapitre actuel:{" "}
+                {
+                  section.modules
+                    .flatMap((m) => m.chapters)
+                    .find((c) => c.id === currentChapterId)?.title
+                }
               </p>
             )}
           </div>
@@ -270,32 +329,21 @@ export default async function LearnPage() {
           <ConteCard
             conteId={section.conte.id}
             title={section.conte.title}
-            isCompleted={
-              currentSectionData.progressData.some(
-                (progress) =>
-                  progress.chapter.module.section.id === section.id &&
-                  progress.isRead
-              ) &&
-              currentSectionData.progressData
-                .filter(
-                  (progress) =>
-                    progress.chapter.module.section.id === section.id
-                )
-                .every((progress) => progress.isRead)
-            }
+            isCompleted={conteProgress?.isCompleted || false}
+            completedAt={conteProgress?.completedAt || null}
           />
         )}
 
         {/* Chapitres du module */}
-        {section.modules.map((module: Module) => (
+        {section.modules.map((module) => (
           <LessonsList
+            key={module.id}
             moduleId={module.id}
             title={module.title.toUpperCase()}
             subtitle={module.subtitle}
             chapters={module.chapters}
-            currentChapterId={currentSectionData.currentChapter?.id || ""}
-            key={module.id}
-            progressData={currentSectionData.progressData}
+            currentChapterId={currentChapterId || ""}
+            progressData={progressData}
           />
         ))}
 

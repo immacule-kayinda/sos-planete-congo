@@ -17,6 +17,7 @@ export default function AvailableLesson({
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
             </div>
+            <div className="absolute inset-0 rounded-full ring-4 ring-blue-400 animate-pulse opacity-75"></div>
           </div>
           <div>
             <p className="font-black uppercase text-blue-800">{title}</p>

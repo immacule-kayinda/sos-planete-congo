@@ -1,3 +1,5 @@
+"use client";
+
 import { Chapter } from "../../../../generated/prisma";
 import { Progress } from "../progress";
 import LessonItem from "./LessonItem";

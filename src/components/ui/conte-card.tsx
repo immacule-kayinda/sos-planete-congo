@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Play, BookOpen } from "lucide-react";
+import { Check, Play, BookOpen, Star } from "lucide-react";
 import Link from "next/link";
 
 interface ConteCardProps {
@@ -8,6 +8,7 @@ interface ConteCardProps {
   title: string;
   isCompleted?: boolean;
   className?: string;
+  completedAt?: Date | null;
 }
 
 export default function ConteCard({
@@ -15,13 +16,23 @@ export default function ConteCard({
   title,
   isCompleted = false,
   className = "",
+  completedAt,
 }: ConteCardProps) {
+  const formatCompletionDate = (date: Date | null) => {
+    if (!date) return "";
+    return new Intl.DateTimeFormat("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(new Date(date));
+  };
+
   return (
     <Link href={`/stories/${conteId}`}>
       <div
         className={`
         bg-white rounded-xl p-4 flex justify-between items-center border-2 
-        transition-all cursor-pointer group
+        transition-all cursor-pointer group hover:shadow-lg
         ${
           isCompleted
             ? "border-green-300 hover:bg-green-50 hover:border-green-400"
@@ -90,13 +101,21 @@ export default function ConteCard({
               {isCompleted ? "Conte terminé" : "Conte à découvrir"} - Cliquez
               pour {isCompleted ? "relire" : "lire"}
             </span>
+            {isCompleted && completedAt && (
+              <p className="text-sm text-gray-500 mt-1">
+                Terminé le {formatCompletionDate(completedAt)}
+              </p>
+            )}
           </div>
         </div>
 
         {/* Étoiles */}
-        <span className="text-yellow-500 font-bold">
-          {isCompleted ? "★20" : "○20"}
-        </span>
+        <div className="flex items-center gap-1">
+          <Star className="text-yellow-500 w-5 h-5" />
+          <span className="text-yellow-500 font-bold">
+            {isCompleted ? "20" : "0"}
+          </span>
+        </div>
       </div>
     </Link>
   );

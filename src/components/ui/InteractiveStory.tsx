@@ -1,11 +1,20 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Pause, Play, SkipBack, SkipForward, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Pause,
+  Play,
+  SkipBack,
+  SkipForward,
+  X,
+  Check,
+} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./button";
+import { useToast } from "@/hooks/use-toast";
 
 interface Page {
   id: string;
@@ -34,9 +43,12 @@ export default function InteractiveStory({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [isMarkingAsCompleted, setIsMarkingAsCompleted] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
+  const { toast } = useToast();
 
   const currentPage = pages[currentPageIndex];
 
@@ -44,12 +56,27 @@ export default function InteractiveStory({
     // Activer le mode plein écran automatiquement
     setIsFullscreen(true);
 
+    // Vérifier le statut de completion au chargement
+    checkCompletionStatus();
+
     return () => {
       if (progressInterval.current) {
         clearInterval(progressInterval.current);
       }
     };
   }, []);
+
+  const checkCompletionStatus = async () => {
+    try {
+      const response = await fetch(`/api/stories/${storyId}/progress`);
+      if (response.ok) {
+        const data = await response.json();
+        setIsCompleted(data.isCompleted);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la vérification du statut:", error);
+    }
+  };
 
   const handlePlay = () => {
     if (audioRef.current) {
@@ -103,16 +130,44 @@ export default function InteractiveStory({
   };
 
   const markStoryAsCompleted = async () => {
+    if (isMarkingAsCompleted) return;
+
+    setIsMarkingAsCompleted(true);
     try {
-      await fetch(`/api/stories/${storyId}/progress`, {
+      const response = await fetch(`/api/stories/${storyId}/progress`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
       });
+
+      if (response.ok) {
+        setIsCompleted(true);
+        toast({
+          title: "🎉 Félicitations !",
+          description:
+            "Vous avez terminé de lire cette histoire ! Continuez votre apprentissage.",
+          variant: "default",
+          duration: 5000,
+        });
+      } else {
+        throw new Error("Erreur lors du marquage");
+      }
     } catch (error) {
       console.error("Erreur lors du marquage du conte comme lu:", error);
+      toast({
+        title: "Erreur",
+        description:
+          "Impossible de marquer le conte comme lu. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsMarkingAsCompleted(false);
     }
+  };
+
+  const handleManualMarkAsCompleted = () => {
+    markStoryAsCompleted();
   };
 
   const handleAudioEnded = () => {
@@ -194,6 +249,39 @@ export default function InteractiveStory({
                 onPlay={handlePlay}
                 onPause={handlePause}
               />
+
+              {/* Bouton marquer comme lu */}
+              {!isCompleted && (
+                <div className="flex justify-center">
+                  <Button
+                    onClick={handleManualMarkAsCompleted}
+                    disabled={isMarkingAsCompleted}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full flex items-center gap-2 transition-all duration-300 hover:scale-105"
+                  >
+                    {isMarkingAsCompleted ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Marquage...
+                      </div>
+                    ) : (
+                      <>
+                        <Check className="h-4 w-4" />
+                        Marquer comme lu
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {/* Indicateur de completion */}
+              {isCompleted && (
+                <div className="flex justify-center animate-in slide-in-from-bottom-2 duration-500">
+                  <div className="bg-green-600 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
+                    <Check className="h-4 w-4" />
+                    Conte terminé
+                  </div>
+                </div>
+              )}
 
               {/* Boutons de contrôle */}
               <div className="flex items-center justify-center gap-3 md:gap-6">
