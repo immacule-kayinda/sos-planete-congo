@@ -2,7 +2,6 @@
 
 import { Check, Play, BookOpen } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 interface ConteCardProps {
   conteId: string;
@@ -14,46 +13,9 @@ interface ConteCardProps {
 export default function ConteCard({
   conteId,
   title,
-  isCompleted: initialIsCompleted = false,
+  isCompleted = false,
   className = "",
 }: ConteCardProps) {
-  const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    // Récupérer le statut actuel du conte
-    const fetchProgress = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/stories/${conteId}/progress`);
-        if (response.ok) {
-          const data = await response.json();
-          setIsCompleted(data.isCompleted);
-        }
-      } catch (error) {
-        console.error("Erreur lors de la récupération du progrès:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProgress();
-  }, [conteId]);
-
-  if (loading) {
-    return (
-      <div className="bg-white rounded-xl p-4 flex justify-between items-center border-2 border-gray-200">
-        <div className="flex items-center gap-5">
-          <div className="h-14 w-14 rounded-full bg-gray-200 animate-pulse" />
-          <div>
-            <div className="h-6 w-32 bg-gray-200 animate-pulse rounded mb-2" />
-            <div className="h-4 w-24 bg-gray-200 animate-pulse rounded" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <Link href={`/stories/${conteId}`}>
       <div

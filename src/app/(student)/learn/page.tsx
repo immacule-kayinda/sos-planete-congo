@@ -267,9 +267,22 @@ export default async function LearnPage() {
 
         {/* Conte de la section */}
         {section.conte && (
-          <ConteCard 
+          <ConteCard
             conteId={section.conte.id}
             title={section.conte.title}
+            isCompleted={
+              currentSectionData.progressData.some(
+                (progress) =>
+                  progress.chapter.module.section.id === section.id &&
+                  progress.isRead
+              ) &&
+              currentSectionData.progressData
+                .filter(
+                  (progress) =>
+                    progress.chapter.module.section.id === section.id
+                )
+                .every((progress) => progress.isRead)
+            }
           />
         )}
 
