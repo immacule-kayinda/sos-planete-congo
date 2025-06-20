@@ -117,6 +117,8 @@ model Student {
   StudentConteProgress   StudentConteProgress[]
   performance            StudentPerformance[]
   StudentStreak          StudentStreak?
+  inventory              StudentInventory[]
+  balance                StudentBalance?
 }
 
 model Admin {
@@ -281,6 +283,40 @@ model StudentConteProgress {
   @@unique([studentId, conteId])
 }
 
+model ShopItem {
+  id          String             @id @default(uuid())
+  name        String
+  description String
+  price       Int // Prix en étoiles
+  category    ItemCategory
+  imageUrl    String?
+  isActive    Boolean            @default(true)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  inventory   StudentInventory[]
+}
+
+model StudentInventory {
+  id          String   @id @default(uuid())
+  studentId   String
+  itemId      String
+  quantity    Int      @default(1)
+  purchasedAt DateTime @default(now())
+  student     Student  @relation(fields: [studentId], references: [id])
+  item        ShopItem @relation(fields: [itemId], references: [id])
+
+  @@unique([studentId, itemId])
+}
+
+model StudentBalance {
+  id        String   @id @default(uuid())
+  studentId String   @unique
+  stars     Int      @default(0)
+  coins     Int      @default(0)
+  updatedAt DateTime @updatedAt
+  student   Student  @relation(fields: [studentId], references: [id])
+}
+
 enum Role {
   ADMIN
   TEACHER
@@ -297,4 +333,13 @@ enum StudentAccountStatus {
   PENDING_ACTIVATION // En attente d'activation manuelle
   LIMITED_ACCESS // Accès limité au premier conte uniquement
   ACTIVE // Accès complet à la plateforme
+}
+
+enum ItemCategory {
+  AVATAR
+  BADGE
+  BOOK
+  GAME_ITEM
+  DECORATION
+  SPECIAL
 }
