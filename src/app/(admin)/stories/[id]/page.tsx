@@ -2,14 +2,16 @@ import { ConteForm } from "@/components/admin/ConteForm";
 import prisma from "@/lib/prisma";
 
 interface StoryPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function StoryPage({ params }: StoryPageProps) {
+  const { id } = await params;
+
   const story = await prisma.conte.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       pages: {
         orderBy: {
