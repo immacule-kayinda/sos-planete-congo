@@ -1,13 +1,20 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+interface PageData {
+  content: string;
+  imageUrl?: string;
+  [key: string]: unknown;
+}
+
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const story = await prisma.conte.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         pages: {
           orderBy: {
@@ -30,29 +37,30 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { title, audioUrl, pages } = body;
 
     // Supprimer toutes les pages existantes
     await prisma.page.deleteMany({
       where: {
-        conteId: params.id,
+        conteId: id,
       },
     });
 
     // Mettre à jour le conte et créer les nouvelles pages
     const story = await prisma.conte.update({
       where: {
-        id: params.id,
+        id,
       },
       data: {
         title,
         audioUrl,
         pages: {
-          create: pages.map((page: any, index: number) => ({
+          create: pages.map((page: PageData, index: number) => ({
             ...page,
             order: index,
           })),
@@ -72,12 +80,13 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await prisma.conte.delete({
       where: {
-        id: params.id,
+        id,
       },
     });
 

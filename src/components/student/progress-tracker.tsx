@@ -45,6 +45,24 @@ interface ProgressData {
   performance: Performance[];
 }
 
+interface SectionData {
+  section: {
+    id: string;
+    title: string;
+    order: number;
+  };
+  modules: Record<string, ModuleData>;
+}
+
+interface ModuleData {
+  module: {
+    id: string;
+    title: string;
+    order: number;
+  };
+  chapters: ChapterProgress[];
+}
+
 export default function ProgressTracker() {
   const [progressData, setProgressData] = useState<ProgressData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -125,9 +143,11 @@ export default function ProgressTracker() {
 
   const { progress, performance } = progressData;
 
-  // Organiser par sections et modules
+  // Organiser les données par sections et modules
   const sections = progress.reduce((acc, prog) => {
     const sectionId = prog.chapter.module.section.id;
+    const moduleId = prog.chapter.module.id;
+
     if (!acc[sectionId]) {
       acc[sectionId] = {
         section: prog.chapter.module.section,
@@ -135,7 +155,6 @@ export default function ProgressTracker() {
       };
     }
 
-    const moduleId = prog.chapter.module.id;
     if (!acc[sectionId].modules[moduleId]) {
       acc[sectionId].modules[moduleId] = {
         module: prog.chapter.module,
@@ -145,7 +164,7 @@ export default function ProgressTracker() {
 
     acc[sectionId].modules[moduleId].chapters.push(prog);
     return acc;
-  }, {} as any);
+  }, {} as Record<string, SectionData>);
 
   // Calculer les statistiques globales
   const totalChapters = progress.length;
@@ -235,8 +254,11 @@ export default function ProgressTracker() {
       {/* Détail par sections */}
       <div className="space-y-4">
         {Object.values(sections)
-          .sort((a: any, b: any) => a.section.order - b.section.order)
-          .map((sectionData: any) => (
+          .sort(
+            (a: SectionData, b: SectionData) =>
+              a.section.order - b.section.order
+          )
+          .map((sectionData: SectionData) => (
             <Card key={sectionData.section.id}>
               <CardHeader>
                 <CardTitle className="text-lg">
@@ -247,8 +269,11 @@ export default function ProgressTracker() {
               <CardContent>
                 <div className="space-y-4">
                   {Object.values(sectionData.modules)
-                    .sort((a: any, b: any) => a.module.order - b.module.order)
-                    .map((moduleData: any) => (
+                    .sort(
+                      (a: ModuleData, b: ModuleData) =>
+                        a.module.order - b.module.order
+                    )
+                    .map((moduleData: ModuleData) => (
                       <div
                         key={moduleData.module.id}
                         className="border rounded-lg p-4"
@@ -260,7 +285,7 @@ export default function ProgressTracker() {
                         <div className="grid gap-2">
                           {moduleData.chapters
                             .sort(
-                              (a: any, b: any) =>
+                              (a: ChapterProgress, b: ChapterProgress) =>
                                 a.chapter.order - b.chapter.order
                             )
                             .map((chapterProg: ChapterProgress) => {
@@ -275,8 +300,8 @@ export default function ProgressTracker() {
                                     chapterProg.isCurrent
                                       ? "border-blue-500 bg-blue-50"
                                       : chapterProg.isRead
-                                        ? "border-green-500 bg-green-50"
-                                        : "border-gray-200"
+                                      ? "border-green-500 bg-green-50"
+                                      : "border-gray-200"
                                   }`}
                                 >
                                   <div className="flex items-center gap-3">

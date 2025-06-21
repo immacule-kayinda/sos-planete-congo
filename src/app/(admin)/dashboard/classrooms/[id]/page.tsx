@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,8 +42,8 @@ import {
   Calendar,
   Hash,
 } from "lucide-react";
-import { toast } from "sonner";
 import Link from "next/link";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Student {
   id: string;
@@ -74,19 +74,15 @@ interface Classroom {
 export default function ClassroomDetailsPage() {
   const params = useParams();
   const router = useRouter();
+  const { toast } = useToast();
   const [classroom, setClassroom] = useState<Classroom | null>(null);
-  const [loading, setLoading] = useState(true);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
   const [isChangingTeacher, setIsChangingTeacher] = useState(false);
   const [showTeacherDialog, setShowTeacherDialog] = useState(false);
 
-  useEffect(() => {
-    fetchClassroom();
-    fetchTeachers();
-  }, [params.id]);
-
-  const fetchClassroom = async () => {
+  const fetchClassroom = useCallback(async () => {
     try {
       const response = await fetch(`/api/classrooms/${params.id}`);
       if (!response.ok) throw new Error("Failed to fetch classroom");
@@ -94,13 +90,17 @@ export default function ClassroomDetailsPage() {
       setClassroom(data);
     } catch (error) {
       console.error("Error fetching classroom:", error);
-      toast.error("Erreur lors du chargement de la classe");
+      toast({
+        title: "Erreur",
+        description: "Erreur lors du chargement de la classe",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id, toast]);
 
-  const fetchTeachers = async () => {
+  const fetchTeachers = useCallback(async () => {
     try {
       const response = await fetch("/api/teachers?approved=true");
       if (!response.ok) throw new Error("Failed to fetch teachers");
@@ -108,9 +108,18 @@ export default function ClassroomDetailsPage() {
       setTeachers(data);
     } catch (error) {
       console.error("Error fetching teachers:", error);
-      toast.error("Erreur lors du chargement des enseignants");
+      toast({
+        title: "Erreur",
+        description: "Erreur lors du chargement des enseignants",
+        variant: "destructive",
+      });
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchClassroom();
+    fetchTeachers();
+  }, [fetchClassroom, fetchTeachers]);
 
   const handleChangeTeacher = async () => {
     if (!selectedTeacherId) return;
@@ -129,12 +138,20 @@ export default function ClassroomDetailsPage() {
 
       const updatedClassroom = await response.json();
       setClassroom(updatedClassroom);
-      toast.success("Responsable de classe mis à jour avec succès");
+      toast({
+        title: "Succès",
+        description: "Responsable de classe mis à jour avec succès",
+        variant: "default",
+      });
       setShowTeacherDialog(false);
       setSelectedTeacherId("");
     } catch (error) {
       console.error("Error updating classroom:", error);
-      toast.error("Erreur lors de la mise à jour du responsable");
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la mise à jour du responsable",
+        variant: "destructive",
+      });
     } finally {
       setIsChangingTeacher(false);
     }

@@ -19,6 +19,7 @@ import { FileUpload } from "@/components/ui/file-upload";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
+import Image from "next/image";
 
 const conteSchema = z.object({
   title: z.string().min(1, "Le titre est requis"),
@@ -238,10 +239,12 @@ export function ConteForm({ conte }: ConteFormProps) {
                           value={field.value ? [field.value] : []}
                         />
                         {field.value && (
-                          <img
+                          <Image
                             src={field.value}
                             alt="Preview"
-                            className="w-32 h-32 object-cover rounded"
+                            width={128}
+                            height={128}
+                            className="object-cover rounded"
                           />
                         )}
                       </div>

@@ -169,6 +169,7 @@ async function getStreakLeaderboard(limit: number) {
           user: {
             select: {
               email: true,
+              isActive: true,
             },
           },
           Classroom: {

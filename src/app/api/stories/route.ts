@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+interface PageData {
+  content: string;
+  imageUrl?: string;
+  [key: string]: unknown;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -11,7 +17,7 @@ export async function POST(request: Request) {
         title,
         audioUrl,
         pages: {
-          create: pages.map((page: any, index: number) => ({
+          create: pages.map((page: PageData, index: number) => ({
             ...page,
             order: index,
           })),

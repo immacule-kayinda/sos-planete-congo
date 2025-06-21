@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Star,
   ShoppingCart,
@@ -64,16 +64,12 @@ const categoryLabels = {
 };
 
 export default function ShopPage() {
+  const { toast } = useToast();
   const [shopData, setShopData] = useState<ShopData | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState<string | null>(null);
-  const { toast } = useToast();
 
-  useEffect(() => {
-    loadShopData();
-  }, []);
-
-  const loadShopData = async () => {
+  const loadShopData = useCallback(async () => {
     try {
       setLoading(true);
       const [itemsResponse, inventoryResponse] = await Promise.all([
@@ -98,7 +94,11 @@ export default function ShopPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadShopData();
+  }, [loadShopData]);
 
   const purchaseItem = async (
     itemId: string,

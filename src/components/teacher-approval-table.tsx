@@ -125,9 +125,13 @@ export function TeacherApprovalTable() {
 
       setTeachers(teachers.filter((teacher) => teacher.id !== teacherId));
       toast.success("Enseignant supprimé avec succès");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting teacher:", error);
-      toast.error(error.message || "Erreur lors de la suppression");
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Erreur lors de la suppression";
+      toast.error(errorMessage);
     }
   };
 

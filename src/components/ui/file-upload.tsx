@@ -46,12 +46,6 @@ export function FileUpload({
     handleFileSelect(e.dataTransfer.files);
   };
 
-  const removeFile = (index: number) => {
-    const newFiles = value.filter((_, i) => i !== index);
-    // Note: This is a simplified version, in a real implementation
-    // you'd need to track the actual File objects
-  };
-
   return (
     <div className="space-y-4">
       <div
@@ -97,12 +91,7 @@ export function FileUpload({
                 <File className="h-4 w-4" />
                 <span className="text-sm">{fileName}</span>
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => removeFile(index)}
-              >
+              <Button type="button" variant="ghost" size="sm">
                 <X className="h-4 w-4" />
               </Button>
             </div>

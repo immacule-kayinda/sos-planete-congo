@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "./button";
 import { useToast } from "@/hooks/use-toast";
 
@@ -52,6 +52,18 @@ export default function InteractiveStory({
 
   const currentPage = pages[currentPageIndex];
 
+  const checkCompletionStatus = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/stories/${storyId}/progress`);
+      if (response.ok) {
+        const data = await response.json();
+        setIsCompleted(data.isCompleted);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la vérification du statut:", error);
+    }
+  }, [storyId]);
+
   useEffect(() => {
     // Activer le mode plein écran automatiquement
     setIsFullscreen(true);
@@ -64,19 +76,7 @@ export default function InteractiveStory({
         clearInterval(progressInterval.current);
       }
     };
-  }, []);
-
-  const checkCompletionStatus = async () => {
-    try {
-      const response = await fetch(`/api/stories/${storyId}/progress`);
-      if (response.ok) {
-        const data = await response.json();
-        setIsCompleted(data.isCompleted);
-      }
-    } catch (error) {
-      console.error("Erreur lors de la vérification du statut:", error);
-    }
-  };
+  }, [checkCompletionStatus]);
 
   const handlePlay = () => {
     if (audioRef.current) {

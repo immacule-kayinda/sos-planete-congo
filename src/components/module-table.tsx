@@ -68,7 +68,6 @@ export function ModuleTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSectionId, setSelectedSectionId] = useState<string>("all");
   const [loading, setLoading] = useState(true);
-  const [loadingSections, setLoadingSections] = useState(true);
 
   useEffect(() => {
     fetchModules();
@@ -98,8 +97,6 @@ export function ModuleTable() {
     } catch (error) {
       console.error("Error fetching sections:", error);
       toast.error("Erreur lors du chargement des sections");
-    } finally {
-      setLoadingSections(false);
     }
   };
 

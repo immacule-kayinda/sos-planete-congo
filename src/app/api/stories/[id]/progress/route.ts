@@ -5,9 +5,10 @@ import { auth } from "../../../../../../auth";
 // Marquer un conte comme lu
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth();
 
     if (!session?.user || session.user.role !== "STUDENT") {
@@ -25,7 +26,7 @@ export async function POST(
 
     // Vérifier si le conte existe
     const conte = await prisma.conte.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!conte) {
@@ -37,7 +38,7 @@ export async function POST(
       where: {
         studentId_conteId: {
           studentId: student.id,
-          conteId: params.id,
+          conteId: id,
         },
       },
       update: {
@@ -46,7 +47,7 @@ export async function POST(
       },
       create: {
         studentId: student.id,
-        conteId: params.id,
+        conteId: id,
         isCompleted: true,
         completedAt: new Date(),
       },
@@ -62,9 +63,10 @@ export async function POST(
 // Obtenir le statut de lecture d'un conte
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth();
 
     if (!session?.user || session.user.role !== "STUDENT") {
@@ -85,7 +87,7 @@ export async function GET(
       where: {
         studentId_conteId: {
           studentId: student.id,
-          conteId: params.id,
+          conteId: id,
         },
       },
     });

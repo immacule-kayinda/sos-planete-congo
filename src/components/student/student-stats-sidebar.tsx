@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  BookOpen,
   Star,
   Target,
   CheckCircle,
@@ -15,6 +14,33 @@ import {
   Users,
 } from "lucide-react";
 import { MobileStats } from "./mobile-stats";
+
+interface ProgressData {
+  id: string;
+  isRead: boolean;
+  isCurrent: boolean;
+  chapter: {
+    id: string;
+    title: string;
+  };
+}
+
+interface PerformanceData {
+  id: string;
+  stars: number;
+  accuracy: number;
+  chapter: {
+    id: string;
+    title: string;
+  };
+}
+
+interface LeaderboardEntry {
+  rank: number;
+  isCurrentUser: boolean;
+  userId: string;
+  score: number;
+}
 
 interface StudentStats {
   totalStars: number;
@@ -53,7 +79,9 @@ export default function StudentStatsSidebar() {
         // Calculer les statistiques à partir des données
         const { progress, performance } = data;
         const totalChapters = progress.length;
-        const completedChapters = progress.filter((p: any) => p.isRead).length;
+        const completedChapters = progress.filter(
+          (p: ProgressData) => p.isRead
+        ).length;
 
         console.log(
           "Chapitres total:",
@@ -67,7 +95,7 @@ export default function StudentStatsSidebar() {
         const totalStars =
           performance && performance.length > 0
             ? performance.reduce(
-                (sum: number, perf: any) => sum + perf.stars,
+                (sum: number, perf: PerformanceData) => sum + perf.stars,
                 0
               )
             : completedChapters * 20; // 20 étoiles par chapitre par défaut
@@ -75,7 +103,7 @@ export default function StudentStatsSidebar() {
         const avgAccuracy =
           performance && performance.length > 0
             ? performance.reduce(
-                (sum: number, perf: any) => sum + perf.accuracy,
+                (sum: number, perf: PerformanceData) => sum + perf.accuracy,
                 0
               ) / performance.length
             : 0.85; // 85% de précision par défaut
@@ -122,13 +150,13 @@ export default function StudentStatsSidebar() {
 
       // Trouver le rang de l'utilisateur actuel
       const globalRank = globalData.leaderboard.find(
-        (entry: any) => entry.isCurrentUser
+        (entry: LeaderboardEntry) => entry.isCurrentUser
       )?.rank;
       const classroomRank = classroomData.leaderboard.find(
-        (entry: any) => entry.isCurrentUser
+        (entry: LeaderboardEntry) => entry.isCurrentUser
       )?.rank;
       const streakRank = streakData.leaderboard.find(
-        (entry: any) => entry.isCurrentUser
+        (entry: LeaderboardEntry) => entry.isCurrentUser
       )?.rank;
 
       setRanking({

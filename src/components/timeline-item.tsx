@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, easeOut, backOut } from "framer-motion";
 import { TimelineItem } from "@/types/timeline";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +32,7 @@ export function TimelineItemComponent({
       y: 0,
       transition: {
         duration: 0.8,
-        ease: "easeOut",
+        ease: easeOut,
       },
     },
   };
@@ -44,7 +44,7 @@ export function TimelineItemComponent({
       opacity: 1,
       transition: {
         duration: 0.5,
-        ease: "backOut",
+        ease: backOut,
       },
     },
   };
