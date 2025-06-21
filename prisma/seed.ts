@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { hashPassword } from "@/lib/utils";
 import { faker } from "@faker-js/faker";
+import { StudentAccountStatus } from "../generated/prisma";
 
 interface Teacher {
   id: string;
@@ -12,6 +13,7 @@ interface Teacher {
   voterCardNumber: string;
   school: string;
   teachingLevel: string;
+  isApproved: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,8 +23,22 @@ interface Student {
   userId: string;
   age: number;
   teacherId: string | null;
+  classroomId: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  classCode: string | null;
+  accountStatus: StudentAccountStatus;
+  hasClassroomAccess: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+interface Classroom {
+  id: string;
+  name: string;
+  classCode: string;
+  teacherId: string | null;
+  createdAt: Date;
 }
 
 async function main() {
@@ -34,11 +50,13 @@ async function main() {
     prisma.option.deleteMany(),
     prisma.question.deleteMany(),
     prisma.chapter.deleteMany(),
+    prisma.page.deleteMany(),
     prisma.conte.deleteMany(),
     prisma.module.deleteMany(),
     prisma.section.deleteMany(),
     prisma.quizz.deleteMany(),
     prisma.student.deleteMany(),
+    prisma.classroom.deleteMany(),
     prisma.teacher.deleteMany(),
     prisma.admin.deleteMany(),
     prisma.session.deleteMany(),
@@ -46,7 +64,7 @@ async function main() {
   ]);
 
   // Créer un admin
-  const adminUser = await prisma.user.create({
+  void (await prisma.user.create({
     data: {
       email: "admin@example.com",
       password: await hashPassword("admin123"),
@@ -56,7 +74,7 @@ async function main() {
         create: {},
       },
     },
-  });
+  }));
 
   // Créer des enseignants
   const teachers = await Promise.all(
@@ -79,6 +97,7 @@ async function main() {
                 "PRIMAIRE",
                 "SECONDAIRE",
               ]),
+              isApproved: faker.datatype.boolean(),
             },
           },
         },
@@ -90,9 +109,38 @@ async function main() {
     })
   );
 
+  // Créer des classes pour les enseignants approuvés
+  const approvedTeachers = teachers.filter((teacher) => teacher.isApproved);
+  const classrooms = await Promise.all(
+    approvedTeachers.map(async (teacher) => {
+      const classroom = await prisma.classroom.create({
+        data: {
+          name: `Classe de ${teacher.firstName} ${teacher.lastName}`,
+          classCode: faker.string.alphanumeric(6).toUpperCase(),
+          teacherId: teacher.id,
+        },
+      });
+      return classroom as Classroom;
+    })
+  );
+
   // Créer des étudiants
   const students = await Promise.all(
     Array.from({ length: 20 }).map(async () => {
+      const randomClassroom = faker.helpers.arrayElement(classrooms);
+      const teacher = approvedTeachers.find(
+        (t) => t.id === randomClassroom.teacherId
+      );
+
+      // Simuler différents types d'étudiants
+      const hasClassCode = faker.datatype.boolean(0.7); // 70% ont un code de classe
+      const accountStatus = hasClassCode
+        ? StudentAccountStatus.ACTIVE
+        : faker.helpers.arrayElement([
+            StudentAccountStatus.LIMITED_ACCESS,
+            StudentAccountStatus.PENDING_ACTIVATION,
+          ]);
+
       const user = await prisma.user.create({
         data: {
           email: faker.internet.email().toLowerCase(),
@@ -102,7 +150,13 @@ async function main() {
           student: {
             create: {
               age: faker.number.int({ min: 6, max: 18 }),
-              teacherId: faker.helpers.arrayElement(teachers).id,
+              teacherId: hasClassCode ? teacher?.id : null,
+              classroomId: hasClassCode ? randomClassroom.id : null,
+              firstName: faker.person.firstName(),
+              lastName: faker.person.lastName(),
+              classCode: hasClassCode ? randomClassroom.classCode : null,
+              accountStatus,
+              hasClassroomAccess: accountStatus === StudentAccountStatus.ACTIVE,
             },
           },
         },
@@ -115,7 +169,7 @@ async function main() {
   );
 
   // Créer des sections avec leurs modules et contes
-  const sections = await Promise.all(
+  void (await Promise.all(
     Array.from({ length: 3 }).map(async (_, sectionIndex) => {
       // Créer d'abord le quiz
       const quizz = await prisma.quizz.create({
@@ -152,9 +206,14 @@ async function main() {
             create: {
               title: faker.lorem.words(3),
               audioUrl: faker.internet.url(),
-              imagesUrls: Array.from({ length: 3 }).map(() =>
-                faker.image.url()
-              ),
+              pages: {
+                create: Array.from({ length: 3 }).map((_, pageIndex) => ({
+                  imageUrl: faker.image.url(),
+                  caption: faker.lorem.sentence(),
+                  duration: faker.number.int({ min: 3000, max: 8000 }),
+                  order: pageIndex,
+                })),
+              },
             },
           },
           modules: {
@@ -183,7 +242,7 @@ async function main() {
 
       return section;
     })
-  );
+  ));
 
   // Récupérer tous les modules pour créer les performances
   const modules = await prisma.module.findMany({
@@ -194,9 +253,9 @@ async function main() {
 
   // Créer des performances d'étudiants
   for (const student of students) {
-    for (const module of modules) {
+    for (const moduleItem of modules) {
       // Créer une performance pour chaque chapitre
-      for (const chapter of module.chapters) {
+      for (const chapter of moduleItem.chapters) {
         await prisma.studentPerformance.create({
           data: {
             studentId: student.id,
@@ -224,6 +283,11 @@ async function main() {
   );
 
   console.log("Base de données seedée avec succès !");
+  console.log(
+    `${teachers.length} enseignants créés (${approvedTeachers.length} approuvés)`
+  );
+  console.log(`${classrooms.length} classes créées`);
+  console.log(`${students.length} étudiants créés`);
 }
 
 main()

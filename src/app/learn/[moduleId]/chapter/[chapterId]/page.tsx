@@ -1,9 +1,140 @@
 import prisma from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { auth } from "../../../../../../auth";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+
+// Action server pour marquer le chapitre comme lu
+async function markChapterAsRead(chapterId: string, userId: string) {
+  "use server";
+
+  try {
+    const student = await prisma.student.findUnique({
+      where: { userId: userId },
+    });
+
+    if (!student) throw new Error("Étudiant non trouvé");
+
+    // Marquer le chapitre actuel comme lu
+    await prisma.studentChapterProgress.upsert({
+      where: {
+        studentId_chapterId: {
+          studentId: student.id,
+          chapterId: chapterId,
+        },
+      },
+      update: {
+        isRead: true,
+        isCurrent: false,
+      },
+      create: {
+        studentId: student.id,
+        chapterId: chapterId,
+        isRead: true,
+        isCurrent: false,
+      },
+    });
+
+    // Trouver le chapitre suivant dans le même module ou le module suivant
+    const currentChapter = await prisma.chapter.findUnique({
+      where: { id: chapterId },
+      include: {
+        module: {
+          include: {
+            chapters: {
+              orderBy: { order: "asc" },
+            },
+            section: {
+              include: {
+                modules: {
+                  include: {
+                    chapters: {
+                      orderBy: { order: "asc" },
+                    },
+                  },
+                  orderBy: { order: "asc" },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (currentChapter) {
+      // Trouver le chapitre suivant
+      let nextChapter = null;
+
+      // D'abord, chercher dans le même module
+      const currentModuleChapters = currentChapter.module.chapters;
+      const currentChapterIndex = currentModuleChapters.findIndex(
+        (ch: { id: string }) => ch.id === chapterId
+      );
+
+      if (
+        currentChapterIndex !== -1 &&
+        currentChapterIndex < currentModuleChapters.length - 1
+      ) {
+        // Il y a un chapitre suivant dans le même module
+        nextChapter = currentModuleChapters[currentChapterIndex + 1];
+      } else {
+        // Chercher dans le module suivant
+        const currentModuleIndex =
+          currentChapter.module.section.modules.findIndex(
+            (mod: { id: string }) => mod.id === currentChapter.moduleId
+          );
+
+        if (
+          currentModuleIndex !== -1 &&
+          currentModuleIndex < currentChapter.module.section.modules.length - 1
+        ) {
+          const nextModule =
+            currentChapter.module.section.modules[currentModuleIndex + 1];
+          if (nextModule.chapters.length > 0) {
+            nextChapter = nextModule.chapters[0];
+          }
+        }
+      }
+
+      // Si on a trouvé un chapitre suivant, le marquer comme current
+      if (nextChapter) {
+        // D'abord, enlever isCurrent de tous les autres chapitres
+        await prisma.studentChapterProgress.updateMany({
+          where: {
+            studentId: student.id,
+            isCurrent: true,
+          },
+          data: {
+            isCurrent: false,
+          },
+        });
+
+        // Marquer le chapitre suivant comme current
+        await prisma.studentChapterProgress.upsert({
+          where: {
+            studentId_chapterId: {
+              studentId: student.id,
+              chapterId: nextChapter.id,
+            },
+          },
+          update: {
+            isCurrent: true,
+          },
+          create: {
+            studentId: student.id,
+            chapterId: nextChapter.id,
+            isRead: false,
+            isCurrent: true,
+          },
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Erreur lors de la sauvegarde du progrès:", error);
+    throw new Error("Impossible de marquer le chapitre comme lu");
+  }
+}
 
 export default async function ChapterPage({
   params,
@@ -12,25 +143,56 @@ export default async function ChapterPage({
 }) {
   const session = await auth();
 
+  if (!session?.user?.id) {
+    redirect("/auth/signin");
+  }
+
   const { moduleId, chapterId } = await params;
 
-  if (!session?.user?.id) return <div>You are not authenticated</div>;
-
-  const chapter = await prisma.chapter.findUnique({
-    where: {
-      id: chapterId,
-      moduleId: moduleId,
-    },
-    include: {
-      module: {
-        include: {
-          section: true,
-        },
-      },
-    },
+  // Récupérer l'étudiant
+  const student = await prisma.student.findUnique({
+    where: { userId: session.user.id },
   });
 
+  if (!student) {
+    return <div>Profil étudiant non trouvé</div>;
+  }
+
+  // Récupérer le chapitre avec les informations de progression
+  const [chapter, studentProgress] = await Promise.all([
+    prisma.chapter.findUnique({
+      where: {
+        id: chapterId,
+        moduleId: moduleId,
+      },
+      include: {
+        module: {
+          include: {
+            section: true,
+          },
+        },
+      },
+    }),
+    prisma.studentChapterProgress.findUnique({
+      where: {
+        studentId_chapterId: {
+          studentId: student.id,
+          chapterId: chapterId,
+        },
+      },
+    }),
+  ]);
+
   if (!chapter) return notFound();
+
+  const isCompleted = studentProgress?.isRead || false;
+
+  // Action pour marquer comme lu
+  const handleMarkAsRead = async () => {
+    "use server";
+    await markChapterAsRead(chapterId, session.user.id);
+    redirect(`/learn/${moduleId}/chapter/${chapterId}?completed=true`);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -51,10 +213,10 @@ export default async function ChapterPage({
           {/* Separator line */}
           <div className="w-full h-px bg-[#666666] mb-16 md:mb-20 lg:mb-24"></div>
 
-          {/* Centered image title */}
+          {/* Centered section title */}
           <div className="text-center">
             <h1 className="text-[#000000] text-xl md:text-2xl lg:text-3xl font-medium">
-              Image de l&apos;antilope Tetsi
+              {chapter.module.section?.title || "Section"}
             </h1>
           </div>
         </div>
@@ -63,58 +225,63 @@ export default async function ChapterPage({
       {/* Content section */}
       <div className="bg-white px-6 py-8 md:px-8 md:py-12 lg:px-12 lg:py-16">
         <div className="max-w-4xl mx-auto">
+          {/* Status indicator */}
+          {isCompleted && (
+            <div className="flex items-center gap-2 mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span className="text-green-700 font-medium">
+                Chapitre terminé
+              </span>
+            </div>
+          )}
+
           {/* Main title */}
           <h2 className="text-[#000000] text-2xl md:text-3xl lg:text-4xl font-bold mb-2 md:mb-3 uppercase">
             {chapter.title}
           </h2>
 
           {/* Subtitle */}
-          <p className="text-[#666666] text-base md:text-lg lg:text-xl mb-8 md:mb-10 lg:mb-12 italic">
-            {chapter.subtitle}
-          </p>
+          {chapter.subtitle && (
+            <p className="text-[#666666] text-base md:text-lg lg:text-xl mb-8 md:mb-10 lg:mb-12 italic">
+              {chapter.subtitle}
+            </p>
+          )}
 
           {/* Content wrapper for better reading experience */}
           <div className="prose prose-lg max-w-none md:prose-xl lg:prose-2xl">
-            {/* First paragraph */}
-
-            <p className="text-[#000000] text-base md:text-lg lg:text-xl leading-relaxed mb-6 md:mb-8 lg:mb-10">
-              {chapter.content.split("\n")}
-            </p>
-
-            {/* <p className="text-[#000000] text-base md:text-lg lg:text-xl leading-relaxed mb-6 md:mb-8 lg:mb-10">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </p> */}
-
-            {/* Second paragraph */}
-            {/* <p className="text-[#000000] text-base md:text-lg lg:text-xl leading-relaxed mb-12 md:mb-16 lg:mb-20">
-              Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-              accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
-              quae ab illo inventore veritatis et quasi architecto beatae vitae
-              dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit
-              aspernatur aut odit aut fugit, sed quia consequuntur magni dolores
-              eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam
-              est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci
-              velit, sed quia non numquam eius modi tempora incidunt ut labore
-              et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima
-              veniam, quis nostrum exercitationem ullam corporis suscipit
-              laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem
-              vel eum iure reprehenderit qui in ea voluptate velit esse quam
-              nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo
-              voluptas nulla pariatur
-            </p> */}
+            {/* Chapter content */}
+            <div className="text-[#000000] text-base md:text-lg lg:text-xl leading-relaxed mb-12 md:mb-16 lg:mb-20">
+              {chapter.content.split("\n").map(
+                (paragraph: string, index: number) =>
+                  paragraph.trim() && (
+                    <p key={index} className="mb-6 md:mb-8 lg:mb-10">
+                      {paragraph}
+                    </p>
+                  )
+              )}
+            </div>
           </div>
 
-          {/* Red button - responsive width */}
+          {/* Action button - responsive width */}
           <div className="flex justify-center md:justify-start">
-            <Button className="w-full md:w-auto md:min-w-[300px] lg:min-w-[400px] bg-[#d31929] hover:bg-[#a52d2d] text-white font-medium py-4 md:py-5 lg:py-6 px-8 md:px-12 lg:px-16 rounded-lg text-base md:text-lg lg:text-xl transition-all duration-200 hover:shadow-lg">
-              Marquer comme lu
-            </Button>
+            {!isCompleted ? (
+              <form action={handleMarkAsRead}>
+                <Button
+                  type="submit"
+                  className="w-full md:w-auto md:min-w-[300px] lg:min-w-[400px] bg-[#d31929] hover:bg-[#a52d2d] text-white font-medium py-4 md:py-5 lg:py-6 px-8 md:px-12 lg:px-16 rounded-lg text-base md:text-lg lg:text-xl transition-all duration-200 hover:shadow-lg"
+                >
+                  Marquer comme lu
+                </Button>
+              </form>
+            ) : (
+              <Button
+                disabled
+                className="w-full md:w-auto md:min-w-[300px] lg:min-w-[400px] bg-green-600 text-white font-medium py-4 md:py-5 lg:py-6 px-8 md:px-12 lg:px-16 rounded-lg text-base md:text-lg lg:text-xl opacity-75 cursor-not-allowed"
+              >
+                <CheckCircle className="w-5 h-5 mr-2" />
+                Chapitre terminé
+              </Button>
+            )}
           </div>
         </div>
       </div>

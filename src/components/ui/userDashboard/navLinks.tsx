@@ -9,6 +9,7 @@ import {
   MoreHorizontal,
   ShoppingBag,
   User,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -18,6 +19,11 @@ const links: { href?: string; icon: React.ReactNode; label: string }[] = [
     href: "/learn",
     icon: <BookOpen className="w-4 h-4" />,
     label: "Apprendre",
+  },
+  {
+    href: "/stories",
+    icon: <FileText className="w-4 h-4" />,
+    label: "Contes",
   },
   {
     href: "/leaderboard",

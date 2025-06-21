@@ -17,6 +17,7 @@ export const studentSignUpSchema = z.object({
     .number()
     .min(5, "L'âge minimum est de 5 ans")
     .max(100, "L'âge maximum est de 100 ans"),
+  classCode: z.string().optional(), // Code de classe optionnel
 });
 
 export const teacherSignUpSchema = z.object({

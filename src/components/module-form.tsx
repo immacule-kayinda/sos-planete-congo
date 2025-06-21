@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -17,22 +17,45 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { createModule, updateModule } from "@/lib/actions";
-import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
 const formSchema = z.object({
-  title: z.string().min(3, { message: "Title must be at least 3 characters." }),
-  description: z
+  title: z
     .string()
-    .min(10, { message: "Description must be at least 10 characters." }),
-  order: z.number(),
+    .min(3, { message: "Le titre doit contenir au moins 3 caractères." }),
+  subtitle: z.string().min(10, {
+    message: "Le sous-titre doit contenir au moins 10 caractères.",
+  }),
+  sectionId: z.string().min(1, { message: "La section est requise." }),
+  order: z.number().min(1, { message: "L'ordre doit être supérieur à 0." }),
 });
 
 type ModuleData = {
   id: string;
   title: string;
-  description: string;
-  order?: number;
+  subtitle: string;
+  sectionId: string;
+  order: number;
+  section?: {
+    id: string;
+    title: string;
+  };
+  chapters?: {
+    id: string;
+    title: string;
+  }[];
+};
+
+type Section = {
+  id: string;
+  title: string;
 };
 
 type ModuleFormProps = {
@@ -41,50 +64,69 @@ type ModuleFormProps = {
 
 export function ModuleForm({ module = null }: ModuleFormProps) {
   const router = useRouter();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sections, setSections] = useState<Section[]>([]);
+  const [loadingSections, setLoadingSections] = useState(true);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: module
       ? {
           title: module.title,
-          description: module.description,
+          subtitle: module.subtitle,
+          sectionId: module.sectionId,
           order: module.order,
         }
       : {
           title: "",
-          description: "",
-          order: 0,
+          subtitle: "",
+          sectionId: "",
+          order: 1,
         },
   });
+
+  useEffect(() => {
+    fetchSections();
+  }, []);
+
+  const fetchSections = async () => {
+    try {
+      const response = await fetch("/api/sections");
+      if (!response.ok) throw new Error("Failed to fetch sections");
+      const data = await response.json();
+      setSections(data);
+    } catch (error) {
+      console.error("Error fetching sections:", error);
+      toast.error("Erreur lors du chargement des sections");
+    } finally {
+      setLoadingSections(false);
+    }
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
-      if (module) {
-        await updateModule(module.id, values);
-        toast({
-          title: "Module updated",
-          description: "The module has been successfully updated.",
-        });
-      } else {
-        await createModule(values);
-        toast({
-          title: "Module created",
-          description: "The module has been successfully created.",
-        });
-      }
+      const response = await fetch(
+        module ? `/api/modules/${module.id}` : "/api/modules",
+        {
+          method: module ? "PATCH" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        }
+      );
+
+      if (!response.ok) throw new Error("Erreur lors de la sauvegarde");
+
+      toast.success(
+        module ? "Module mis à jour avec succès" : "Module créé avec succès"
+      );
+      router.refresh();
       router.push("/dashboard/modules");
     } catch (error) {
       console.error("Module submission error:", error);
-      toast({
-        title: "Error",
-        description: `Failed to ${
-          module ? "update" : "create"
-        } module. Please try again.`,
-        variant: "destructive",
-      });
+      toast.error("Une erreur est survenue");
     } finally {
       setIsSubmitting(false);
     }
@@ -98,12 +140,15 @@ export function ModuleForm({ module = null }: ModuleFormProps) {
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>Titre</FormLabel>
               <FormControl>
-                <Input placeholder="Introduction to Mathematics" {...field} />
+                <Input
+                  placeholder="Introduction aux Mathématiques"
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
-                The title of the module as it will appear to users.
+                Le titre du module tel qu'il apparaîtra aux utilisateurs.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -112,19 +157,74 @@ export function ModuleForm({ module = null }: ModuleFormProps) {
 
         <FormField
           control={form.control}
-          name="description"
+          name="subtitle"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>Sous-titre</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="A comprehensive introduction to basic mathematical concepts..."
+                  placeholder="Une introduction complète aux concepts mathématiques de base..."
                   className="min-h-32"
                   {...field}
                 />
               </FormControl>
               <FormDescription>
-                Provide a detailed description of what this module covers.
+                Fournissez une description détaillée de ce que couvre ce module.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="sectionId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Section</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        loadingSections
+                          ? "Chargement..."
+                          : "Sélectionner une section"
+                      }
+                    />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {sections.map((section) => (
+                    <SelectItem key={section.id} value={section.id}>
+                      {section.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                La section à laquelle appartient ce module.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="order"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ordre</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                />
+              </FormControl>
+              <FormDescription>
+                Ordre d'affichage du module dans la section.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -137,14 +237,14 @@ export function ModuleForm({ module = null }: ModuleFormProps) {
             variant="outline"
             onClick={() => router.push("/dashboard/modules")}
           >
-            Cancel
+            Annuler
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting
-              ? "Saving..."
+              ? "Sauvegarde..."
               : module
-              ? "Update Module"
-              : "Create Module"}
+              ? "Mettre à jour"
+              : "Créer"}
           </Button>
         </div>
       </form>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { auth } from "../../../auth";
 import LogoutButton from "@/components/logout-bouton";
+import StudentStatsSidebar from "@/components/student/student-stats-sidebar";
 
 export default async function StudentLayout({
   children,
@@ -35,18 +36,23 @@ export default async function StudentLayout({
         <div className="md:w-8/12 w-screen px-5 md:px-10 md:py-4 pt-16 h-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] pb-20">
           <div className="lg:w-5/6 m-auto self-end items-end">{children}</div>
         </div>
-        <div className="md:w-2/12 px-3 py-2 md:px-10 md:py-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] absolute right-0 top-0 w-full bg-white border-b md:border-b-0">
-          <div className="flex justify-between">
-            <div className="flex">
-              <Flame />
-              <p>0</p>
+        <div className="md:w-2/12 px-3 py-2 md:px-5 md:py-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] absolute right-0 top-0 w-full bg-white border-b md:border-b-0 md:border-l">
+          {/* Header mobile avec streak */}
+          <div className="flex justify-between md:hidden mb-4">
+            <div className="flex items-center gap-1">
+              <Flame className="h-4 w-4 text-orange-500" />
+              <p className="text-sm font-medium">0</p>
             </div>
-            <div className="flex">
-              <Flame />
-              <p>0</p>
+            <div className="flex items-center gap-1">
+              <Flame className="h-4 w-4 text-orange-500" />
+              <p className="text-sm font-medium">0</p>
             </div>
           </div>
-          <div className="hidden md:flex">Righ Sidebar</div>
+
+          {/* Sidebar content - visible uniquement sur desktop */}
+          <div className="hidden md:block">
+            <StudentStatsSidebar />
+          </div>
         </div>
       </main>
     </div>

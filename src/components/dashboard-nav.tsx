@@ -10,6 +10,8 @@ import {
   HelpCircle,
   School,
   Users,
+  Layers,
+  Building,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -36,6 +38,11 @@ const navItems = [
     icon: Users,
   },
   {
+    title: "Sections",
+    href: "/dashboard/sections",
+    icon: Layers,
+  },
+  {
     title: "Modules",
     href: "/dashboard/modules",
     icon: BookOpen,
@@ -59,6 +66,11 @@ const navItems = [
     title: "Enseignants",
     href: "/dashboard/teachers",
     icon: School,
+  },
+  {
+    title: "Classes",
+    href: "/dashboard/classrooms",
+    icon: Building,
   },
   {
     title: "Étudiants",

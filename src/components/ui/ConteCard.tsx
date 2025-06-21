@@ -1,0 +1,141 @@
+"use client";
+
+import { Check, Play, BookOpen } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+interface ConteCardProps {
+  conteId: string;
+  title: string;
+  isCompleted?: boolean;
+  className?: string;
+}
+
+export default function ConteCard({
+  conteId,
+  title,
+  isCompleted: initialIsCompleted = false,
+  className = "",
+}: ConteCardProps) {
+  const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Récupérer le statut actuel du conte
+    const fetchProgress = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/stories/${conteId}/progress`);
+        if (response.ok) {
+          const data = await response.json();
+          setIsCompleted(data.isCompleted);
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération du progrès:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProgress();
+  }, [conteId]);
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-xl p-4 flex justify-between items-center border-2 border-gray-200">
+        <div className="flex items-center gap-5">
+          <div className="h-14 w-14 rounded-full bg-gray-200 animate-pulse" />
+          <div>
+            <div className="h-6 w-32 bg-gray-200 animate-pulse rounded mb-2" />
+            <div className="h-4 w-24 bg-gray-200 animate-pulse rounded" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Link href={`/stories/${conteId}`}>
+      <div
+        className={`
+        bg-white rounded-xl p-4 flex justify-between items-center border-2 
+        transition-all cursor-pointer group
+        ${
+          isCompleted
+            ? "border-green-300 hover:bg-green-50 hover:border-green-400"
+            : "border-blue-300 hover:bg-blue-50 hover:border-blue-400"
+        }
+        ${className}
+      `}
+      >
+        <div className="flex items-center gap-5">
+          {/* Icône de statut */}
+          <div
+            className={`
+            h-14 w-14 rounded-full p-1 relative
+            ${isCompleted ? "ring-green-500 ring-4" : "ring-blue-500 ring-4"}
+          `}
+          >
+            {/* Badge de statut */}
+            <div
+              className={`
+              p-1 rounded-full flex items-center justify-center absolute -bottom-3 left-4
+              ${isCompleted ? "bg-green-500" : "bg-blue-500"}
+            `}
+            >
+              {isCompleted ? (
+                <Check className="text-white w-4 h-4" />
+              ) : (
+                <BookOpen className="text-white w-4 h-4" />
+              )}
+            </div>
+
+            {/* Icône principale */}
+            <div className="w-full h-full bg-neutral-200 rounded-full flex items-center justify-center">
+              <Play
+                className={`
+                w-6 h-6 transition-colors
+                ${
+                  isCompleted
+                    ? "text-green-600 group-hover:text-green-700"
+                    : "text-blue-600 group-hover:text-blue-700"
+                }
+              `}
+              />
+            </div>
+          </div>
+
+          {/* Contenu */}
+          <div>
+            <p
+              className={`
+              font-black text-lg uppercase transition-colors
+              ${
+                isCompleted
+                  ? "text-green-800 group-hover:text-green-700"
+                  : "text-blue-800 group-hover:text-blue-700"
+              }
+            `}
+            >
+              {title.length > 30 ? title.substring(0, 30) + "..." : title}
+            </p>
+            <span
+              className={`
+              text-lg font-bold
+              ${isCompleted ? "text-green-600" : "text-blue-600"}
+            `}
+            >
+              {isCompleted ? "Conte terminé" : "Conte à découvrir"} - Cliquez
+              pour {isCompleted ? "relire" : "lire"}
+            </span>
+          </div>
+        </div>
+
+        {/* Étoiles */}
+        <span className="text-yellow-500 font-bold">
+          {isCompleted ? "★20" : "○20"}
+        </span>
+      </div>
+    </Link>
+  );
+}

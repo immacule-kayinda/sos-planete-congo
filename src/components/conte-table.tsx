@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Table,
@@ -20,131 +20,115 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Search,
-  Music,
-  ImageIcon,
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { deleteConte } from "@/lib/actions";
+import { MoreHorizontal, Edit, Trash2, Search, Play } from "lucide-react";
+import { toast } from "sonner";
 
-// Mock data - in a real app, this would come from your database
-const mockContes = [
-  {
-    id: "1",
-    moduleTitle: "Introduction to Mathematics",
-    text: "Once upon a time, there was a kingdom of numbers...",
-    hasAudio: true,
-    imagesCount: 3,
-    createdAt: "2023-01-15T00:00:00.000Z",
-  },
-  {
-    id: "2",
-    moduleTitle: "French Grammar",
-    text: "Dans un petit village français...",
-    hasAudio: true,
-    imagesCount: 5,
-    createdAt: "2023-02-10T00:00:00.000Z",
-  },
-  {
-    id: "4",
-    moduleTitle: "History of Africa",
-    text: "Long ago, in the heart of Africa...",
-    hasAudio: true,
-    imagesCount: 8,
-    createdAt: "2023-04-20T00:00:00.000Z",
-  },
-];
+interface Conte {
+  id: string;
+  title: string;
+  audioUrl: string;
+  sectionId: string;
+  pages: {
+    id: string;
+    imageUrl: string;
+    caption: string;
+    duration: number;
+    order: number;
+  }[];
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export function ConteTable() {
-  const { toast } = useToast();
+  const [contes, setContes] = useState<Conte[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  // Filter contes based on search term
-  const filteredContes = mockContes.filter(
-    (conte) =>
-      conte.moduleTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      conte.text.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    fetchContes();
+  }, []);
 
-  const handleDeleteConte = async (conteId: string) => {
+  const fetchContes = async () => {
     try {
-      // In a real app, this would call a server action to delete the conte
-      await deleteConte(conteId);
-      toast({
-        title: "Conte deleted",
-        description: "The conte has been successfully deleted.",
-      });
+      const response = await fetch("/api/stories");
+      if (!response.ok) throw new Error("Failed to fetch contes");
+      const data = await response.json();
+      setContes(data);
     } catch (error) {
-      console.error("Failed to delete conte:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete conte. Please try again.",
-        variant: "destructive",
-      });
+      console.error("Error fetching contes:", error);
+      toast.error("Erreur lors du chargement des contes");
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleDeleteConte = async (id: string) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer ce conte ?")) return;
+
+    try {
+      const response = await fetch(`/api/stories/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete conte");
+
+      setContes(contes.filter((conte) => conte.id !== id));
+      toast.success("Conte supprimé avec succès");
+    } catch (error) {
+      console.error("Error deleting conte:", error);
+      toast.error("Erreur lors de la suppression");
+    }
+  };
+
+  const filteredContes = contes.filter((conte) =>
+    conte.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
+    return <div>Chargement...</div>;
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search contes..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+      <div className="flex items-center space-x-2">
+        <Search className="h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Rechercher des contes..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-sm"
+        />
       </div>
 
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Module</TableHead>
-              <TableHead>Text Preview</TableHead>
-              <TableHead>Audio</TableHead>
-              <TableHead>Images</TableHead>
-              <TableHead>Created</TableHead>
+              <TableHead>Titre</TableHead>
+              <TableHead>Nombre de pages</TableHead>
+              <TableHead>Section ID</TableHead>
+              <TableHead>Créé le</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredContes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  No contes found.
+                <TableCell
+                  colSpan={5}
+                  className="text-center text-muted-foreground"
+                >
+                  Aucun conte trouvé.
                 </TableCell>
               </TableRow>
             ) : (
               filteredContes.map((conte) => (
                 <TableRow key={conte.id}>
-                  <TableCell className="font-medium">
-                    {conte.moduleTitle}
-                  </TableCell>
-                  <TableCell className="max-w-[200px] truncate">
-                    {conte.text}
-                  </TableCell>
+                  <TableCell className="font-medium">{conte.title}</TableCell>
+                  <TableCell>{conte.pages.length}</TableCell>
+                  <TableCell>{conte.sectionId}</TableCell>
                   <TableCell>
-                    {conte.hasAudio ? (
-                      <Music className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <span className="text-muted-foreground">None</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <ImageIcon className="h-5 w-5 text-green-500" />
-                      <span>{conte.imagesCount}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(conte.createdAt).toLocaleDateString()}
+                    {new Date(conte.createdAt).toLocaleDateString("fr-FR")}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
@@ -157,9 +141,15 @@ export function ConteTable() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem asChild>
+                          <Link href={`/stories/${conte.id}`}>
+                            <Play className="mr-2 h-4 w-4" />
+                            Voir le conte
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
                           <Link href={`/dashboard/contes/${conte.id}`}>
                             <Edit className="mr-2 h-4 w-4" />
-                            Edit
+                            Modifier
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -168,7 +158,7 @@ export function ConteTable() {
                           onClick={() => handleDeleteConte(conte.id)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
+                          Supprimer
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
