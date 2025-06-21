@@ -1,6 +1,6 @@
 import { FlatCompat } from '@eslint/eslintrc';
 
-// Ce compat permet de faire le pont avec l’ancienne syntaxe `.eslintrc`
+// Ce compat permet de faire le pont avec l'ancienne syntaxe `.eslintrc`
 const compat = new FlatCompat({
     baseDirectory: import.meta.dirname,
 });
