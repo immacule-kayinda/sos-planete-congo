@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Save, Plus, X } from "lucide-react";
 import Link from "next/link";
-import { fetchNewsBySlug, updateNewsArticle } from "@/lib/news-api";
+import {
+  fetchNewsBySlug,
+  updateNewsArticle,
+  NewsArticle,
+} from "@/lib/news-api";
 
 const CATEGORIES = [
   "Éducation",
@@ -38,7 +42,7 @@ export default function EditNewsPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [article, setArticle] = useState<any>(null);
+  const [article, setArticle] = useState<NewsArticle | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     excerpt: "",
@@ -51,11 +55,7 @@ export default function EditNewsPage() {
   });
   const [newTag, setNewTag] = useState("");
 
-  useEffect(() => {
-    loadArticle();
-  }, [slug]);
-
-  const loadArticle = async () => {
+  const loadArticle = useCallback(async () => {
     try {
       setLoading(true);
       const articleData = await fetchNewsBySlug(slug);
@@ -82,7 +82,11 @@ export default function EditNewsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug, router]);
+
+  useEffect(() => {
+    loadArticle();
+  }, [loadArticle]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({
