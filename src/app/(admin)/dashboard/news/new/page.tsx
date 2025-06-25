@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Save, Eye, Plus, X } from "lucide-react";
+import { ArrowLeft, Save, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { createNewsArticle } from "@/lib/news-api";
 
