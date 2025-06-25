@@ -324,6 +324,21 @@ model Newsletter {
   active    Boolean  @default(true)
 }
 
+model News {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  title     String
+  excerpt   String
+  content   String   @db.Text
+  image     String
+  author    String
+  category  String
+  tags      String[] @default([])
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 enum Role {
   ADMIN
   TEACHER

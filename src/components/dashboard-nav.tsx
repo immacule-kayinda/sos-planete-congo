@@ -12,6 +12,7 @@ import {
   Users,
   Layers,
   Building,
+  Newspaper,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -36,6 +37,11 @@ const navItems = [
     title: "Utilisateurs",
     href: "/dashboard/users",
     icon: Users,
+  },
+  {
+    title: "Actualités",
+    href: "/dashboard/news",
+    icon: Newspaper,
   },
   {
     title: "Sections",
