@@ -16,9 +16,9 @@ import {
 import { useState, useEffect } from "react";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export default function NewsArticlePage({ params }: PageProps) {
@@ -28,13 +28,15 @@ export default function NewsArticlePage({ params }: PageProps) {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    const loadArticle = async () => {
+    const loadData = async () => {
       try {
+        const resolvedParams = await params;
+
         setLoading(true);
         setError(false);
 
         // Charger l'article principal
-        const articleData = await fetchNewsArticle(params.slug);
+        const articleData = await fetchNewsArticle(resolvedParams.slug);
 
         if (!articleData) {
           setError(true);
@@ -44,7 +46,7 @@ export default function NewsArticlePage({ params }: PageProps) {
         setArticle(articleData);
 
         // Charger les articles connexes
-        const relatedData = await fetchRelatedNews(params.slug, 2);
+        const relatedData = await fetchRelatedNews(resolvedParams.slug, 2);
         setRelatedArticles(relatedData);
       } catch (error) {
         console.error("Erreur lors du chargement de l'article:", error);
@@ -54,8 +56,8 @@ export default function NewsArticlePage({ params }: PageProps) {
       }
     };
 
-    loadArticle();
-  }, [params.slug]);
+    loadData();
+  }, [params]);
 
   // Formatage de la date
   const formatDate = (dateString: string) => {
@@ -167,7 +169,7 @@ export default function NewsArticlePage({ params }: PageProps) {
               <ScrollReveal>
                 <div className="relative h-96 mb-12 rounded-2xl overflow-hidden">
                   <Image
-                    src={article.image}
+                    src={article.image || "/placeholder.jpg"}
                     alt={article.title}
                     fill
                     className="object-cover"
@@ -232,7 +234,7 @@ export default function NewsArticlePage({ params }: PageProps) {
                         <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                           <div className="relative h-48">
                             <Image
-                              src={relatedArticle.image}
+                              src={relatedArticle.image || "/placeholder.jpg"}
                               alt={relatedArticle.title}
                               fill
                               className="object-cover group-hover:scale-105 transition-transform duration-300"

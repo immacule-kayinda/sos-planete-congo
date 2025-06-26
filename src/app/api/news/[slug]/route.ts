@@ -2,15 +2,15 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 // GET /api/news/[slug] - Récupérer un article par son slug
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const news = await prisma.news.findUnique({
       where: {
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PUT /api/news/[slug] - Mettre à jour un article (admin seulement)
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
     const body = await request.json();
     const {
       title,
@@ -90,7 +90,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/news/[slug] - Supprimer un article (admin seulement)
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const existingNews = await prisma.news.findUnique({
       where: { slug },

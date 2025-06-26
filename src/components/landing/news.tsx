@@ -98,7 +98,7 @@ export default function News() {
                     <div className="flex flex-col md:flex-row">
                       <div className="relative md:w-1/2 h-64 md:h-auto">
                         <Image
-                          src={item.image}
+                          src={item.image || "/placeholder.jpg"}
                           alt={item.title}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-500"

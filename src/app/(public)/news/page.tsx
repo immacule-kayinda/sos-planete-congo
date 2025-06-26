@@ -156,7 +156,7 @@ export default function NewsPage() {
                       <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                         <div className="relative h-48">
                           <Image
-                            src={item.image}
+                            src={item.image || "/placeholder.jpg"}
                             alt={item.title}
                             fill
                             className="object-cover group-hover:scale-105 transition-transform duration-500"
