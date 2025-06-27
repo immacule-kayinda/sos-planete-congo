@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile } from "fs/promises";
 import { join } from "path";
+import { auth } from "../../../../auth";
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const data = await request.formData();
     const file: File | null = data.get("file") as unknown as File;
 
@@ -11,19 +17,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file received" }, { status: 400 });
     }
 
+    const maxFileSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxFileSize) {
+      return NextResponse.json(
+        { error: "File size exceeds 10MB" },
+        { status: 400 }
+      );
+    }
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Créer un nom de fichier unique
-    const timestamp = Date.now();
-    const fileName = `${timestamp}-${file.name}`;
+    const crypto = await import("crypto");
+    const fileName = `${crypto.randomUUID()}-${file.name}`;
     const path = join(process.cwd(), "public/uploads", fileName);
-
-    // Écrire le fichier
-    await writeFile(path, buffer);
-
-    // Retourner l'URL du fichier
     const fileUrl = `/uploads/${fileName}`;
+
+    await writeFile(path, buffer);
 
     return NextResponse.json({ url: fileUrl });
   } catch (error) {

@@ -311,10 +311,32 @@ model StudentInventory {
 model StudentBalance {
   id        String   @id @default(uuid())
   studentId String   @unique
-  stars     Int      @default(0)
-  coins     Int      @default(0)
+  balance   Int      @default(0)
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   student   Student  @relation(fields: [studentId], references: [id])
+}
+
+model Newsletter {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  active    Boolean  @default(true)
+}
+
+model News {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  title     String
+  excerpt   String
+  content   String   @db.Text
+  image     String
+  author    String
+  category  String
+  tags      String[] @default([])
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {

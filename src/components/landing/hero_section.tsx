@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 export default function HeroSection() {
@@ -25,16 +25,18 @@ export default function HeroSection() {
                   les élèves et enseignants.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90">
+                  <Link
+                    href="/signup"
+                    className="inline-flex items-center justify-center px-6 border font-montserrat font-bold border-primary-stroke border-b-4 py-3 text-base text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
+                  >
                     S'inscrire
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-primary text-primary hover:bg-primary/10"
+                  </Link>
+                  <Link
+                    href="/signin"
+                    className="inline-flex items-center font-montserrat font-bold justify-center px-6 py-3 text-base text-primary border border-primary duration-300 border-b-4 rounded-lg hover:bg-primary/10 transition-colors"
                   >
                     J'ai déjà un compte
-                  </Button>
+                  </Link>
                 </div>
               </div>
             </ScrollReveal>
