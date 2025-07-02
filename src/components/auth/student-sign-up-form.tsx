@@ -101,9 +101,16 @@ export default function StudentSignUpForm() {
             name="age"
             render={({ field }) => (
               <FormItem>
+                <label
+                  htmlFor="signup-age"
+                  className="text-base text-gray-700 font-semibold mb-1"
+                >
+                  Âge
+                </label>
                 <FormControl>
                   <Input
                     {...field}
+                    id="signup-age"
                     ref={inputRef}
                     type="number"
                     max={500}
@@ -122,9 +129,16 @@ export default function StudentSignUpForm() {
             name="name"
             render={({ field }) => (
               <FormItem>
+                <label
+                  htmlFor="signup-name"
+                  className="text-base text-gray-700 font-semibold mb-1"
+                >
+                  Nom complet
+                </label>
                 <FormControl>
                   <Input
                     {...field}
+                    id="signup-name"
                     type="text"
                     placeholder="Nom complet"
                     className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
@@ -139,9 +153,16 @@ export default function StudentSignUpForm() {
             name="classCode"
             render={({ field }) => (
               <FormItem>
+                <label
+                  htmlFor="signup-classCode"
+                  className="text-base text-gray-700 font-semibold mb-1"
+                >
+                  Code de classe (optionnel)
+                </label>
                 <FormControl>
                   <Input
                     {...field}
+                    id="signup-classCode"
                     type="text"
                     placeholder="Code de classe (optionnel)"
                     className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
@@ -161,9 +182,16 @@ export default function StudentSignUpForm() {
             name="email"
             render={({ field }) => (
               <FormItem>
+                <label
+                  htmlFor="signup-email"
+                  className="text-base text-gray-700 font-semibold mb-1"
+                >
+                  Email
+                </label>
                 <FormControl>
                   <Input
                     {...field}
+                    id="signup-email"
                     type="email"
                     placeholder="Email"
                     className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
@@ -178,10 +206,17 @@ export default function StudentSignUpForm() {
             name="password"
             render={({ field }) => (
               <FormItem>
+                <label
+                  htmlFor="signup-password"
+                  className="text-base text-gray-700 font-semibold mb-1"
+                >
+                  Mot de passe
+                </label>
                 <FormControl>
                   <div className="relative">
                     <Input
                       {...field}
+                      id="signup-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Mot de passe"
                       className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg pr-12"
