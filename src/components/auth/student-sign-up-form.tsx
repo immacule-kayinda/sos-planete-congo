@@ -98,34 +98,6 @@ export default function StudentSignUpForm() {
         >
           <FormField
             control={form.control}
-            name="age"
-            render={({ field }) => (
-              <FormItem>
-                <label
-                  htmlFor="signup-age"
-                  className="text-base text-gray-700 font-semibold mb-1"
-                >
-                  Âge
-                </label>
-                <FormControl>
-                  <Input
-                    {...field}
-                    id="signup-age"
-                    ref={inputRef}
-                    type="number"
-                    max={500}
-                    min={0}
-                    placeholder="Age"
-                    className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
@@ -139,9 +111,52 @@ export default function StudentSignUpForm() {
                   <Input
                     {...field}
                     id="signup-name"
+                    ref={inputRef}
                     type="text"
                     placeholder="Nom complet"
                     className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="age"
+            render={({ field }) => (
+              <FormItem>
+                <label
+                  htmlFor="signup-birthdate"
+                  className="text-base text-gray-700 font-semibold mb-1"
+                >
+                  Date de naissance
+                </label>
+                <FormControl>
+                  <Input
+                    {...field}
+                    id="signup-birthdate"
+                    type="date"
+                    placeholder="Date de naissance"
+                    className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
+                    onChange={(e) => {
+                      // Calculer l'âge à partir de la date de naissance
+                      if (e.target.value) {
+                        const birthDate = new Date(e.target.value);
+                        const today = new Date();
+                        let age = today.getFullYear() - birthDate.getFullYear();
+                        const monthDiff =
+                          today.getMonth() - birthDate.getMonth();
+                        if (
+                          monthDiff < 0 ||
+                          (monthDiff === 0 &&
+                            today.getDate() < birthDate.getDate())
+                        ) {
+                          age--;
+                        }
+                        field.onChange(age);
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -248,8 +263,18 @@ export default function StudentSignUpForm() {
         </form>
       </Form>
       <p className="text-sm text-muted-foreground">
-        En vous inscrivant, vous acceptez nos conditions d&apos;utilisation et
-        notre politique de confidentialité.
+        En vous inscrivant, vous acceptez nos{" "}
+        <a href="/terms" className="text-primary underline">
+          conditions d&apos;utilisation
+        </a>{" "}
+        et notre{" "}
+        <a href="/privacy" className="text-primary underline">
+          politique de confidentialité
+        </a>
+        .
+      </p>
+      <p className="text-sm text-muted-foreground mt-2">
+        📧 Vous recevrez un email de confirmation après votre inscription.
       </p>
     </>
   );
