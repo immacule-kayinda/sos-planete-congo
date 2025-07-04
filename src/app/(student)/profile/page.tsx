@@ -1,65 +1,233 @@
-import React from "react";
+import { auth } from "../../../../auth";
+import { redirect } from "next/navigation";
+import { getStudentProfile } from "@/lib/actions";
+import { getStudentStreakInfo } from "@/lib/student-progress";
+import { ProfileEditForm } from "@/components/student/profile-edit-form";
+import { StreakDisplay } from "@/components/student/streak-display";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  User,
+  Mail,
+  Calendar,
+  School,
+  Trophy,
+  Star,
+  Target,
+  CheckCircle,
+  BookOpen,
+} from "lucide-react";
 
-export default function Profile() {
+export default async function ProfilePage() {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/signin");
+  }
+
+  if (session.user.role !== "STUDENT") {
+    redirect("/dashboard");
+  }
+
+  const [profile, streakInfo] = await Promise.all([
+    getStudentProfile(session.user.id),
+    getStudentStreakInfo(session.user.id),
+  ]);
+
+  if (!profile) {
+    redirect("/signin");
+  }
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "ACTIVE":
+        return <Badge className="bg-green-500">Actif</Badge>;
+      case "LIMITED_ACCESS":
+        return <Badge className="bg-yellow-500">Accès Limité</Badge>;
+      case "PENDING_ACTIVATION":
+        return <Badge className="bg-orange-500">En Attente</Badge>;
+      default:
+        return <Badge variant="secondary">Inconnu</Badge>;
+    }
+  };
+
   return (
-    <div className="bg-white md:p-8 pb-10">
-      {/* Avatar et en-tête */}
-      <div className="flex flex-col mb-8">
-        <div className="bg-gray-300 relative h-64 w-full mb-20 rounded-b-2xl">
-          <div className="w-32 h-32 rounded-full bg-gray-500 absolute -bottom-12 left-10" />
-        </div>
-        <div className="">
-          <span className="text-3xl font-black">Carolle Kasongo</span>
-          <span className="text-lg text-gray-500 ml-2">@Carokas19</span>
-        </div>
-        <div className="text-lg text-gray-800 mt-2">
-          Membre depuis Mars 2025
-        </div>
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Mon Profil</h1>
+        <p className="text-muted-foreground">
+          Gérez vos informations personnelles et suivez vos progrès
+        </p>
       </div>
-      <hr className="my-8" />
-      {/* Statistiques */}
-      <div>
-        <h2 className="text-2xl font-bold mb-6">Statistiques</h2>
-        <div className="grid grid-cols-2 gap-5">
-          <div className="flex items-center gap-4 flex-1 min-w-[200px] bg-gray-50 border-2 border-gray-200 rounded-xl p-5">
-            <span className="text-3xl">🔥</span>
-            <div>
-              <div className="text-xl font-bold">5</div>
-              <div className="text-gray-500 text-sm">Jours d&apos;affilé</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 flex-1 min-w-[200px] bg-gray-50 border-2 border-gray-200 rounded-xl p-5">
-            <span className="text-3xl text-yellow-400">⭐</span>
-            <div>
-              <div className="text-xl font-bold">16998</div>
-              <div className="text-gray-500 text-sm">Étoiles gagnées</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 flex-1 min-w-[200px] bg-gray-50 border-2 border-gray-200 rounded-xl p-5">
-            <span className="text-3xl text-yellow-800">🥉</span>
-            <div>
-              <div className="text-base font-bold">Bronze</div>
-              <div className="text-gray-500 text-sm">Division Actuelle</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 flex-1 min-w-[200px] bg-gray-50 border-2 border-gray-200 rounded-xl p-5">
-            <span className="text-3xl text-yellow-400">⭐</span>
-            <div>
-              <div className="text-base font-bold">4j 4h 50min</div>
-              <div className="text-gray-500 text-sm">
-                Temps d&apos;apprentissage
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Informations personnelles */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Informations Personnelles
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Prénom
+                  </label>
+                  <p className="text-lg">
+                    {profile.firstName || "Non renseigné"}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Nom
+                  </label>
+                  <p className="text-lg">
+                    {profile.lastName || "Non renseigné"}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Email
+                  </label>
+                  <p className="text-lg flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    {profile.email}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Âge
+                  </label>
+                  <p className="text-lg flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    {profile.age} ans
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Statut du compte
+                  </label>
+                  <div className="mt-1">
+                    {getStatusBadge(profile.accountStatus)}
+                  </div>
+                </div>
+                {profile.classroom && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Classe
+                    </label>
+                    <p className="text-lg flex items-center gap-2">
+                      <School className="h-4 w-4" />
+                      {profile.classroom}
+                    </p>
+                  </div>
+                )}
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
+
+          {/* Formulaire d'édition */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Modifier mes informations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProfileEditForm
+                firstName={profile.firstName}
+                lastName={profile.lastName}
+                age={profile.age}
+                onUpdate={() => window.location.reload()}
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar avec statistiques et streak */}
+        <div className="space-y-6">
+          {/* Série quotidienne */}
+          <StreakDisplay
+            currentStreak={streakInfo.currentStreak}
+            lastActive={streakInfo.lastActive}
+          />
+
+          {/* Statistiques */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-5 w-5" />
+                Mes Statistiques
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                  <Star className="h-6 w-6 text-yellow-500 mx-auto mb-1" />
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {profile.totalStars}
+                  </div>
+                  <div className="text-xs text-yellow-600">Étoiles</div>
+                </div>
+                <div className="text-center p-3 bg-blue-50 rounded-lg">
+                  <Target className="h-6 w-6 text-blue-500 mx-auto mb-1" />
+                  <div className="text-2xl font-bold text-blue-600">
+                    {Math.round(profile.progressPercentage)}%
+                  </div>
+                  <div className="text-xs text-blue-600">Progression</div>
+                </div>
+                <div className="text-center p-3 bg-green-50 rounded-lg">
+                  <CheckCircle className="h-6 w-6 text-green-500 mx-auto mb-1" />
+                  <div className="text-2xl font-bold text-green-600">
+                    {profile.avgAccuracy}%
+                  </div>
+                  <div className="text-xs text-green-600">Précision</div>
+                </div>
+                <div className="text-center p-3 bg-purple-50 rounded-lg">
+                  <BookOpen className="h-6 w-6 text-purple-500 mx-auto mb-1" />
+                  <div className="text-2xl font-bold text-purple-600">
+                    {profile.completedChapters}
+                  </div>
+                  <div className="text-xs text-purple-600">Chapitres</div>
+                </div>
+              </div>
+
+              {/* Progression générale */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Progression générale</span>
+                  <span>{Math.round(profile.progressPercentage)}%</span>
+                </div>
+                <Progress value={profile.progressPercentage} className="h-2" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Informations sur les récompenses de streak */}
+          {streakInfo.totalRewardsEarned > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Trophy className="h-4 w-4 text-yellow-500" />
+                  Récompenses de Série
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-600 mb-1">
+                    {streakInfo.totalRewardsEarned}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Étoiles gagnées grâce aux séries
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
-      <p className="text-muted-foreground">
-        Gérez vos informations personnelles et vos préférences
-        d&apos;apprentissage.
-      </p>
-      <p className="text-muted-foreground">
-        Suivez votre progression et vos réalisations d&apos;apprentissage.
-      </p>
     </div>
   );
 }

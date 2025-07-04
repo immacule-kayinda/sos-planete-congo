@@ -80,8 +80,9 @@ export default function Footer() {
           </p>
         </div>
       </section>
-      <div className="container mx-auto py-5">
-        SOS PLANETE CONGO. Tout droits reservés
+      <div className="container mx-auto py-5 text-center">
+        SOS PLANETE CONGO, CRÉÉ PAR L'ASBL TEXAF BILEMBO. Tous droits réservés
+        2025.
       </div>
     </footer>
   );
@@ -95,40 +96,27 @@ const footerSections: {
   }[];
 }[] = [
   {
-    name: "A propos de nous",
+    name: "À propos de nous",
     links: [
-      { label: "Qui sommes-nous ?", href: "/about/qui-sommes-nous" },
-      { label: "Notre mission", href: "/about/notre-mission" },
-      { label: "Contactez-nous", href: "/contact" },
-      { label: "Partenaires", href: "/about/partenaires" },
-      { label: "Histoire", href: "/about/histoire" },
-      { label: "Jeux", href: "/about/jeux" },
+      { label: "Le projet", href: "/about" },
+      { label: "Nos livres", href: "/books" },
+      { label: "Contactez-nous", href: "/help" },
     ],
   },
   {
-    name: "Aide et support",
+    name: "Légal",
     links: [
-      { label: "FAQ", href: "/faq" },
-      { label: "Centre d'aide", href: "/help" },
-    ],
-  },
-  {
-    name: "Conditions d'utilisation et de confidentialité",
-    links: [
-      { label: "Regle de conduite de la communauté", href: "/rules" },
       { label: "Conditions d'utilisation", href: "/terms" },
       { label: "Politique de confidentialité", href: "/privacy" },
     ],
   },
   {
-    name: "Social",
+    name: "Réseaux sociaux",
     links: [
-      { label: "Facebook", href: "/" },
-      { label: "Twitter", href: "/" },
-      { label: "Instagram", href: "/" },
-      { label: "Youtube", href: "/" },
-      { label: "Tiktok", href: "/" },
-      { label: "Blog", href: "/" },
+      { label: "Facebook", href: "https://www.facebook.com" },
+      { label: "Instagram", href: "https://www.instagram.com" },
+      { label: "LinkedIn", href: "https://www.linkedin.com" },
+      { label: "YouTube", href: "https://www.youtube.com" },
     ],
   },
 ];

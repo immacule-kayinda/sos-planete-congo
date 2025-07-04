@@ -69,9 +69,16 @@ export default function SignInForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
+              <label
+                htmlFor="signin-email"
+                className="text-base text-gray-700 font-semibold mb-1"
+              >
+                Email
+              </label>
               <FormControl>
                 <input
                   {...field}
+                  id="signin-email"
                   ref={inputRef}
                   type="email"
                   placeholder="Email"
@@ -88,10 +95,17 @@ export default function SignInForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
+              <label
+                htmlFor="signin-password"
+                className="text-base text-gray-700 font-semibold mb-1"
+              >
+                Mot de passe
+              </label>
               <FormControl>
                 <div className="relative">
                   <input
                     {...field}
+                    id="signin-password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Mot de passe"
                     className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:border-red-600 text-lg pr-12"

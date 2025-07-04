@@ -88,9 +88,16 @@ export default function TeacherSignUpForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
+              <label
+                htmlFor="teacher-name"
+                className="text-base text-gray-700 font-semibold mb-1"
+              >
+                Nom complet
+              </label>
               <FormControl>
                 <Input
                   {...field}
+                  id="teacher-name"
                   ref={inputRef}
                   type="text"
                   placeholder="Nom complet"
@@ -106,9 +113,16 @@ export default function TeacherSignUpForm() {
           name="voterId"
           render={({ field }) => (
             <FormItem>
+              <label
+                htmlFor="teacher-voterId"
+                className="text-base text-gray-700 font-semibold mb-1"
+              >
+                Numéro de carte d'électeur
+              </label>
               <FormControl>
                 <Input
                   {...field}
+                  id="teacher-voterId"
                   type="text"
                   placeholder="Numero de carte d'electeur"
                   className="w-full px-4 py-3 border h-auto border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
@@ -123,9 +137,16 @@ export default function TeacherSignUpForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
+              <label
+                htmlFor="teacher-email"
+                className="text-base text-gray-700 font-semibold mb-1"
+              >
+                Email
+              </label>
               <FormControl>
                 <Input
                   {...field}
+                  id="teacher-email"
                   type="email"
                   placeholder="Email"
                   className="w-full px-4 py-3 border h-auto focus-visible: border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
@@ -141,12 +162,21 @@ export default function TeacherSignUpForm() {
             name="teachingLevel"
             render={({ field }) => (
               <FormItem className="flex-1">
+                <label
+                  htmlFor="teacher-teachingLevel"
+                  className="text-base text-gray-700 font-semibold mb-1"
+                >
+                  Niveau d'enseignement
+                </label>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="text-base h-auto adaptive py-6">
+                    <SelectTrigger
+                      className="text-base h-auto adaptive py-6"
+                      id="teacher-teachingLevel"
+                    >
                       <SelectValue placeholder="Niveau d'enseignement" />
                     </SelectTrigger>
                   </FormControl>
@@ -168,9 +198,16 @@ export default function TeacherSignUpForm() {
             name="schoolName"
             render={({ field }) => (
               <FormItem className="flex-1">
+                <label
+                  htmlFor="teacher-schoolName"
+                  className="text-base text-gray-700 font-semibold mb-1"
+                >
+                  Nom de l'établissement
+                </label>
                 <FormControl>
                   <Input
                     {...field}
+                    id="teacher-schoolName"
                     type="text"
                     placeholder="Nom de l'etablissement"
                     className="flex-1 px-4 py-3 border h-auto border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg w-full"
@@ -186,10 +223,17 @@ export default function TeacherSignUpForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
+              <label
+                htmlFor="teacher-password"
+                className="text-base text-gray-700 font-semibold mb-1"
+              >
+                Mot de passe
+              </label>
               <FormControl>
                 <div className="relative">
                   <Input
                     {...field}
+                    id="teacher-password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Mot de passe"
                     className="w-full px-4 py-3 border h-auto border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg pr-12"

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { AiOutlineArrowLeft } from "react-icons/ai";
-import Image from "next/image";
 import SignInForm from "@/components/auth/sign-in-form";
 
 export default function Signin() {
@@ -25,41 +24,16 @@ export default function Signin() {
         </h1>
         {/* Form */}
         <SignInForm />
-        {/* Separator */}
-        <div className="flex items-center w-full my-6">
-          <div className="flex-1 h-px bg-gray-300" />
-          <span className="mx-4 text-gray-500 font-semibold">ou</span>
-          <div className="flex-1 h-px bg-gray-300" />
-        </div>
-        {/* Social buttons */}
-        <div className="flex w-full gap-4 mb-6 font-montserrat">
+        {/* Forgot password link */}
+        <div className="w-full text-right mb-4">
           <Link
-            href="/oauth/facebook"
-            className="flex-1 flex items-center justify-center gap-2 border text-[#1877F2] border-gray-300 rounded-lg py-3 text-lg font-semibold hover:bg-[#1877F2]/5 transition"
+            href="/forgot-password"
+            className="text-green-600 hover:underline text-sm"
           >
-            <Image
-              src="/facebook.svg"
-              alt="facebook"
-              width={20}
-              height={20}
-              className="text-blue-600"
-            />{" "}
-            Facebook
-          </Link>
-          <Link
-            href="/oauth/google"
-            className="flex-1 flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-3 text-lg font-semibold hover:bg-[#587DBD]/5 transition text-[#587DBD]"
-          >
-            <Image
-              src="/google.svg"
-              alt="google"
-              width={20}
-              height={20}
-              className="text-red-600"
-            />
-            Google
+            Mot de passe oublié ?
           </Link>
         </div>
+
         {/* Signup link */}
         <div className="text-center mt-2">
           <span className="text-lg">Tu n'as pas encore de compte ? </span>

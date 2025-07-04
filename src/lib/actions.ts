@@ -127,3 +127,72 @@ export async function deleteConte(conteId: string) {
   console.log("Deleting conte:", conteId);
   return { success: true };
 }
+
+// Student profile actions
+export async function getStudentProfile(userId: string) {
+  const { default: prisma } = await import("./prisma");
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      student: {
+        include: {
+          Classroom: true,
+          performance: {
+            include: {
+              chapter: true,
+            },
+          },
+          StudentChapterProgress: {
+            include: {
+              chapter: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!user || !user.student) {
+    return null;
+  }
+
+  const student = user.student;
+  const performances = student.performance || [];
+  const progressRecords = student.StudentChapterProgress || [];
+
+  // Calculate statistics
+  const totalStars = performances.reduce(
+    (sum: number, p: any) => sum + (p.stars || 0),
+    0
+  );
+  const completedChapters = progressRecords.filter(
+    (p: any) => p.completed
+  ).length;
+  const totalChapters = progressRecords.length;
+  const progressPercentage =
+    totalChapters > 0 ? (completedChapters / totalChapters) * 100 : 0;
+  const avgAccuracy =
+    performances.length > 0
+      ? Math.round(
+          performances.reduce(
+            (sum: number, p: any) => sum + (p.accuracy || 0),
+            0
+          ) / performances.length
+        )
+      : 0;
+
+  return {
+    id: user.id,
+    email: user.email,
+    firstName: student.firstName,
+    lastName: student.lastName,
+    age: student.age,
+    accountStatus: student.accountStatus,
+    classroom: student.Classroom?.name || null,
+    totalStars,
+    completedChapters,
+    progressPercentage,
+    avgAccuracy,
+  };
+}

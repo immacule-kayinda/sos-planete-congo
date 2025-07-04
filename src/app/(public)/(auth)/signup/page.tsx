@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { AiOutlineArrowLeft } from "react-icons/ai";
-import TeacherSignUpForm from "@/components/auth/teacher-sign-up-form";
 import StudentSignUpForm from "@/components/auth/student-sign-up-form";
+import TeacherSignUpForm from "@/components/auth/teacher-sign-up-form";
+import Link from "next/link";
+import { useState } from "react";
+import { AiOutlineArrowLeft } from "react-icons/ai";
 
 export default function Signup() {
   const [role, setRole] = useState<"apprenant" | "enseignant">("apprenant");
@@ -61,41 +60,6 @@ export default function Signup() {
           {/* Forms */}
           {role === "apprenant" ? <StudentSignUpForm /> : <TeacherSignUpForm />}
 
-          {/* Separator */}
-          <div className="flex items-center w-full my-6">
-            <div className="flex-1 h-px bg-gray-300" />
-            <span className="mx-4 text-gray-500 font-semibold">ou</span>
-            <div className="flex-1 h-px bg-gray-300" />
-          </div>
-          {/* Social buttons */}
-          <div className="flex w-full gap-4 mb-6 font-montserrat">
-            <Link
-              href="/oauth/facebook"
-              className="flex-1 flex items-center justify-center gap-2 border text-base text-[#1877F2] border-gray-300 rounded-lg py-3 font-semibold hover:bg-[#1877F2]/5 transition"
-            >
-              <Image
-                src="/facebook.svg"
-                alt="facebook"
-                width={20}
-                height={20}
-                className="text-blue-600"
-              />
-              Facebook
-            </Link>
-            <Link
-              href="/oauth/google"
-              className="flex-1 flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-3 text-base font-semibold hover:bg-[#587DBD]/5 transition text-[#587DBD]"
-            >
-              <Image
-                src="/google.svg"
-                alt="google"
-                width={20}
-                height={20}
-                className="text-red-600"
-              />
-              Google
-            </Link>
-          </div>
           {/* Signin link */}
           <div className="text-center mt-2 text-base">
             <span className="">Tu as déjà un compte ? </span>
