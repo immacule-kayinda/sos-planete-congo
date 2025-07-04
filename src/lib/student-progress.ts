@@ -120,7 +120,7 @@ export async function updateStudentProgress(
 }
 
 /**
- * Mettre à jour le streak d'un étudiant
+ * Mettre à jour le streak d'un étudiant avec système de récompenses
  */
 export async function updateStudentStreak(studentId: string) {
   const today = new Date();
@@ -131,12 +131,16 @@ export async function updateStudentStreak(studentId: string) {
       where: { studentId },
     });
 
+    let newStreak = 0;
+    let bonusStars = 0;
+
     if (!streak) {
       // Créer un nouveau streak
+      newStreak = 1;
       await prisma.studentStreak.create({
         data: {
           studentId,
-          currentStreak: 1,
+          currentStreak: newStreak,
           lastActive: new Date(),
         },
       });
@@ -153,27 +157,163 @@ export async function updateStudentStreak(studentId: string) {
         return streak;
       } else if (daysDiff === 1) {
         // Jour consécutif, incrémenter le streak
+        newStreak = streak.currentStreak + 1;
         await prisma.studentStreak.update({
           where: { studentId },
           data: {
-            currentStreak: streak.currentStreak + 1,
+            currentStreak: newStreak,
             lastActive: new Date(),
           },
         });
       } else {
         // Trop de jours manqués, recommencer le streak
+        newStreak = 1;
         await prisma.studentStreak.update({
           where: { studentId },
           data: {
-            currentStreak: 1,
+            currentStreak: newStreak,
             lastActive: new Date(),
           },
         });
       }
     }
+
+    // Système de récompenses basé sur les paliers de streak
+    if (newStreak === 7) {
+      bonusStars = 2; // Première semaine
+    } else if (newStreak === 30) {
+      bonusStars = 5; // Premier mois
+    } else if (newStreak === 100) {
+      bonusStars = 10; // 100 jours
+    } else if (newStreak % 50 === 0 && newStreak > 100) {
+      bonusStars = 15; // Chaque 50 jours après 100
+    } else if (newStreak % 10 === 0 && newStreak >= 10) {
+      bonusStars = 1; // Chaque 10 jours
+    }
+
+    // Ajouter les étoiles bonus si applicable
+    if (bonusStars > 0) {
+      await updateStudentBalance(studentId, bonusStars);
+    }
+
+    return {
+      currentStreak: newStreak,
+      bonusStars,
+      isNewMilestone: bonusStars > 1,
+    };
   } catch (error) {
     console.error("Erreur lors de la mise à jour du streak:", error);
     throw error;
+  }
+}
+
+/**
+ * Mettre à jour le solde d'étoiles d'un étudiant
+ */
+async function updateStudentBalance(studentId: string, stars: number) {
+  try {
+    await prisma.studentBalance.upsert({
+      where: { studentId },
+      update: {
+        balance: {
+          increment: stars,
+        },
+      },
+      create: {
+        studentId,
+        balance: stars,
+      },
+    });
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du solde:", error);
+    throw error;
+  }
+}
+
+/**
+ * Obtenir les informations détaillées du streak d'un étudiant
+ */
+export async function getStudentStreakInfo(studentId: string) {
+  try {
+    const streak = await prisma.studentStreak.findUnique({
+      where: { studentId },
+    });
+
+    if (!streak) {
+      return {
+        currentStreak: 0,
+        lastActive: null,
+        nextMilestone: 7,
+        daysUntilNextMilestone: 7,
+        totalRewardsEarned: 0,
+      };
+    }
+
+    // Calculer le prochain palier
+    let nextMilestone = 7;
+    if (streak.currentStreak >= 100) {
+      nextMilestone = Math.ceil(streak.currentStreak / 50) * 50;
+    } else if (streak.currentStreak >= 30) {
+      nextMilestone = 100;
+    } else if (streak.currentStreak >= 7) {
+      nextMilestone = 30;
+    }
+
+    // Calculer les récompenses totales gagnées
+    let totalRewardsEarned = 0;
+    const current = streak.currentStreak;
+
+    if (current >= 7) totalRewardsEarned += 2;
+    if (current >= 30) totalRewardsEarned += 5;
+    if (current >= 100) totalRewardsEarned += 10;
+
+    // Récompenses pour chaque tranche de 50 après 100
+    if (current > 100) {
+      const fiftyDayBonuses = Math.floor((current - 100) / 50);
+      totalRewardsEarned += fiftyDayBonuses * 15;
+    }
+
+    // Récompenses pour chaque tranche de 10
+    if (current >= 10) {
+      const tenDayBonuses = Math.floor(current / 10);
+      totalRewardsEarned += tenDayBonuses * 1;
+    }
+
+    return {
+      currentStreak: streak.currentStreak,
+      lastActive: streak.lastActive,
+      nextMilestone,
+      daysUntilNextMilestone: nextMilestone - streak.currentStreak,
+      totalRewardsEarned,
+    };
+  } catch (error) {
+    console.error("Erreur lors de la récupération des infos de streak:", error);
+    throw error;
+  }
+}
+
+/**
+ * Vérifier si un étudiant doit être notifié pour maintenir son streak
+ */
+export async function checkStreakReminder(studentId: string) {
+  try {
+    const streak = await prisma.studentStreak.findUnique({
+      where: { studentId },
+    });
+
+    if (!streak) return false;
+
+    const lastActiveDate = new Date(streak.lastActive);
+    const today = new Date();
+    const hoursDiff =
+      Math.abs(today.getTime() - lastActiveDate.getTime()) / (1000 * 60 * 60);
+
+    // Envoyer un rappel si l'utilisateur n'a pas été actif depuis 20 heures
+    // et que son streak est > 0
+    return hoursDiff >= 20 && streak.currentStreak > 0;
+  } catch (error) {
+    console.error("Erreur lors de la vérification du rappel:", error);
+    return false;
   }
 }
 
