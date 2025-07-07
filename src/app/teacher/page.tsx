@@ -1,4 +1,6 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { auth } from "../../../auth";
+import { redirect } from "next/navigation";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,8 +18,103 @@ import {
   Users,
 } from "lucide-react";
 import type React from "react";
+import prisma from "@/lib/prisma";
 
-export default function TeacherDashboard() {
+async function getTeacherData(userId: string) {
+  const teacher = await prisma.teacher.findUnique({
+    where: { userId },
+    include: {
+      user: {
+        select: {
+          email: true,
+          isActive: true,
+        },
+      },
+      Classroom: {
+        include: {
+          students: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              accountStatus: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!teacher) {
+    return null;
+  }
+
+  // Calculate statistics
+  const totalClasses = teacher.Classroom.length;
+  const totalStudents = teacher.Classroom.reduce(
+    (sum, classroom) => sum + classroom.students.length,
+    0
+  );
+  const activeStudents = teacher.Classroom.reduce(
+    (sum, classroom) =>
+      sum +
+      classroom.students.filter((s) => s.accountStatus === "ACTIVE").length,
+    0
+  );
+
+  return {
+    id: teacher.id,
+    firstName: teacher.firstName,
+    lastName: teacher.lastName,
+    school: teacher.school,
+    teachingLevel: teacher.teachingLevel,
+    isApproved: teacher.isApproved,
+    email: teacher.user.email,
+    totalClasses,
+    totalStudents,
+    activeStudents,
+    classrooms: teacher.Classroom,
+  };
+}
+
+export default async function TeacherDashboard() {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/signin");
+  }
+
+  if (session.user.role !== "TEACHER") {
+    redirect("/dashboard");
+  }
+
+  const teacherData = await getTeacherData(session.user.id);
+
+  if (!teacherData) {
+    redirect("/signin");
+  }
+
+  if (!teacherData.isApproved) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="max-w-md w-full mx-4">
+          <CardHeader>
+            <CardTitle className="text-center">Compte en attente</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-muted-foreground mb-4">
+              Votre compte professeur est en attente d'approbation par
+              l'administrateur.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Vous recevrez un email une fois votre compte approuvé.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Main Content */}
@@ -33,7 +130,7 @@ export default function TeacherDashboard() {
           <div className="flex items-center gap-2 lg:gap-4">
             <div className="relative w-[200px] lg:w-[320px] hidden sm:block">
               <Input
-                placeholder="Explore courses..."
+                placeholder="Rechercher..."
                 className="pl-10 pr-4 border-gray-300 text-sm"
               />
               <Search
@@ -45,22 +142,21 @@ export default function TeacherDashboard() {
             <Button variant="ghost" size="icon" className="relative">
               <Bell size={20} />
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                3
+                {teacherData.classrooms.length}
               </span>
             </Button>
 
             <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
-                <p className="font-medium text-sm">Mr. Kashala</p>
+                <p className="font-medium text-sm">
+                  {teacherData.firstName} {teacherData.lastName}
+                </p>
                 <p className="text-xs text-gray-500">Professeur</p>
               </div>
               <Avatar className="h-8 w-8 lg:h-9 lg:w-9">
-                <AvatarImage
-                  src="/placeholder.svg?height=36&width=36"
-                  alt="Professeur"
-                />
                 <AvatarFallback className="bg-gray-100 text-gray-600 text-sm">
-                  MK
+                  {teacherData.firstName?.[0]}
+                  {teacherData.lastName?.[0]}
                 </AvatarFallback>
               </Avatar>
             </div>
@@ -72,88 +168,82 @@ export default function TeacherDashboard() {
           {/* Welcome Section */}
           <div className="mb-6 lg:mb-8">
             <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
-              Bienvenu Mr. Kashala
+              Bienvenue {teacherData.firstName} {teacherData.lastName}
             </h2>
             <p className="text-sm lg:text-base text-gray-600">
-              Cette semaine vous avez créé 4 nouvelles formations. Continuez
-              votre excellent travail !
+              Vous gérez actuellement {teacherData.totalClasses} classe
+              {teacherData.totalClasses > 1 ? "s" : ""} avec{" "}
+              {teacherData.totalStudents} étudiant
+              {teacherData.totalStudents > 1 ? "s" : ""} au total.
             </p>
           </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
             <StatsCard
-              title="Formations actives"
-              value="8"
-              subtitle="3 nouvelles cette semaine"
-              icon={<BookOpen className="text-blue-600" />}
-            />
-            <StatsCard
-              title="Classes"
-              value="5"
-              subtitle="156 étudiants au total"
+              title="Classes actives"
+              value={teacherData.totalClasses.toString()}
+              subtitle={`${teacherData.activeStudents} étudiants actifs`}
               icon={<Users className="text-green-600" />}
             />
             <StatsCard
-              title="Matériel"
-              value="24"
-              subtitle="12 ajoutés ce mois"
-              icon={<FileText className="text-purple-600" />}
+              title="Total étudiants"
+              value={teacherData.totalStudents.toString()}
+              subtitle={`${teacherData.activeStudents} actifs`}
+              icon={<Users className="text-blue-600" />}
             />
             <StatsCard
-              title="Taux d'engagement"
-              value="78%"
-              subtitle="+5% ce mois"
+              title="École"
+              value={teacherData.school}
+              subtitle={teacherData.teachingLevel}
+              icon={<BookOpen className="text-purple-600" />}
+            />
+            <StatsCard
+              title="Statut"
+              value="Approuvé"
+              subtitle="Compte vérifié"
               icon={<TrendingUp className="text-orange-600" />}
             />
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
-            {/* Formations Section */}
+            {/* Classes Section */}
             <div className="xl:col-span-2">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Formations en progression
+                  Mes Classes
                 </h3>
                 <Button className="bg-[#d31929] hover:bg-[#b91525] w-full sm:w-auto">
                   <Plus size={16} className="mr-2" />
-                  Nouvelle formation
+                  Nouvelle classe
                 </Button>
               </div>
 
               <div className="space-y-4">
-                <FormationCard
-                  title="Les jeux"
-                  description="Apprenez le fonctionnement de chaque jeux et les règles de chaque jeux"
-                  students={24}
-                  completion={65}
-                  lastUpdate="Il y a 2 heures"
-                  status="active"
-                />
-                <FormationCard
-                  title="Mathématiques niveau 1"
-                  description="Formation complète sur les bases des mathématiques"
-                  students={32}
-                  completion={78}
-                  lastUpdate="Hier"
-                  status="active"
-                />
-                <FormationCard
-                  title="Sciences naturelles"
-                  description="Découverte de l'environnement et de la nature"
-                  students={18}
-                  completion={45}
-                  lastUpdate="Il y a 3 jours"
-                  status="draft"
-                />
-                <FormationCard
-                  title="Histoire du Congo"
-                  description="Patrimoine et culture de notre pays"
-                  students={28}
-                  completion={92}
-                  lastUpdate="La semaine dernière"
-                  status="completed"
-                />
+                {teacherData.classrooms.length > 0 ? (
+                  teacherData.classrooms.map((classroom) => (
+                    <ClassroomCard
+                      key={classroom.id}
+                      name={classroom.name}
+                      classCode={classroom.classCode}
+                      students={classroom.students.length}
+                      activeStudents={
+                        classroom.students.filter(
+                          (s) => s.accountStatus === "ACTIVE"
+                        ).length
+                      }
+                    />
+                  ))
+                ) : (
+                  <Card>
+                    <CardContent className="p-6 text-center">
+                      <p className="text-muted-foreground">
+                        Vous n'avez pas encore de classes. Créez votre première
+                        classe pour commencer.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </div>
 
@@ -167,7 +257,7 @@ export default function TeacherDashboard() {
                 <CardContent className="space-y-3">
                   <Button variant="outline" className="w-full justify-start">
                     <Plus size={16} className="mr-2" />
-                    Créer une formation
+                    Créer une classe
                   </Button>
                   <Button variant="outline" className="w-full justify-start">
                     <Users size={16} className="mr-2" />
@@ -175,110 +265,30 @@ export default function TeacherDashboard() {
                   </Button>
                   <Button variant="outline" className="w-full justify-start">
                     <FileText size={16} className="mr-2" />
-                    Ajouter du matériel
+                    Voir le matériel
                   </Button>
                 </CardContent>
               </Card>
 
-              {/* Aperçu des progrès */}
+              {/* School Info */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">
-                    Aperçu des progrès
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium">
-                        Formations en progression
-                      </span>
-                      <Badge className="bg-[#059d00] hover:bg-[#059d00]/90 text-white">
-                        4
-                      </Badge>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-[#059d00] h-2 rounded-full"
-                        style={{ width: "65%" }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium">
-                        Formations terminées
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <span className="text-yellow-500">⭐</span>
-                        <span className="font-bold">8</span>
-                      </div>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-yellow-500 h-2 rounded-full"
-                        style={{ width: "100%" }}
-                      ></div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Recent Activity */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Activité récente</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ActivityItem
-                    student="Marie Mukendi"
-                    action="a terminé"
-                    course="Les jeux"
-                    time="Il y a 1h"
-                  />
-                  <ActivityItem
-                    student="Jean Kabila"
-                    action="a commencé"
-                    course="Mathématiques niveau 1"
-                    time="Il y a 2h"
-                  />
-                  <ActivityItem
-                    student="Sarah Tshisekedi"
-                    action="a posé une question dans"
-                    course="Sciences naturelles"
-                    time="Il y a 4h"
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Prochaines sessions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">
-                    Prochaines sessions
-                  </CardTitle>
+                  <CardTitle className="text-base">Informations</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-gray-50 rounded-lg gap-2">
-                    <div>
-                      <p className="font-medium text-sm">Les jeux - Classe A</p>
-                      <p className="text-xs text-gray-500">14h00 - 15h30</p>
-                    </div>
-                    <Badge variant="outline" className="w-fit">
-                      Aujourd'hui
-                    </Badge>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">École</p>
+                    <p className="text-sm">{teacherData.school}</p>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-gray-50 rounded-lg gap-2">
-                    <div>
-                      <p className="font-medium text-sm">
-                        Mathématiques - Classe B
-                      </p>
-                      <p className="text-xs text-gray-500">10h00 - 11h30</p>
-                    </div>
-                    <Badge variant="outline" className="w-fit">
-                      Demain
-                    </Badge>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">
+                      Niveau d'enseignement
+                    </p>
+                    <p className="text-sm">{teacherData.teachingLevel}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Email</p>
+                    <p className="text-sm">{teacherData.email}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -321,65 +331,37 @@ function StatsCard({
   );
 }
 
-function FormationCard({
-  title,
-  description,
+function ClassroomCard({
+  name,
+  classCode,
   students,
-  completion,
-  lastUpdate,
-  status,
+  activeStudents,
 }: {
-  title: string;
-  description: string;
+  name: string;
+  classCode: string;
   students: number;
-  completion: number;
-  lastUpdate: string;
-  status: "active" | "draft" | "completed";
+  activeStudents: number;
 }) {
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "active":
-        return (
-          <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-            Actif
-          </Badge>
-        );
-      case "draft":
-        return (
-          <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100">
-            Brouillon
-          </Badge>
-        );
-      case "completed":
-        return (
-          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">
-            Terminé
-          </Badge>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4 lg:p-6">
         <div className="flex flex-col lg:flex-row lg:items-start justify-between mb-4 gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-              <h4 className="font-semibold text-gray-900">{title}</h4>
-              {getStatusBadge(status)}
+              <h4 className="font-semibold text-gray-900">{name}</h4>
+              <Badge variant="outline">Code: {classCode}</Badge>
             </div>
-            <p className="text-sm text-gray-600 mb-3">{description}</p>
-            <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-xs text-gray-500">
-              <span>{students} étudiants</span>
+            <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-sm text-gray-600">
+              <span>
+                {students} étudiant{students > 1 ? "s" : ""}
+              </span>
               <span className="hidden sm:inline">•</span>
-              <span>{completion}% complété</span>
-              <span className="hidden sm:inline">•</span>
-              <span>{lastUpdate}</span>
+              <span>
+                {activeStudents} actif{activeStudents > 1 ? "s" : ""}
+              </span>
             </div>
           </div>
-          <div className="flex items-center gap-2 lg:flex-col lg:gap-2">
+          <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <Eye size={16} />
             </Button>
@@ -391,45 +373,7 @@ function FormationCard({
             </Button>
           </div>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div
-            className="bg-[#d31929] h-2 rounded-full transition-all"
-            style={{ width: `${completion}%` }}
-          ></div>
-        </div>
       </CardContent>
     </Card>
-  );
-}
-
-function ActivityItem({
-  student,
-  action,
-  course,
-  time,
-}: {
-  student: string;
-  action: string;
-  course: string;
-  time: string;
-}) {
-  return (
-    <div className="flex items-start gap-3">
-      <Avatar className="h-8 w-8 flex-shrink-0">
-        <AvatarFallback className="bg-gray-100 text-gray-600 text-xs">
-          {student
-            .split(" ")
-            .map((n) => n[0])
-            .join("")}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm">
-          <span className="font-medium">{student}</span> {action}{" "}
-          <span className="font-medium">{course}</span>
-        </p>
-        <p className="text-xs text-gray-500">{time}</p>
-      </div>
-    </div>
   );
 }
