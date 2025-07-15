@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import prisma from "@/lib/prisma";
 import {
   Bell,
   Clock,
@@ -16,8 +15,9 @@ import {
   Search,
   Users,
 } from "lucide-react";
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import prisma from "@/lib/prisma";
 import { auth } from "../../../../auth";
 
 export default async function FormationsPage() {
