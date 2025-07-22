@@ -3,29 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
-import { useSession } from "next-auth/react";
+import { useRoleNavigation } from "@/hooks/use-role-navigation";
 
 export default function Header({ className }: { className?: string }) {
-  const { data: session } = useSession();
-  console.log(!!className);
+  const { getUserHomePage, isAuthenticated, userRole } = useRoleNavigation();
 
-  // Déterminer le lien du profil selon le rôle de l'utilisateur
-  const getProfileLink = () => {
-    if (!session) {
-      return "/signin"; // Rediriger vers la connexion si pas connecté
-    }
-
-    switch (session.user.role) {
-      case "STUDENT":
-        return "/learn"; // Dashboard étudiant
-      case "TEACHER":
-        return "/teacher/dashboard"; // Dashboard enseignant
-      case "ADMIN":
-        return "/dashboard"; // Dashboard admin
-      default:
-        return "/signin";
-    }
-  };
+  // Ne pas afficher certains liens si l'utilisateur est connecté et sur son espace de travail
+  const shouldShowSignUpButton = !isAuthenticated || userRole === undefined;
 
   return (
     <header
@@ -45,18 +29,30 @@ export default function Header({ className }: { className?: string }) {
           <Link href="/about" className="hover:underline">
             À propos
           </Link>
-          <Link href={getProfileLink()} className="hover:underline">
-            Mon profil
+          <Link href={getUserHomePage()} className="hover:underline">
+            Mon espace
           </Link>
           <Link href="/help" className="hover:underline">
             Aide
           </Link>
-          <Link
-            href="/signup"
-            className="bg-primary font-montserrat text-white px-5 py-1 rounded-md border border-b-4 border-red-800 font-semibold"
-          >
-            S'inscrire
-          </Link>
+          {shouldShowSignUpButton && (
+            <Link
+              href="/signup"
+              className="bg-primary font-montserrat text-white px-5 py-1 rounded-md border border-b-4 border-red-800 font-semibold"
+            >
+              S'inscrire
+            </Link>
+          )}
+          {isAuthenticated && (
+            <span className="text-sm text-gray-600">
+              Connecté en tant que{" "}
+              {userRole === "STUDENT"
+                ? "Étudiant"
+                : userRole === "TEACHER"
+                  ? "Professeur"
+                  : "Admin"}
+            </span>
+          )}
         </nav>
       </div>
     </header>

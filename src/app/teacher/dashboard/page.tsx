@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
+import { TeacherHeader } from "@/components/teacher/teacher-header";
 
 async function getTeacherDashboardData(userId: string) {
   const teacher = await prisma.teacher.findUnique({
@@ -238,29 +239,15 @@ export default async function TeacherDashboard() {
   return (
     <div className="flex-1 flex flex-col">
       {/* Header */}
-      <header className="h-16 bg-white border-b border-gray-200 flex items-center px-4 lg:px-6 justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="text-xl font-semibold text-gray-900">
-            Tableau de bord
-          </h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="text-right hidden sm:block">
-            <p className="font-medium text-sm">
-              {data.teacher.firstName} {data.teacher.lastName}
-            </p>
-            <p className="text-xs text-gray-500">
-              Professeur • {data.teacher.school}
-            </p>
-          </div>
-          <Avatar className="h-8 w-8 lg:h-9 lg:w-9">
-            <AvatarFallback className="bg-gray-100 text-gray-600 text-sm">
-              {data.teacher.firstName?.[0]}
-              {data.teacher.lastName?.[0]}
-            </AvatarFallback>
-          </Avatar>
-        </div>
-      </header>
+      <TeacherHeader
+        title="Tableau de bord"
+        teacher={{
+          firstName: data.teacher.firstName,
+          lastName: data.teacher.lastName,
+        }}
+        showSearch={false}
+        notificationCount={3}
+      />
 
       {/* Main Content */}
       <main className="flex-1 p-4 lg:p-6 overflow-auto">

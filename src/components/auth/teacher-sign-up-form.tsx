@@ -174,7 +174,7 @@ export default function TeacherSignUpForm() {
                 >
                   <FormControl>
                     <SelectTrigger
-                      className="text-base h-auto adaptive py-6"
+                      className="text-base h-auto adaptive"
                       id="teacher-teachingLevel"
                     >
                       <SelectValue placeholder="Niveau d'enseignement" />
@@ -263,12 +263,19 @@ export default function TeacherSignUpForm() {
           S'inscrire
         </Button>
         <p className="text-sm text-muted-foreground">
-          En vous inscrivant, vous acceptez nos conditions d&apos;utilisation et
-          notre politique de confidentialité.
+          En vous inscrivant, vous acceptez nos{" "}
+          <a href="/terms" className="text-primary underline">
+            conditions d&apos;utilisation
+          </a>{" "}
+          et notre{" "}
+          <a href="/privacy" className="text-primary underline">
+            politique de confidentialité
+          </a>
+          .
         </p>
-        <p className="text-sm text-muted-foreground">
+        {/* <p className="text-sm text-muted-foreground">
           Vous recevrez un email de confirmation à l&apos;adresse fournie.
-        </p>
+        </p> */}
       </form>
     </Form>
   );

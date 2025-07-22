@@ -71,7 +71,7 @@ export default function SignInForm() {
             <FormItem>
               <label
                 htmlFor="signin-email"
-                className="text-base text-gray-700 font-semibold mb-1"
+                className="text text-gray-700 font-semibold mb-1"
               >
                 Email
               </label>
@@ -108,7 +108,7 @@ export default function SignInForm() {
                     id="signin-password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Mot de passe"
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:border-red-600 text-lg pr-12"
+                    className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:border-red-600 text pr-12"
                     disabled={isLoading}
                   />
                   <button

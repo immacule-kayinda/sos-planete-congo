@@ -19,7 +19,7 @@ export default function Signin() {
           </p>
         </Link>
         {/* Title */}
-        <h1 className="text-5xl md:text-6xl font-semibold text-black mb-10 text-center font-nunito">
+        <h1 className="text-5xl md:text-6xl font-semibold text-black mb-8 text-center font-nunito">
           Connexion
         </h1>
         {/* Form */}
