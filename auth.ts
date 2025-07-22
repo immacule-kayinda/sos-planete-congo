@@ -66,7 +66,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     newUser: "/signUp",
     verifyRequest: "/signin",
   },
-  debug: true,
   session: {
     maxAge: 30 * 24 * 60 * 60, // 30 jours
     strategy: "jwt",
