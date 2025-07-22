@@ -82,7 +82,7 @@ export default function SignInForm() {
                   ref={inputRef}
                   type="email"
                   placeholder="Email"
-                  className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
+                  className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:border-red-600 transition-all duration-300"
                   disabled={isLoading}
                 />
               </FormControl>
