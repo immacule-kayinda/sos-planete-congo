@@ -139,24 +139,6 @@ export default function StudentSignUpForm() {
                     type="date"
                     placeholder="Date de naissance"
                     className="w-full px-4 py-3 border border-neutral-400 rounded-lg focus:outline-none focus:border-red-600 text-lg transition-all duration-300"
-                    onChange={(e) => {
-                      // Calculer l'âge à partir de la date de naissance
-                      if (e.target.value) {
-                        const birthDate = new Date(e.target.value);
-                        const today = new Date();
-                        let age = today.getFullYear() - birthDate.getFullYear();
-                        const monthDiff =
-                          today.getMonth() - birthDate.getMonth();
-                        if (
-                          monthDiff < 0 ||
-                          (monthDiff === 0 &&
-                            today.getDate() < birthDate.getDate())
-                        ) {
-                          age--;
-                        }
-                        field.onChange(age);
-                      }
-                    }}
                   />
                 </FormControl>
                 <FormMessage />
