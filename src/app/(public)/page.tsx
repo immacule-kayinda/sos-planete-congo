@@ -11,15 +11,7 @@ import { Button } from "@/components/ui/button";
 import Footer from "@/components/ui/footer";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { useScroll } from "@/hooks/use-scroll";
-import {
-  Book,
-  Globe,
-  School,
-  Users,
-  GraduationCap,
-  Play,
-  Heart,
-} from "lucide-react";
+import { Book, Globe, School, Users, GraduationCap, Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -171,7 +163,7 @@ export default function Home() {
               <div className="max-w-4xl mx-auto">
                 <div className="aspect-video bg-neutral-200 rounded-2xl flex items-center justify-center relative overflow-hidden">
                   {/* Placeholder pour vidéo YouTube/Vimeo */}
-                  <div className="text-center">
+                  {/* <div className="text-center">
                     <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Play className="w-10 h-10 text-primary" />
                     </div>
@@ -181,7 +173,12 @@ export default function Home() {
                     <p className="text-neutral-500">
                       Intégration YouTube/Vimeo - Simon Hardenne
                     </p>
-                  </div>
+                  </div> */}
+                  <iframe
+                    src="http://youtube.com/embed/xkfhbx0_ez4"
+                    allowFullScreen
+                    className="max-w-4xl mx-auto w-full h-full"
+                  />
                 </div>
               </div>
             </ScrollReveal>

@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
 import { verifyMailerConfig, sendTestEmail } from "@/lib/mailer";
-import { auth } from "../../../../auth";
 
 export async function POST(request: Request) {
   try {
     // Vérifier que l'utilisateur est admin
-    const session = await auth();
-    if (!session || session.user?.role !== "ADMIN") {
-      return NextResponse.json(
-        { message: "Accès non autorisé" },
-        { status: 403 }
-      );
-    }
+    // const session = await auth();
+    // if (!session || session.user?.role !== "ADMIN") {
+    //   return NextResponse.json(
+    //     { message: "Accès non autorisé" },
+    //     { status: 403 }
+    //   );
+    // }
 
     const { email, testType } = await request.json();
 
@@ -97,13 +96,13 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     // Vérifier l'authentification admin
-    const session = await auth();
-    if (!session || session.user?.role !== "ADMIN") {
-      return NextResponse.json(
-        { message: "Accès non autorisé" },
-        { status: 403 }
-      );
-    }
+    // const session = await auth();
+    // if (!session || session.user?.role !== "ADMIN") {
+    //   return NextResponse.json(
+    //     { message: "Accès non autorisé" },
+    //     { status: 403 }
+    //   );
+    // }
 
     // Retourner juste le statut de la configuration
     const configCheck = await verifyMailerConfig();
