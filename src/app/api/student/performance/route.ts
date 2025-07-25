@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "../../../../../auth";
 import prisma from "@/lib/prisma";
+import { updateStudentStreak } from "@/lib/student-progress";
 
 // POST - Enregistrer une performance pour un chapitre
 export async function POST(request: Request) {
@@ -103,56 +104,5 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Erreur lors de l'enregistrement de la performance:", error);
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
-  }
-}
-
-// Fonction helper pour mettre à jour le streak
-async function updateStudentStreak(studentId: string) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const streak = await prisma.studentStreak.findUnique({
-    where: { studentId },
-  });
-
-  if (!streak) {
-    // Créer un nouveau streak
-    await prisma.studentStreak.create({
-      data: {
-        studentId,
-        currentStreak: 1,
-        lastActive: new Date(),
-      },
-    });
-  } else {
-    const lastActiveDate = new Date(streak.lastActive);
-    lastActiveDate.setHours(0, 0, 0, 0);
-
-    const daysDiff = Math.floor(
-      (today.getTime() - lastActiveDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-
-    if (daysDiff === 0) {
-      // Même jour, pas de changement de streak
-      return;
-    } else if (daysDiff === 1) {
-      // Jour consécutif, incrémenter le streak
-      await prisma.studentStreak.update({
-        where: { studentId },
-        data: {
-          currentStreak: streak.currentStreak + 1,
-          lastActive: new Date(),
-        },
-      });
-    } else {
-      // Trop de jours manqués, recommencer le streak
-      await prisma.studentStreak.update({
-        where: { studentId },
-        data: {
-          currentStreak: 1,
-          lastActive: new Date(),
-        },
-      });
-    }
   }
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { TeacherSidebar } from "@/components/teacher-sidebar";
+import { RoleGuard } from "@/components/access-control/RoleGuard";
 
 export const metadata: Metadata = {
   title: "Teacher",
@@ -14,9 +15,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="md:flex min-h-screen bg-gray-50">
-      <TeacherSidebar />
-      <main className="flex-1 max-h-screen overflow-y-auto ">{children}</main>
-    </div>
+    <RoleGuard allowedRoles={["TEACHER"]}>
+      <div className="md:flex min-h-screen bg-gray-50">
+        <TeacherSidebar />
+        <main className="flex-1 max-h-screen overflow-y-auto ">{children}</main>
+      </div>
+    </RoleGuard>
   );
 }

@@ -6,8 +6,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Users, BookOpen, FileText, BookMarked } from "lucide-react";
+import {
+  getDashboardStats,
+  getUserDistribution,
+  getRecentActivity,
+  formatTimeAgo,
+} from "@/lib/dashboard-actions";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  // Récupérer les vraies données de la base de données
+  const [stats, userDistribution, recentActivity] = await Promise.all([
+    getDashboardStats(),
+    getUserDistribution(),
+    getRecentActivity(),
+  ]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -27,9 +40,11 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">120</div>
+            <div className="text-2xl font-bold">{stats.totalUsers}</div>
             <p className="text-xs text-muted-foreground">
-              +10% par rapport au mois dernier
+              {stats.usersThisMonth > 0
+                ? `+${stats.usersThisMonth} nouveau${stats.usersThisMonth > 1 ? "x" : ""} ce mois-ci`
+                : "Aucun nouveau ce mois-ci"}
             </p>
           </CardContent>
         </Card>
@@ -39,9 +54,11 @@ export default function DashboardPage() {
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
+            <div className="text-2xl font-bold">{stats.totalModules}</div>
             <p className="text-xs text-muted-foreground">
-              +2 nouveaux ce mois-ci
+              {stats.modulesThisMonth > 0
+                ? `+${stats.modulesThisMonth} nouveau${stats.modulesThisMonth > 1 ? "x" : ""} ce mois-ci`
+                : "Aucun nouveau ce mois-ci"}
             </p>
           </CardContent>
         </Card>
@@ -51,9 +68,11 @@ export default function DashboardPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">142</div>
+            <div className="text-2xl font-bold">{stats.totalChapters}</div>
             <p className="text-xs text-muted-foreground">
-              +12 nouveaux ce mois-ci
+              {stats.chaptersThisMonth > 0
+                ? `+${stats.chaptersThisMonth} nouveau${stats.chaptersThisMonth > 1 ? "x" : ""} ce mois-ci`
+                : "Aucun nouveau ce mois-ci"}
             </p>
           </CardContent>
         </Card>
@@ -63,9 +82,11 @@ export default function DashboardPage() {
             <BookMarked className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
+            <div className="text-2xl font-bold">{stats.totalContes}</div>
             <p className="text-xs text-muted-foreground">
-              +2 nouveaux ce mois-ci
+              {stats.contesThisMonth > 0
+                ? `+${stats.contesThisMonth} nouveau${stats.contesThisMonth > 1 ? "x" : ""} ce mois-ci`
+                : "Aucun nouveau ce mois-ci"}
             </p>
           </CardContent>
         </Card>
@@ -80,49 +101,29 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    Nouvel utilisateur inscrit
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    student123@example.com s&apos;est inscrit en tant
-                    qu&apos;étudiant
-                  </p>
-                </div>
-                <div className="ml-auto text-sm text-muted-foreground">
-                  Juste maintenant
-                </div>
+            {recentActivity.length > 0 ? (
+              <div className="space-y-4">
+                {recentActivity.map((activity) => (
+                  <div key={activity.id} className="flex items-center">
+                    <div className="ml-4 space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {activity.title}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {activity.description}
+                      </p>
+                    </div>
+                    <div className="ml-auto text-sm text-muted-foreground">
+                      {formatTimeAgo(activity.timestamp)}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="flex items-center">
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    Module mis à jour
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    &quot;Introduction aux mathématiques&quot; a été mis à jour
-                  </p>
-                </div>
-                <div className="ml-auto text-sm text-muted-foreground">
-                  Il y a 2 heures
-                </div>
+            ) : (
+              <div className="text-center text-muted-foreground py-4">
+                <p>Aucune activité récente à afficher</p>
               </div>
-              <div className="flex items-center">
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    Nouveau chapitre ajouté
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    &quot;Fractions&quot; a été ajouté à &quot;Bases des
-                    mathématiques&quot;
-                  </p>
-                </div>
-                <div className="ml-auto text-sm text-muted-foreground">
-                  Il y a 5 heures
-                </div>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
         <Card className="col-span-3">
@@ -139,21 +140,30 @@ export default function DashboardPage() {
                   <div className="h-4 w-4 rounded-full bg-primary"></div>
                   <span className="text-sm font-medium">Étudiants</span>
                 </div>
-                <span className="text-sm font-medium">70%</span>
+                <span className="text-sm font-medium">
+                  {userDistribution.studentsPercentage}% (
+                  {userDistribution.students})
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 rounded-full bg-green-500"></div>
                   <span className="text-sm font-medium">Enseignants</span>
                 </div>
-                <span className="text-sm font-medium">25%</span>
+                <span className="text-sm font-medium">
+                  {userDistribution.teachersPercentage}% (
+                  {userDistribution.teachers})
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 rounded-full bg-yellow-500"></div>
                   <span className="text-sm font-medium">Administrateurs</span>
                 </div>
-                <span className="text-sm font-medium">5%</span>
+                <span className="text-sm font-medium">
+                  {userDistribution.adminsPercentage}% (
+                  {userDistribution.admins})
+                </span>
               </div>
             </div>
           </CardContent>

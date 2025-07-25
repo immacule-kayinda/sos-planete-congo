@@ -7,6 +7,13 @@ export default async function PublicLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
-  if (session) redirect("/learn");
+
+  if (session) {
+    if (session.user.role === "STUDENT") {
+      redirect("/learn");
+    } else {
+      redirect("/teacher");
+    }
+  }
   return <div className="">{children}</div>;
 }

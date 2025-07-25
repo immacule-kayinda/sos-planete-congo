@@ -23,6 +23,7 @@ type CurrentPageType =
   | "dashboard"
   | "formations"
   | "classes"
+  | "students"
   | "materiel"
   | "notifications"
   | "aide";
@@ -104,6 +105,13 @@ export function TeacherSidebar() {
             label="Classes"
             count={5}
             active={currentPage === "classes"}
+            onClick={() => setIsMobileOpen(false)}
+          />
+          <SidebarItem
+            href="/teacher/students"
+            icon={<Users size={18} />}
+            label="Étudiants"
+            active={currentPage === "students"}
             onClick={() => setIsMobileOpen(false)}
           />
           <SidebarItem

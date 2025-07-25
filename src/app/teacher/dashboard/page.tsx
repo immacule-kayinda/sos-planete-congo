@@ -1,399 +1,567 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { auth } from "../../../../auth";
+import { redirect } from "next/navigation";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
-  Bell,
-  BookOpen,
-  Edit,
-  Eye,
-  FileText,
-  MoreHorizontal,
-  Plus,
-  Search,
-  TrendingUp,
   Users,
+  TrendingUp,
+  BookOpen,
+  Award,
+  Clock,
+  CheckCircle,
+  Plus,
+  ArrowRight,
 } from "lucide-react";
-import type React from "react";
+import Link from "next/link";
+import prisma from "@/lib/prisma";
+import { TeacherHeader } from "@/components/teacher/teacher-header";
 
-export default function TeacherDashboard() {
+async function getTeacherDashboardData(userId: string) {
+  const teacher = await prisma.teacher.findUnique({
+    where: { userId },
+    include: {
+      user: {
+        select: {
+          email: true,
+          lastLogin: true,
+        },
+      },
+      Classroom: {
+        include: {
+          students: {
+            include: {
+              user: {
+                select: {
+                  lastLogin: true,
+                  createdAt: true,
+                },
+              },
+              performance: {
+                include: {
+                  chapter: {
+                    select: {
+                      title: true,
+                      module: {
+                        select: {
+                          title: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              StudentChapterProgress: {
+                include: {
+                  chapter: {
+                    select: {
+                      title: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!teacher) {
+    return null;
+  }
+
+  // Calculate comprehensive statistics
+  const allStudents = teacher.Classroom.flatMap(
+    (classroom) => classroom.students
+  );
+  const totalStudents = allStudents.length;
+  const activeStudents = allStudents.filter(
+    (s) => s.accountStatus === "ACTIVE"
+  ).length;
+  const pendingStudents = allStudents.filter(
+    (s) => s.accountStatus === "PENDING_ACTIVATION"
+  ).length;
+
+  // Recent activity (last 7 days)
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+
+  const recentStudents = allStudents.filter((s) => s.user.createdAt >= weekAgo);
+
+  const recentActivity = allStudents
+    .filter((s) => s.user.lastLogin && s.user.lastLogin >= weekAgo)
+    .sort(
+      (a, b) =>
+        new Date(b.user.lastLogin!).getTime() -
+        new Date(a.user.lastLogin!).getTime()
+    )
+    .slice(0, 5);
+
+  // Performance statistics
+  const allPerformances = allStudents.flatMap((s) => s.performance);
+  const totalStars = allPerformances.reduce(
+    (sum, p) => sum + (p.stars || 0),
+    0
+  );
+  const avgAccuracy =
+    allPerformances.length > 0
+      ? Math.round(
+          allPerformances.reduce((sum, p) => sum + (p.accuracy || 0), 0) /
+            allPerformances.length
+        )
+      : 0;
+
+  // Progress statistics
+  const allProgress = allStudents.flatMap((s) => s.StudentChapterProgress);
+  const completedChapters = allProgress.filter((p) => p.isRead).length;
+  const totalChapters = allProgress.length;
+  const overallProgress =
+    totalChapters > 0
+      ? Math.round((completedChapters / totalChapters) * 100)
+      : 0;
+
+  // Top performing students
+  const studentsWithStats = allStudents
+    .map((student) => {
+      const stars = student.performance.reduce(
+        (sum, p) => sum + (p.stars || 0),
+        0
+      );
+      const accuracy =
+        student.performance.length > 0
+          ? Math.round(
+              student.performance.reduce(
+                (sum, p) => sum + (p.accuracy || 0),
+                0
+              ) / student.performance.length
+            )
+          : 0;
+      const completed = student.StudentChapterProgress.filter(
+        (p) => p.isRead
+      ).length;
+      const total = student.StudentChapterProgress.length;
+      const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      return {
+        ...student,
+        stars,
+        accuracy,
+        progress,
+        score: stars + accuracy + progress, // Simple scoring system
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
+
+  return {
+    teacher: {
+      firstName: teacher.firstName,
+      lastName: teacher.lastName,
+      school: teacher.school,
+      teachingLevel: teacher.teachingLevel,
+      isApproved: teacher.isApproved,
+      email: teacher.user.email,
+      lastLogin: teacher.user.lastLogin,
+    },
+    stats: {
+      totalClasses: teacher.Classroom.length,
+      totalStudents,
+      activeStudents,
+      pendingStudents,
+      recentStudents: recentStudents.length,
+      totalStars,
+      avgAccuracy,
+      overallProgress,
+    },
+    classrooms: teacher.Classroom.map((classroom) => ({
+      ...classroom,
+      activeStudents: classroom.students.filter(
+        (s) => s.accountStatus === "ACTIVE"
+      ).length,
+      avgProgress:
+        classroom.students.length > 0
+          ? Math.round(
+              classroom.students.reduce((sum, s) => {
+                const completed = s.StudentChapterProgress.filter(
+                  (p) => p.isRead
+                ).length;
+                const total = s.StudentChapterProgress.length;
+                return sum + (total > 0 ? (completed / total) * 100 : 0);
+              }, 0) / classroom.students.length
+            )
+          : 0,
+    })),
+    recentActivity,
+    topStudents: studentsWithStats,
+  };
+}
+
+export default async function TeacherDashboard() {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/signin");
+  }
+
+  if (session.user.role !== "TEACHER") {
+    redirect("/dashboard");
+  }
+
+  const data = await getTeacherDashboardData(session.user.id);
+
+  if (!data) {
+    redirect("/signin");
+  }
+
+  if (!data.teacher.isApproved) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="max-w-md w-full mx-4">
+          <CardHeader>
+            <CardTitle className="text-center">Compte en attente</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-muted-foreground mb-4">
+              Votre compte professeur est en attente d'approbation par
+              l'administrateur.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Vous recevrez un email une fois votre compte approuvé.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <>
+    <div className="flex-1 flex flex-col">
       {/* Header */}
-      <header className="h-16 bg-white border-b border-gray-200 flex items-center px-4 lg:px-6 justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="text-lg lg:text-xl font-semibold text-gray-900">
-            Tableau de bord
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-2 lg:gap-4">
-          <div className="relative w-[200px] lg:w-[320px] hidden sm:block">
-            <Input
-              placeholder="Explore courses..."
-              className="pl-10 pr-4 border-gray-300 text-sm"
-            />
-            <Search
-              className="absolute left-3 top-2.5 text-gray-400"
-              size={18}
-            />
-          </div>
-
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell size={20} />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-              3
-            </span>
-          </Button>
-
-          <div className="flex items-center gap-3">
-            <div className="text-right hidden sm:block">
-              <p className="font-medium text-sm">Mr. Kashala</p>
-              <p className="text-xs text-gray-500">Professeur</p>
-            </div>
-            <Avatar className="h-8 w-8 lg:h-9 lg:w-9">
-              <AvatarImage
-                src="/placeholder.svg?height=36&width=36"
-                alt="Professeur"
-              />
-              <AvatarFallback className="bg-gray-100 text-gray-600 text-sm">
-                MK
-              </AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-      </header>
+      <TeacherHeader
+        title="Tableau de bord"
+        teacher={{
+          firstName: data.teacher.firstName,
+          lastName: data.teacher.lastName,
+        }}
+        showSearch={false}
+        notificationCount={3}
+      />
 
       {/* Main Content */}
-      <main className="flex-1 p-4 lg:p-6">
+      <main className="flex-1 p-4 lg:p-6 overflow-auto">
         {/* Welcome Section */}
-        <div className="mb-6 lg:mb-8">
-          <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
-            Bienvenu Mr. Kashala
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Bienvenue {data.teacher.firstName} !
           </h2>
-          <p className="text-sm lg:text-base text-gray-600">
-            Cette semaine vous avez créé 4 nouvelles formations. Continuez votre
-            excellent travail !
+          <p className="text-gray-600">
+            Vous gérez {data.stats.totalClasses} classe
+            {data.stats.totalClasses > 1 ? "s" : ""} avec{" "}
+            {data.stats.totalStudents} étudiant
+            {data.stats.totalStudents > 1 ? "s" : ""}.
+            {data.stats.recentStudents > 0 && (
+              <span className="text-green-600 font-medium">
+                {" "}
+                {data.stats.recentStudents} nouveau
+                {data.stats.recentStudents > 1 ? "x" : ""} cette semaine !
+              </span>
+            )}
           </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
-          <StatsCard
-            title="Formations actives"
-            value="8"
-            subtitle="3 nouvelles cette semaine"
-            icon={<BookOpen className="text-blue-600" />}
-          />
-          <StatsCard
-            title="Classes"
-            value="5"
-            subtitle="156 étudiants au total"
-            icon={<Users className="text-green-600" />}
-          />
-          <StatsCard
-            title="Matériel"
-            value="24"
-            subtitle="12 ajoutés ce mois"
-            icon={<FileText className="text-purple-600" />}
-          />
-          <StatsCard
-            title="Taux d'engagement"
-            value="78%"
-            subtitle="+5% ce mois"
-            icon={<TrendingUp className="text-orange-600" />}
-          />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Étudiants Actifs
+                  </p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {data.stats.activeStudents}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    +{data.stats.recentStudents} cette semaine
+                  </p>
+                </div>
+                <CheckCircle className="text-green-600" size={24} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    En Attente
+                  </p>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {data.stats.pendingStudents}
+                  </p>
+                  <p className="text-xs text-gray-500">Approbation requise</p>
+                </div>
+                <Clock className="text-orange-600" size={24} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Étoiles Totales
+                  </p>
+                  <p className="text-2xl font-bold text-yellow-600">
+                    {data.stats.totalStars}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Moy. {data.stats.avgAccuracy}% précision
+                  </p>
+                </div>
+                <Award className="text-yellow-600" size={24} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Progression
+                  </p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {data.stats.overallProgress}%
+                  </p>
+                  <p className="text-xs text-gray-500">Moyenne générale</p>
+                </div>
+                <TrendingUp className="text-blue-600" size={24} />
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
-          {/* Formations Section */}
-          <div className="xl:col-span-2">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Formations en progression
-              </h3>
-              <Button className="bg-[#d31929] hover:bg-[#b91525] w-full sm:w-auto">
-                <Plus size={16} className="mr-2" />
-                Nouvelle formation
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              <FormationCard
-                title="Les jeux"
-                description="Apprenez le fonctionnement de chaque jeux et les règles de chaque jeux"
-                students={24}
-                completion={65}
-                lastUpdate="Il y a 2 heures"
-                status="active"
-              />
-              <FormationCard
-                title="Mathématiques niveau 1"
-                description="Formation complète sur les bases des mathématiques"
-                students={32}
-                completion={78}
-                lastUpdate="Hier"
-                status="active"
-              />
-              <FormationCard
-                title="Sciences naturelles"
-                description="Découverte de l'environnement et de la nature"
-                students={18}
-                completion={45}
-                lastUpdate="Il y a 3 jours"
-                status="draft"
-              />
-              <FormationCard
-                title="Histoire du Congo"
-                description="Patrimoine et culture de notre pays"
-                students={28}
-                completion={92}
-                lastUpdate="La semaine dernière"
-                status="completed"
-              />
-            </div>
-          </div>
-
-          {/* Right Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Actions */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Classes Overview */}
+          <div className="xl:col-span-2 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Actions rapides</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
-                  <Plus size={16} className="mr-2" />
-                  Créer une formation
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Users size={16} className="mr-2" />
-                  Gérer les classes
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <FileText size={16} className="mr-2" />
-                  Ajouter du matériel
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Aperçu des progrès */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Aperçu des progrès</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium">
-                      Formations en progression
-                    </span>
-                    <Badge className="bg-[#059d00] hover:bg-[#059d00]/90 text-white">
-                      4
-                    </Badge>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-[#059d00] h-2 rounded-full"
-                      style={{ width: "65%" }}
-                    ></div>
-                  </div>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Mes Classes</CardTitle>
+                  <Link href="/teacher/classes">
+                    <Button variant="outline" size="sm">
+                      Voir tout <ArrowRight size={14} className="ml-1" />
+                    </Button>
+                  </Link>
                 </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium">
-                      Formations terminées
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-yellow-500">⭐</span>
-                      <span className="font-bold">8</span>
-                    </div>
+              </CardHeader>
+              <CardContent>
+                {data.classrooms.length > 0 ? (
+                  <div className="space-y-4">
+                    {data.classrooms.slice(0, 3).map((classroom) => (
+                      <div
+                        key={classroom.id}
+                        className="flex items-center justify-between p-4 border rounded-lg"
+                      >
+                        <div className="flex-1">
+                          <h4 className="font-medium">{classroom.name}</h4>
+                          <p className="text-sm text-gray-500">
+                            {classroom.students.length} étudiant
+                            {classroom.students.length > 1 ? "s" : ""} •
+                            {classroom.activeStudents} actif
+                            {classroom.activeStudents > 1 ? "s" : ""}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium">
+                            {classroom.avgProgress}%
+                          </p>
+                          <div className="w-16 bg-gray-200 rounded-full h-2 mt-1">
+                            <div
+                              className="bg-blue-500 h-2 rounded-full"
+                              style={{ width: `${classroom.avgProgress}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-yellow-500 h-2 rounded-full"
-                      style={{ width: "100%" }}
-                    ></div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500 mb-4">Aucune classe créée</p>
+                    <Button className="bg-[#d31929] hover:bg-[#b91525]">
+                      <Plus size={16} className="mr-2" />
+                      Créer une classe
+                    </Button>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Recent Activity */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Activité récente</CardTitle>
+                <CardTitle>Activité Récente</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <ActivityItem
-                  student="Marie Mukendi"
-                  action="a terminé"
-                  course="Les jeux"
-                  time="Il y a 1h"
-                />
-                <ActivityItem
-                  student="Jean Kabila"
-                  action="a commencé"
-                  course="Mathématiques niveau 1"
-                  time="Il y a 2h"
-                />
-                <ActivityItem
-                  student="Sarah Tshisekedi"
-                  action="a posé une question dans"
-                  course="Sciences naturelles"
-                  time="Il y a 4h"
-                />
+              <CardContent>
+                {data.recentActivity.length > 0 ? (
+                  <div className="space-y-4">
+                    {data.recentActivity.map((student) => (
+                      <div key={student.id} className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-gray-100 text-gray-600 text-sm">
+                            {student.firstName?.[0] || "U"}
+                            {student.lastName?.[0] || ""}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="text-sm">
+                            <span className="font-medium">
+                              {student.firstName || "Étudiant"}{" "}
+                              {student.lastName || ""}
+                            </span>{" "}
+                            s'est connecté
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {student.user.lastLogin
+                              ? new Date(
+                                  student.user.lastLogin
+                                ).toLocaleDateString("fr-FR", {
+                                  day: "numeric",
+                                  month: "short",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : "Jamais connecté"}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">
+                    Aucune activité récente
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Sidebar */}
+          <div className="space-y-6">
+            {/* Top Students */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award size={20} className="text-yellow-500" />
+                  Top Étudiants
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {data.topStudents.length > 0 ? (
+                  <div className="space-y-3">
+                    {data.topStudents.map((student, index) => (
+                      <div key={student.id} className="flex items-center gap-3">
+                        <div className="flex-shrink-0">
+                          <Badge
+                            variant={index === 0 ? "default" : "secondary"}
+                            className="w-6 h-6 p-0 flex items-center justify-center"
+                          >
+                            {index + 1}
+                          </Badge>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {student.firstName || "Étudiant"}{" "}
+                            {student.lastName || ""}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <span>⭐ {student.stars}</span>
+                            <span>•</span>
+                            <span>{student.progress}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">
+                    Aucun étudiant encore
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Actions Rapides</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Link href="/teacher/classes">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Plus size={16} className="mr-2" />
+                    Créer une classe
+                  </Button>
+                </Link>
+                <Link href="/teacher/students">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Users size={16} className="mr-2" />
+                    Gérer les étudiants
+                  </Button>
+                </Link>
+                <Link href="/teacher/classes">
+                  <Button variant="outline" className="w-full justify-start">
+                    <BookOpen size={16} className="mr-2" />
+                    Voir les classes
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* System Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Informations</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Dernière connexion
+                  </p>
+                  <p className="text-sm">
+                    {data.teacher.lastLogin
+                      ? new Date(data.teacher.lastLogin).toLocaleDateString(
+                          "fr-FR",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )
+                      : "Première connexion"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">École</p>
+                  <p className="text-sm">{data.teacher.school}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Niveau</p>
+                  <p className="text-sm">{data.teacher.teachingLevel}</p>
+                </div>
               </CardContent>
             </Card>
           </div>
         </div>
       </main>
-    </>
-  );
-}
-
-function StatsCard({
-  title,
-  value,
-  subtitle,
-  icon,
-}: {
-  title: string;
-  value: string;
-  subtitle: string;
-  icon: React.ReactNode;
-}) {
-  return (
-    <Card>
-      <CardContent className="p-4 lg:p-6">
-        <div className="flex items-center justify-between">
-          <div className="min-w-0 flex-1">
-            <p className="text-xs lg:text-sm font-medium text-gray-600 truncate">
-              {title}
-            </p>
-            <p className="text-xl lg:text-2xl font-bold text-gray-900">
-              {value}
-            </p>
-            <p className="text-xs text-gray-500 mt-1 truncate">{subtitle}</p>
-          </div>
-          <div className="p-2 lg:p-3 bg-gray-50 rounded-lg ml-2">{icon}</div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function FormationCard({
-  title,
-  description,
-  students,
-  completion,
-  lastUpdate,
-  status,
-}: {
-  title: string;
-  description: string;
-  students: number;
-  completion: number;
-  lastUpdate: string;
-  status: "active" | "draft" | "completed";
-}) {
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "active":
-        return (
-          <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-            Actif
-          </Badge>
-        );
-      case "draft":
-        return (
-          <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100">
-            Brouillon
-          </Badge>
-        );
-      case "completed":
-        return (
-          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">
-            Terminé
-          </Badge>
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-4 lg:p-6">
-        <div className="flex flex-col lg:flex-row lg:items-start justify-between mb-4 gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-              <h4 className="font-semibold text-gray-900">{title}</h4>
-              {getStatusBadge(status)}
-            </div>
-            <p className="text-sm text-gray-600 mb-3">{description}</p>
-            <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-xs text-gray-500">
-              <span>{students} étudiants</span>
-              <span className="hidden sm:inline">•</span>
-              <span>{completion}% complété</span>
-              <span className="hidden sm:inline">•</span>
-              <span>{lastUpdate}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 lg:flex-col lg:gap-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Eye size={16} />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Edit size={16} />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal size={16} />
-            </Button>
-          </div>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div
-            className="bg-[#d31929] h-2 rounded-full transition-all"
-            style={{ width: `${completion}%` }}
-          ></div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function ActivityItem({
-  student,
-  action,
-  course,
-  time,
-}: {
-  student: string;
-  action: string;
-  course: string;
-  time: string;
-}) {
-  return (
-    <div className="flex items-start gap-3">
-      <Avatar className="h-8 w-8 flex-shrink-0">
-        <AvatarFallback className="bg-gray-100 text-gray-600 text-xs">
-          {student
-            .split(" ")
-            .map((n) => n[0])
-            .join("")}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm">
-          <span className="font-medium">{student}</span> {action}{" "}
-          <span className="font-medium">{course}</span>
-        </p>
-        <p className="text-xs text-gray-500">{time}</p>
-      </div>
     </div>
   );
 }

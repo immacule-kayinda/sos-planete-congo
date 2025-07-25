@@ -1,67 +1,39 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Search,
-  Bell,
-  Settings,
-  Check,
-  X,
-  Clock,
-  Info,
-  Trash2,
-} from "lucide-react";
+import { Settings, Check, X, Clock, Info, Trash2 } from "lucide-react";
+import { redirect } from "next/navigation";
+import prisma from "@/lib/prisma";
+import { auth } from "../../../../auth";
+import { TeacherHeader } from "@/components/teacher/teacher-header";
 
-export default function NotificationsPage() {
+export default async function NotificationsPage() {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/signin");
+  }
+  if (session.user.role !== "TEACHER") {
+    redirect("/dashboard");
+  }
+  const teacher = await prisma.teacher.findUnique({
+    where: { userId: session.user.id },
+  });
+  if (!teacher) {
+    redirect("/signin");
+  }
   return (
     <>
       {/* Header */}
-      <header className="h-16 bg-white border-b border-gray-200 flex items-center px-4 lg:px-6 justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="text-lg lg:text-xl font-semibold text-gray-900">
-            Notifications
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-2 lg:gap-4">
-          <div className="relative w-[200px] lg:w-[320px] hidden sm:block">
-            <Input
-              placeholder="Rechercher une notification..."
-              className="pl-10 pr-4 border-gray-300 text-sm"
-            />
-            <Search
-              className="absolute left-3 top-2.5 text-gray-400"
-              size={18}
-            />
-          </div>
-
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell size={20} />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-              3
-            </span>
-          </Button>
-
-          <div className="flex items-center gap-3">
-            <div className="text-right hidden sm:block">
-              <p className="font-medium text-sm">Mr. Kashala</p>
-              <p className="text-xs text-gray-500">Professeur</p>
-            </div>
-            <Avatar className="h-8 w-8 lg:h-9 lg:w-9">
-              <AvatarImage
-                src="/placeholder.svg?height=36&width=36"
-                alt="Professeur"
-              />
-              <AvatarFallback className="bg-gray-100 text-gray-600 text-sm">
-                MK
-              </AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-      </header>
+      <TeacherHeader
+        title="Notifications"
+        teacher={{
+          firstName: teacher.firstName,
+          lastName: teacher.lastName,
+        }}
+        showSearch={true}
+        notificationCount={3}
+      />
 
       {/* Main Content */}
       <main className="flex-1 p-4 lg:p-6">

@@ -4,6 +4,7 @@ import { getStudentProfile } from "@/lib/actions";
 import { getStudentStreakInfo } from "@/lib/student-progress";
 import { ProfileEditForm } from "@/components/student/profile-edit-form";
 import { StreakDisplay } from "@/components/student/streak-display";
+import { LimitedAccessActions } from "@/components/student/limited-access-actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -17,7 +18,9 @@ import {
   Target,
   CheckCircle,
   BookOpen,
+  Lock,
 } from "lucide-react";
+import { StudentLayout } from "@/components/student/student-layout";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -53,7 +56,7 @@ export default async function ProfilePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <StudentLayout>
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Mon Profil</h1>
         <p className="text-muted-foreground">
@@ -148,86 +151,109 @@ export default async function ProfilePage() {
 
         {/* Sidebar avec statistiques et streak */}
         <div className="space-y-6">
-          {/* Série quotidienne */}
-          <StreakDisplay
-            currentStreak={streakInfo.currentStreak}
-            lastActive={streakInfo.lastActive}
-          />
-
-          {/* Statistiques */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5" />
-                Mes Statistiques
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-3 bg-yellow-50 rounded-lg">
-                  <Star className="h-6 w-6 text-yellow-500 mx-auto mb-1" />
-                  <div className="text-2xl font-bold text-yellow-600">
-                    {profile.totalStars}
-                  </div>
-                  <div className="text-xs text-yellow-600">Étoiles</div>
-                </div>
-                <div className="text-center p-3 bg-blue-50 rounded-lg">
-                  <Target className="h-6 w-6 text-blue-500 mx-auto mb-1" />
-                  <div className="text-2xl font-bold text-blue-600">
-                    {Math.round(profile.progressPercentage)}%
-                  </div>
-                  <div className="text-xs text-blue-600">Progression</div>
-                </div>
-                <div className="text-center p-3 bg-green-50 rounded-lg">
-                  <CheckCircle className="h-6 w-6 text-green-500 mx-auto mb-1" />
-                  <div className="text-2xl font-bold text-green-600">
-                    {profile.avgAccuracy}%
-                  </div>
-                  <div className="text-xs text-green-600">Précision</div>
-                </div>
-                <div className="text-center p-3 bg-purple-50 rounded-lg">
-                  <BookOpen className="h-6 w-6 text-purple-500 mx-auto mb-1" />
-                  <div className="text-2xl font-bold text-purple-600">
-                    {profile.completedChapters}
-                  </div>
-                  <div className="text-xs text-purple-600">Chapitres</div>
-                </div>
-              </div>
-
-              {/* Progression générale */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Progression générale</span>
-                  <span>{Math.round(profile.progressPercentage)}%</span>
-                </div>
-                <Progress value={profile.progressPercentage} className="h-2" />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Informations sur les récompenses de streak */}
-          {streakInfo.totalRewardsEarned > 0 && (
-            <Card>
+          {profile.accountStatus === "LIMITED_ACCESS" ? (
+            <Card className="bg-yellow-50 border-yellow-200">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-sm">
-                  <Trophy className="h-4 w-4 text-yellow-500" />
-                  Récompenses de Série
+                <CardTitle className="flex items-center gap-2">
+                  <Lock className="h-5 w-5 text-yellow-600" />
+                  Accès limité
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-600 mb-1">
-                    {streakInfo.totalRewardsEarned}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Étoiles gagnées grâce aux séries
-                  </div>
-                </div>
+                <p className="mb-4 text-yellow-800">
+                  Votre compte est en accès limité. Entrez un code de classe ou
+                  demandez l'activation pour débloquer toutes les
+                  fonctionnalités.
+                </p>
+                <LimitedAccessActions />
               </CardContent>
             </Card>
+          ) : (
+            <>
+              <StreakDisplay
+                currentStreak={streakInfo.currentStreak}
+                lastActive={streakInfo.lastActive}
+              />
+
+              {/* Statistiques */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Trophy className="h-5 w-5" />
+                    Mes Statistiques
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                      <Star className="h-6 w-6 text-yellow-500 mx-auto mb-1" />
+                      <div className="text-2xl font-bold text-yellow-600">
+                        {profile.totalStars}
+                      </div>
+                      <div className="text-xs text-yellow-600">Étoiles</div>
+                    </div>
+                    <div className="text-center p-3 bg-blue-50 rounded-lg">
+                      <Target className="h-6 w-6 text-blue-500 mx-auto mb-1" />
+                      <div className="text-2xl font-bold text-blue-600">
+                        {Math.round(profile.progressPercentage)}%
+                      </div>
+                      <div className="text-xs text-blue-600">Progression</div>
+                    </div>
+                    <div className="text-center p-3 bg-green-50 rounded-lg">
+                      <CheckCircle className="h-6 w-6 text-green-500 mx-auto mb-1" />
+                      <div className="text-2xl font-bold text-green-600">
+                        {profile.avgAccuracy}%
+                      </div>
+                      <div className="text-xs text-green-600">Précision</div>
+                    </div>
+                    <div className="text-center p-3 bg-purple-50 rounded-lg">
+                      <BookOpen className="h-6 w-6 text-purple-500 mx-auto mb-1" />
+                      <div className="text-2xl font-bold text-purple-600">
+                        {profile.completedChapters}
+                      </div>
+                      <div className="text-xs text-purple-600">Chapitres</div>
+                    </div>
+                  </div>
+
+                  {/* Progression générale */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Progression générale</span>
+                      <span>{Math.round(profile.progressPercentage)}%</span>
+                    </div>
+                    <Progress
+                      value={profile.progressPercentage}
+                      className="h-2"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Informations sur les récompenses de streak */}
+              {streakInfo.totalRewardsEarned > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      <Trophy className="h-4 w-4 text-yellow-500" />
+                      Récompenses de Série
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-yellow-600 mb-1">
+                        {streakInfo.totalRewardsEarned}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Étoiles gagnées grâce aux séries
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
           )}
         </div>
       </div>
-    </div>
+    </StudentLayout>
   );
 }

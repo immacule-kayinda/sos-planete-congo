@@ -1,5 +1,7 @@
 "use client";
 
+import LogoutButton from "../logout-bouton";
+
 interface ErrorDisplayProps {
   title?: string;
   message?: string;
@@ -28,6 +30,8 @@ export default function ErrorDisplay({
           Réessayer
         </button>
       )}
+
+      <LogoutButton />
     </div>
   );
 }

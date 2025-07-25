@@ -13,8 +13,25 @@ import {
   Filter,
   Upload,
 } from "lucide-react";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import prisma from "@/lib/prisma";
+import { auth } from "../../../../auth";
 
-export default function MaterielPage() {
+export default async function MaterielPage() {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/signin");
+  }
+  if (session.user.role !== "TEACHER") {
+    redirect("/dashboard");
+  }
+  const teacher = await prisma.teacher.findUnique({
+    where: { userId: session.user.id },
+  });
+  if (!teacher) {
+    redirect("/signin");
+  }
   return (
     <>
       {/* Header */}
@@ -37,16 +54,20 @@ export default function MaterielPage() {
             />
           </div>
 
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell size={20} />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-              3
-            </span>
-          </Button>
+          <Link href="/teacher/notifications">
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell size={20} />
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                3
+              </span>
+            </Button>
+          </Link>
 
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
-              <p className="font-medium text-sm">Mr. Kashala</p>
+              <p className="font-medium text-sm">
+                {teacher.firstName} {teacher.lastName}
+              </p>
               <p className="text-xs text-gray-500">Professeur</p>
             </div>
             <Avatar className="h-8 w-8 lg:h-9 lg:w-9">
@@ -55,9 +76,15 @@ export default function MaterielPage() {
                 alt="Professeur"
               />
               <AvatarFallback className="bg-gray-100 text-gray-600 text-sm">
-                MK
+                {teacher.firstName?.[0]}
+                {teacher.lastName?.[0]}
               </AvatarFallback>
             </Avatar>
+            <form action="/api/auth/signout" method="post">
+              <Button type="submit" variant="outline" size="sm">
+                Déconnexion
+              </Button>
+            </form>
           </div>
         </div>
       </header>

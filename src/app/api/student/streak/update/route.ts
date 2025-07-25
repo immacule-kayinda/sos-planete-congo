@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "../../../../../../auth";
 import { updateStudentStreak } from "@/lib/student-progress";
+import { getStudentData } from "@/lib/db";
 
 export async function POST() {
   try {
@@ -14,7 +15,17 @@ export async function POST() {
       return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
     }
 
-    const streakData = await updateStudentStreak(session.user.id);
+    // Get the student record first
+    const student = await getStudentData(session.user.id);
+
+    if (!student) {
+      return NextResponse.json(
+        { error: "Étudiant non trouvé" },
+        { status: 404 }
+      );
+    }
+
+    const streakData = await updateStudentStreak(student.id);
 
     return NextResponse.json(streakData);
   } catch (error) {

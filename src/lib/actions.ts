@@ -166,9 +166,7 @@ export async function getStudentProfile(userId: string) {
     (sum: number, p: any) => sum + (p.stars || 0),
     0
   );
-  const completedChapters = progressRecords.filter(
-    (p: any) => p.completed
-  ).length;
+  const completedChapters = progressRecords.filter((p: any) => p.isRead).length;
   const totalChapters = progressRecords.length;
   const progressPercentage =
     totalChapters > 0 ? (completedChapters / totalChapters) * 100 : 0;

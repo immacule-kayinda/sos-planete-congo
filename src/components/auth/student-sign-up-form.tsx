@@ -273,9 +273,9 @@ export default function StudentSignUpForm() {
         </a>
         .
       </p>
-      <p className="text-sm text-muted-foreground mt-2">
+      {/* <p className="text-sm text-muted-foreground mt-2">
         📧 Vous recevrez un email de confirmation après votre inscription.
-      </p>
+      </p> */}
     </>
   );
 }
